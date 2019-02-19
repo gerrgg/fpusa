@@ -1308,3 +1308,55 @@ a.product-image-link-lg{
 	border-radius: 2px;
 	padding: 1rem;
 }
+
+
+/*--------------------------------------------------------------
+## Breadcrumb
+--------------------------------------------------------------*/
+nav.woocommerce-breadcrumb{
+	padding-left: 5px;
+	font-weight: 600;
+}
+nav.woocommerce-breadcrumb a{
+	color: #333;
+}
+nav.woocommerce-breadcrumb a:hover{
+	color: red;
+}
+
+nav.woocommerce-breadcrumb span.link-active{
+	color: red;
+}
+
+#loop-results-bar{
+	padding: 10px;
+	border-top: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	box-shadow: 0 0 10px #ddd;
+	-webkit-box-shadow: 0 0 10px #ddd;
+	margin-bottom: 1rem;
+}
+
+h2.woocommerce-loop-product__title{
+	font-size: 18px;
+}
+
+a.woocommerce-LoopProduct-link, a.woocommerce-LoopProduct-link:hover{
+	color: #333;
+	text-decoration: none;
+}
+
+span.onsale{
+	text-align: center;
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	background-color: red;
+	color: #fff;
+	border-radius: 100%;
+	width: 50px;
+	height: 50px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

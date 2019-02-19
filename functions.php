@@ -128,10 +128,15 @@ function fpusa_scripts() {
 
 	wp_enqueue_style( 'fontawesome', 'https://use.fontawesome.com/releases/v5.7.1/css/all.css' );
 
+	wp_enqueue_style( 'slick', get_template_directory_uri() . '/css/slick.css' );
+
+	wp_enqueue_style( 'slick-theme', get_template_directory_uri() . '/css/slick-theme.css' );
+
 	wp_enqueue_script( 'bs4-js', get_template_directory_uri() . '/js/bootstrap.min.js', array('jquery'), '4.2', true );
 
 	wp_enqueue_script( 'js-functions', get_template_directory_uri() . '/js/functions.js', array('jquery'), filemtime(get_template_directory() . '/js/functions.js'), true );
 
+	wp_enqueue_script( 'slick-js', get_template_directory_uri() . '/js/slick.min.js', array('jquery'), '4.9', true );
 	// wp_enqueue_script( 'fpusa-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151217', true );
 
 	// wp_enqueue_script( 'fpusa-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
@@ -142,8 +147,12 @@ function fpusa_scripts() {
 		wp_enqueue_script( 'comment-reply' );
 	}
 }
+
 add_action( 'wp_enqueue_scripts', 'fpusa_scripts' );
 add_action( 'admin_post_nopriv_fpusa_update_zip', 'fpusa_update_zip' );
+remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10 );
+remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_rating', 5 );
+add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_rating', 10 );
 
 /**
  * Custom template tags for this theme.
@@ -292,24 +301,24 @@ function fpusa_split_tags( $tags ){
 
 add_action( 'woocommerce_before_main_content', 'fpusa_cat_sub_nav_cat_menu', 1 );
 remove_action('woocommerce_before_main_content', 'woocommerce_breadcrumb', 20 );
-add_action('woocommerce_before_shop_loop', 'woocommerce_breadcrumb', 15 );
+add_action('woocommerce_before_shop_loop', 'woocommerce_breadcrumb', 21 );
 function fpusa_cat_sub_nav_cat_menu(){
 	/**
 	*
 	*
 	*/
-		if( fpusa_is_cat() ) :
+		if( fpusa_is_cat() ) : // needed when on shop page
 			$siblings = fpusa_get_cat_siblings( fpusa_get_department() );
 			if( sizeof( $siblings ) > 1 ) : ?>
-			<nav class="navbar navbar-expand-lg navbar-light bg-dark">
-		    <div class="navbar-nav">
-		      <?php foreach( $siblings as $term ) : ?>
-						<li class="nav-item">
-							<a class="nav-link" href="<?php echo get_term_link( (int)$term->term_id ) ?>"><?php echo $term->name; ?></a>
-						</li>
-					<?php endforeach; ?>
-		    </div>
-			</nav>
+				<nav class="navbar navbar-expand-lg navbar-light bg-dark">
+			    <div class="navbar-nav">
+			      <?php foreach( $siblings as $term ) : ?>
+							<li class="nav-item">
+								<a class="nav-link" href="<?php echo get_term_link( (int)$term->term_id ) ?>"><?php echo $term->name; ?></a>
+							</li>
+						<?php endforeach; ?>
+			    </div>
+				</nav>
 			<?php
 			endif;
 		endif;
@@ -354,4 +363,78 @@ function fpusa_get_department(){
  }
 
  return $department[0];
+}
+
+add_action( 'woocommerce_archive_description', 'fpusa_shop_by_category', 15 );
+function fpusa_get_cats_w_img(){
+	$categories_w_img = array();
+	$children = fpusa_get_cat_children();
+	if( $children ) {
+		foreach( $children as $child ){
+			$thumbnail_id = get_woocommerce_term_meta( $child->term_id, 'thumbnail_id', true );
+			if( $thumbnail_id ){
+				$image_src = wp_get_attachment_url( $thumbnail_id );
+
+				array_push( $categories_w_img, array(
+					'image_src' => $image_src,
+					'link' => get_term_link( (int)$child->term_id ),
+					'name' => $child->name,
+				));
+
+			}
+		}
+	}
+	return $categories_w_img;
+}
+
+function fpusa_shop_by_category( ){
+	$cats = fpusa_get_cats_w_img();
+	if( ! empty( $cats ) ){
+		?>
+		<h3>Shop by Category</h3>
+		<div class="row">
+			<?php foreach( $cats as $cat ) : ?>
+				<div class="col-6 col-sm-2">
+					<a href="<?php echo $cat['link']; ?>">
+						<img src="<?php echo $cat['image_src']?>" />
+						<p class="text-center"><?php echo $cat['name']; ?></p>
+					</a>
+				</div>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+}
+
+add_action('woocommerce_archive_description', 'fpusa_get_best_sellers', 16);
+function fpusa_get_best_sellers(){
+	$children  = fpusa_get_cat_children();
+	if( $children ) : ?>
+		fpusa_get_best_sellers
+		<!-- If this isnt the leaf
+		This will show various sliders for each category such as best sellers. newest additions, and top rated. -->
+	<?php endif;
+}
+
+function fpusa_get_cat_children(){
+	// helper class returns children of a category, if any.
+	$term = get_queried_object();
+
+	$children = get_terms( $term->taxonomy, array(
+	'parent'    => $term->term_id,
+	'hide_empty' => false
+	) );
+
+	return $children;
+}
+
+/**
+ * Change number of products that are displayed per page (shop page)
+ */
+add_filter( 'loop_shop_per_page', 'new_loop_shop_per_page', 20 );
+function new_loop_shop_per_page( $cols ) {
+  // $cols contains the current number of products per page based on the value stored on Options -> Reading
+  // Return the number of products you wanna show per page.
+  $cols = 36;
+  return $cols;
 }
