@@ -297,10 +297,9 @@ function fpusa_cat_sub_nav_cat_menu(){
 	/**
 	*
 	*
-	*
 	*/
 		if( fpusa_is_cat() ) :
-			$siblings = fpusa_get_cat_siblings();
+			$siblings = fpusa_get_cat_siblings( fpusa_get_department() );
 			if( sizeof( $siblings ) > 1 ) : ?>
 			<nav class="navbar navbar-expand-lg navbar-light bg-dark">
 		    <div class="navbar-nav">
@@ -325,21 +324,34 @@ function fpusa_is_cat(){
 	return preg_match( '/product-category/', $_SERVER['REQUEST_URI'] );
 }
 
-function fpusa_get_cat_siblings(){
+function fpusa_get_cat_siblings( $department ){
 	/**
-	* gets the grandparent and returns a list of children of that category.
-	* @return $terms - list of categories for aunts and uncle categories.
-	*
+	* @param WP_Term $department
+	* @return array WP_Term $terms
 	*/
-	global $wp_query;
-	$parent = get_term( $wp_query->get_queried_object()->parent, 'product_cat' );
-	if( ! is_wp_error( $parent ) ){
-		if( $parent->parent > 0 ){
-			$args = array( 'taxonomy' => 'product_cat', 'parent' => $parent->parent );
-			$terms = get_terms( $args );
-			return $terms;
-		} else {
-			return 0;
-		}
+	if( ! is_wp_error( $department ) ){
+		$args = array( 'taxonomy' => 'product_cat', 'parent' => $department->term_id );
+		$terms = get_terms( $args );
+		return $terms;
+	} else {
+		return 0;
 	}
+}
+
+function fpusa_get_department(){
+	/**
+	* Checks if we are in a category using the URI, if so, grab the slug of the next cat and return WP_Term
+	* @return WP_Term $department
+	*/
+ global $wp_query;
+ $categories = explode( '/', $_SERVER['REQUEST_URI'] );
+
+ if( $categories[1] = 'product-category' ){
+	 $department = get_terms( array(
+		 'slug' => $categories[2],
+		 'taxonomy' => 'product_cat',
+	 ));
+ }
+
+ return $department[0];
 }
