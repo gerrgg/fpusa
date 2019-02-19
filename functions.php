@@ -406,14 +406,103 @@ function fpusa_shop_by_category( ){
 	}
 }
 
-add_action('woocommerce_archive_description', 'fpusa_get_best_sellers', 16);
-function fpusa_get_best_sellers(){
+add_action('woocommerce_archive_description', 'fpusa_category_best_sellers', 16);
+function fpusa_category_best_sellers(){
+	$args = array(
+		'posts_per_page' => 8,
+		'post_type' => 'product',
+		'orderby' => 'title',
+		'meta_key' => 'total_sales',
+		'orderby' => 'meta_value_num',
+		'tax_query' => array(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'		 => get_queried_object()->term_id,
+			),
+		),
+	);
+
+	fpusa_slick_query('Best Sellers', $args);
+}
+
+add_action('woocommerce_archive_description', 'fpusa_category_newest_products', 17);
+function fpusa_category_newest_products(){
+	$args = array(
+		'posts_per_page' => 8,
+		'post_type' => 'product',
+		'orderby' => 'date',
+		'tax_query' => array(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'		 => get_queried_object()->term_id,
+			),
+		),
+	);
+
+	fpusa_slick_query('Hot new releases', $args);
+}
+
+add_action('woocommerce_archive_description', 'fpusa_category_top_rated', 18);
+function fpusa_category_top_rated(){
+	$args = array(
+		'posts_per_page' => 8,
+		'post_type' => 'product',
+		'orderby' => 'meta_value_num',
+		'meta_key' => '_wc_average_rating',
+		'tax_query' => array(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'		 => get_queried_object()->term_id,
+			),
+		),
+	);
+
+	fpusa_slick_query('Top Rated', $args);
+}
+
+add_action('woocommerce_archive_description', 'fpusa_category_cheapest', 18);
+function fpusa_category_cheapest(){
+	$args = array(
+		'posts_per_page' => 8,
+		'post_type' => 'product',
+		'order' => 'ASC',
+		'orderby' => 'meta_value_num',
+		'meta_key' => '_price',
+		'tax_query' => array(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'		 => get_queried_object()->term_id,
+			),
+		),
+	);
+
+	fpusa_slick_query('Cheapest', $args);
+}
+
+
+function fpusa_slick_query($header, $args){
 	$children  = fpusa_get_cat_children();
-	if( $children ) : ?>
-		fpusa_get_best_sellers
-		<!-- If this isnt the leaf
-		This will show various sliders for each category such as best sellers. newest additions, and top rated. -->
-	<?php endif;
+	if( $children ){
+		$wc_query = new WP_Query( $args );
+		?>
+		<h3><?php echo $header; ?></h3>
+		<div class="slick">
+		<?php
+		if( $wc_query->have_posts() ) :
+			while( $wc_query->have_posts() ) :
+				$wc_query->the_post();
+				wc_get_template_part('content', 'product');
+			endwhile;
+		endif;
+		wp_reset_postdata();
+		?>
+		</div>
+		<?php
+	}
 }
 
 function fpusa_get_cat_children(){
