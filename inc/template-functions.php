@@ -299,3 +299,77 @@ function fpusa_yourstore_buy_it_again(){
 		woocommerce_login_form( array('message' => 'Whoops, we couldn\'t find any previous orders. Login or register.') );
 	endif;
 }
+
+function fpusa_slick_query($header, $args){
+	/**
+	 * Used to get the children of a product category
+	 * @param string $header - The TITLE of the slider
+	 * @param array $args - a query used to display differant information.
+	 */
+	$term =
+	$children  = fpusa_get_cat_children();
+	if( $children ){
+		$wc_query = new WP_Query( $args );
+		?>
+		<h3><?php echo $header; ?></h3>
+		<div class="slick">
+		<?php
+		if( $wc_query->have_posts() ) :
+			while( $wc_query->have_posts() ) :
+				$wc_query->the_post();
+				wc_get_template_part('content', 'product');
+			endwhile;
+		endif;
+		wp_reset_postdata();
+		?>
+		</div>
+		<?php
+	}
+}
+
+function fpusa_shop_by_category( ){
+	$cats = fpusa_get_cats_w_img();
+	if( ! empty( $cats ) ){
+		?>
+		<h3>Shop by Category</h3>
+		<div class="row">
+			<?php foreach( $cats as $cat ) : ?>
+				<div class="col-6 col-sm-2">
+					<a href="<?php echo $cat['link']; ?>">
+						<img src="<?php echo $cat['image_src']?>" />
+						<p class="text-center"><?php echo $cat['name']; ?></p>
+					</a>
+				</div>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+}
+
+function fpusa_cat_sub_nav_cat_menu(){
+	/**
+	*
+	*
+	*/
+		if( fpusa_is_cat() ) : // needed when on shop page
+			$siblings = fpusa_get_cat_siblings( fpusa_get_department() );
+			if( sizeof( $siblings ) > 1 ) : ?>
+				<nav class="navbar navbar-expand-lg navbar-light bg-dark">
+			    <div class="navbar-nav">
+			      <?php foreach( $siblings as $term ) : ?>
+							<li class="nav-item">
+								<a class="nav-link" href="<?php echo get_term_link( (int)$term->term_id ) ?>"><?php echo $term->name; ?></a>
+							</li>
+						<?php endforeach; ?>
+			    </div>
+				</nav>
+			<?php
+			endif;
+		endif;
+}
+
+add_filter('woocommerce_edit_account_form_start', function(){
+	?>
+	<div class="row">
+	<?php
+});

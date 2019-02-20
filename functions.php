@@ -251,11 +251,6 @@ function fpusa_custom_checkout_fields( $fields ){
 	return $fields;
 }
 
-add_filter('woocommerce_edit_account_form_start', function(){
-	?>
-	<div class="row"/>
-	<?php
-});
 
 add_action( 'fpusa_order_actions', 'fpusa_track_package' );
 
@@ -302,27 +297,6 @@ function fpusa_split_tags( $tags ){
 add_action( 'woocommerce_before_main_content', 'fpusa_cat_sub_nav_cat_menu', 1 );
 remove_action('woocommerce_before_main_content', 'woocommerce_breadcrumb', 20 );
 add_action('woocommerce_before_shop_loop', 'woocommerce_breadcrumb', 21 );
-function fpusa_cat_sub_nav_cat_menu(){
-	/**
-	*
-	*
-	*/
-		if( fpusa_is_cat() ) : // needed when on shop page
-			$siblings = fpusa_get_cat_siblings( fpusa_get_department() );
-			if( sizeof( $siblings ) > 1 ) : ?>
-				<nav class="navbar navbar-expand-lg navbar-light bg-dark">
-			    <div class="navbar-nav">
-			      <?php foreach( $siblings as $term ) : ?>
-							<li class="nav-item">
-								<a class="nav-link" href="<?php echo get_term_link( (int)$term->term_id ) ?>"><?php echo $term->name; ?></a>
-							</li>
-						<?php endforeach; ?>
-			    </div>
-				</nav>
-			<?php
-			endif;
-		endif;
-}
 
 function fpusa_is_cat(){
 	/**
@@ -367,6 +341,10 @@ function fpusa_get_department(){
 
 add_action( 'woocommerce_archive_description', 'fpusa_shop_by_category', 15 );
 function fpusa_get_cats_w_img(){
+	/**
+	* Only displays categories with an image assigned to it.
+	* @return array $categories_w_img - Collection of image src, link and name of a category
+	*/
 	$categories_w_img = array();
 	$children = fpusa_get_cat_children();
 	if( $children ) {
@@ -385,25 +363,6 @@ function fpusa_get_cats_w_img(){
 		}
 	}
 	return $categories_w_img;
-}
-
-function fpusa_shop_by_category( ){
-	$cats = fpusa_get_cats_w_img();
-	if( ! empty( $cats ) ){
-		?>
-		<h3>Shop by Category</h3>
-		<div class="row">
-			<?php foreach( $cats as $cat ) : ?>
-				<div class="col-6 col-sm-2">
-					<a href="<?php echo $cat['link']; ?>">
-						<img src="<?php echo $cat['image_src']?>" />
-						<p class="text-center"><?php echo $cat['name']; ?></p>
-					</a>
-				</div>
-			<?php endforeach; ?>
-		</div>
-		<?php
-	}
 }
 
 add_action('woocommerce_archive_description', 'fpusa_category_best_sellers', 16);
@@ -484,30 +443,14 @@ function fpusa_category_cheapest(){
 }
 
 
-function fpusa_slick_query($header, $args){
-	$children  = fpusa_get_cat_children();
-	if( $children ){
-		$wc_query = new WP_Query( $args );
-		?>
-		<h3><?php echo $header; ?></h3>
-		<div class="slick">
-		<?php
-		if( $wc_query->have_posts() ) :
-			while( $wc_query->have_posts() ) :
-				$wc_query->the_post();
-				wc_get_template_part('content', 'product');
-			endwhile;
-		endif;
-		wp_reset_postdata();
-		?>
-		</div>
-		<?php
-	}
-}
-
 function fpusa_get_cat_children(){
-	// helper class returns children of a category, if any.
+	/**
+	 * Used to get the children of a product category
+	 * @return WP_Term $children - The children taxonomys of a product category
+	 */
 	$term = get_queried_object();
+
+	// var_dump( $term );
 
 	$children = get_terms( $term->taxonomy, array(
 	'parent'    => $term->term_id,
@@ -517,13 +460,13 @@ function fpusa_get_cat_children(){
 	return $children;
 }
 
-/**
- * Change number of products that are displayed per page (shop page)
- */
+
 add_filter( 'loop_shop_per_page', 'new_loop_shop_per_page', 20 );
 function new_loop_shop_per_page( $cols ) {
-  // $cols contains the current number of products per page based on the value stored on Options -> Reading
-  // Return the number of products you wanna show per page.
+	/**
+	 * Change number of products that are displayed per page (shop page)
+	 * @param $cols - How many products per page
+	 */
   $cols = 36;
   return $cols;
 }
