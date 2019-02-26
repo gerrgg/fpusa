@@ -1,8 +1,8 @@
 <?php
 /**
- * Content wrappers
+ * Single Product stock.
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/global/wrapper-start.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/single-product/stock.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -10,17 +10,15 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     3.3.0
+ * @see     https://docs.woocommerce.com/document/template-structure/
+ * @author  WooThemes
+ * @package WooCommerce/Templates
+ * @version 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
 ?>
-<div id="primary" class="content-area container-fluid">
-	<main id="main" class="site-main" role="main">
-	<?php
+<p class="stock <?php echo esc_attr( $class ); ?>"><?php echo wp_kses_post( $availability ); ?></p>

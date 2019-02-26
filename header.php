@@ -31,9 +31,13 @@
 					  <?php the_custom_logo(); ?>
 					</div>
 
-					<form id="search-wrap" method="GET" class="nav-center">
-						<input class="form-control" type="search" name="s"/>
-						<button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+					<form role="search" method="get" class="d-flex justify-content-center" action="<?php echo home_url( '/' ); ?>">
+				    <label class="">
+				        <span class="screen-reader-text"><?php echo _x( 'Search for:', 'label' ) ?></span>
+				        <input type="search" class="form-control" placeholder="<?php echo esc_attr_x( 'Search …', 'placeholder' ) ?>" value="<?php echo get_search_query() ?>" name="s" title="<?php echo esc_attr_x( 'Search for:', 'label' ) ?>" />
+				    </label>
+				    <button type="submit" class="btn btn-danger"><i class="fas fa-search"></i></button>
+				    <input type="hidden" value="product" name="post_type" id="post_type" />
 					</form>
 
 					<div id="top-right" class="ml-auto">

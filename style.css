@@ -1201,7 +1201,10 @@ span.hr-text{
 ## Article
 --------------------------------------------------------------*/
 article{
-	margin: 1.5rem auto !important;
+	/* margin: 1.5rem auto !important; */
+}
+.woocommerce-cart article{
+	margin: 0px;
 }
 
 /*--------------------------------------------------------------
@@ -1350,7 +1353,7 @@ span.onsale{
 	text-align: center;
 	position: absolute;
 	top: 5px;
-	left: 5px;
+	right: 5px;
 	background-color: red;
 	color: #fff;
 	border-radius: 100%;
@@ -1359,4 +1362,79 @@ span.onsale{
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	z-index: 5;
+}
+
+
+/*--------------------------------------------------------------
+## single product
+--------------------------------------------------------------*/
+h1.product_title{
+	font-size: 1.5rem;
+}
+
+#single-product-price{
+	font-size: 1.5rem;
+}
+
+.fpusa-single-product-right{
+	border: 1px solid rgba(0,0,0,0.1);
+	padding: 1rem;
+	/* text-align: center; */
+}
+
+.woocommerce-product-details__short-description ul{
+	margin-left: 1.5rem;
+}
+
+.woocommerce-product-details__short-description ul li{
+
+}
+
+#image_main{
+	display: flex;
+	flex-direction: row-reverse;
+}
+
+.single-product div.product .woocommerce-product-gallery ol.flex-control-thumbs{
+	display: flex;
+	flex-direction: column;
+	width: 50%;
+	margin-right: 10px;
+}
+
+.single-product div.product .woocommerce-product-gallery.woocommerce-product-gallery--columns-4 ol.flex-control-thumbs li{
+	width: 100%;
+	margin-top: 5px;
+}
+
+body.single-product p.price{
+	font-size: 1.5rem;
+}
+
+p.stock{
+	font-size: 1.5rem;
+}
+
+.input-text.qty{
+	width: 100%;
+}
+
+.single_variation_wrap{
+	display: none !important;
+}
+
+.text-small{
+	font-size: 14px !important;
+}
+.img-xs{
+	width: 50px;
+	height: 50px;
+}
+/*--------------------------------------------------------------
+## Cart
+--------------------------------------------------------------*/
+td.product-name > a, td.product-price{
+	font-size: 1.5rem;
+	font-weight: 600;
 }

@@ -70,16 +70,7 @@ function fpusa_get_header_right(){
 
 function fpusa_choose_location_btn(){
 	$user = wp_get_current_user();
-	if( ! empty($user) ){
-		$customer = new WC_Customer( $user->ID );
-		if( ! empty( $customer->get_shipping_city() ) && $customer->get_shipping_postcode() ){
-			$loc_str = $customer->get_shipping_city() . ' ' . $customer->get_shipping_postcode();
-		} else {
-			$loc_str = "Your Location";
-		}
-	} else {
-		$loc_str = "Your Location";
-	}
+	$loc_str = fpusa_get_ship_address_str( $user );
 	?>
 	<a id="user-navigation" class="nav-link align-items-center" data-toggle="modal" data-target="#fpusa_choose_loc">
 		<i class="fas fa-map-marker-alt fa-2x pr-2"></i>
@@ -95,6 +86,21 @@ function fpusa_choose_location_btn(){
 	<?php
 }
 
+function fpusa_get_ship_address_str( $user = '' ){
+	if( empty( $user ) ) $user = wp_get_current_user();
+
+	if( ! empty($user) ){
+		$customer = new WC_Customer( $user->ID );
+		if( ! empty( $customer->get_shipping_city() ) && $customer->get_shipping_postcode() ){
+			$loc_str = $customer->get_shipping_city() . ' ' . $customer->get_shipping_postcode();
+		} else {
+			$loc_str = "Login to select location";
+		}
+	} else {
+		$loc_str = "Login to select location";
+	}
+	return $loc_str;
+}
 
 function fpusa_make_modal( $args = '' ){
 	 $defaults = array(
@@ -162,8 +168,37 @@ function fpusa_get_guest_loc_html(){
 }
 
 function fpusa_get_user_loc_html(){
-	?>
-	<?php
+	$address = fpusa_get_customer_location_details( 'shipping' );
+	if( ! empty( $address ) ) : ?>
+		<p class="text-muted">Delivery options and speeds can vary based differant locations</p>
+		<label>Current Shipping Address:</label>
+		<button role="button" class="text-left mb-2">
+			<address>
+				<b><?php echo $address['shipto']; ?></b>
+				<span><?php echo $address['address_1']; ?>,</span><br>
+				<span><?php echo $address['address_2']; ?></span>
+				<span><?php echo $address['city']; ?> </span>
+				<span><?php echo $address['state']; ?></span>
+				<span><?php echo $address['postcode']; ?></span>
+			</address>
+		</button><br><br>
+		<a href="/edit-address/">Edit Addresses</a>
+	<?php else :
+		 fpusa_get_guest_loc_html();
+	endif;
+}
+
+function fpusa_get_customer_location_details( $type = 'shipping' ){
+	$user = wp_get_current_user();
+	$address = array(
+		'shipto' => get_user_meta( $user->ID, 'first_name', true ) . ' ' . get_user_meta( $user->ID, 'last_name', true ),
+		'address_1' => get_user_meta( $user->ID, $type.'_address_1', true ),
+		'address_2' => get_user_meta( $user->ID, $type.'_address_2', true ),
+		'city' => get_user_meta( $user->ID, $type.'_city', true ),
+		'state' => get_user_meta( $user->ID, $type.'_state', true ),
+		'postcode' => get_user_meta( $user->ID, $type.'_postcode', true ),
+	);
+	return $address;
 }
 
 function fpusa_get_myaccount_icons( $endpoint ){
@@ -306,7 +341,6 @@ function fpusa_slick_query($header, $args){
 	 * @param string $header - The TITLE of the slider
 	 * @param array $args - a query used to display differant information.
 	 */
-	$term =
 	$children  = fpusa_get_cat_children();
 	if( $children ){
 		$wc_query = new WP_Query( $args );
