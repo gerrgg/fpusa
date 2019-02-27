@@ -11,8 +11,11 @@ $post_src = wp_get_attachment_image_src( $product->get_image_id(), 'woocommerce_
     <?php do_action( 'fpusa_template_product_gallery' ); ?>
   </div>
   <div id="main">
-    <a href="javascript:void(0)" class="product-image-link">
+    <a id="for_img" href="javascript:void(0)" class="product-image-link single-left">
       <img src="<?php if( ! empty( $post_src ) ) echo $post_src[0]; ?>" />
     </a>
+    <div id="for_vid" class="embed-responsive embed-responsive-16by9 single-left">
+      <iframe class="embed-responsive-item" frameborder="0"></iframe>
+    </div>
   </div>
 </div>

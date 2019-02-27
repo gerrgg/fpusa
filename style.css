@@ -1443,6 +1443,7 @@ p.stock{
 }
 
 #main{
+	position: relative;
 	width: 100%;
 }
 
@@ -1452,6 +1453,12 @@ p.stock{
 
 #main a.product-image-link img{
 	max-height: 100%;
+}
+
+#for_vid{
+	/* position: absolute; */
+	/* top: 0; */
+	display: none;
 }
 
 .thumb-active{

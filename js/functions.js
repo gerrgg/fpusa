@@ -132,8 +132,18 @@ jQuery(document).ready(function($){
   });
 
   function fpusa_change_main_img( thumb ){
-    $main = $('#main a.product-image-link img');
-    $main.attr('src', thumb.attr('src-full') );
+    console.log( thumb );
+    $image = $('#for_img');
+    $video = $('#for_vid');
+    if( ! thumb.hasClass('fpusa_video_link') ){
+      $video.hide();
+      $image.find('img').attr('src', thumb.attr('src-full') );
+      $image.show();
+    } else {
+      $image.hide();
+      $video.find('iframe').attr('src', thumb.attr('vid-url') );
+      $video.show();
+    }
   }
 
   // Single product images - end

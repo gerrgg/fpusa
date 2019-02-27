@@ -62,7 +62,7 @@ if ( post_password_required() ) {
 			?>
 
 		</div>
-		<div class="col-3">
+		<div class="col-2">
 				<?php
 				/**
 				 * Hook: fpusa_single_product_right.

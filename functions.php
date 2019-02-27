@@ -199,6 +199,11 @@ require get_template_directory() . '/inc/template-tags.php';
 require get_template_directory() . '/inc/template-functions.php';
 
 /**
+ * Admin Functions which enhance the theme by hooking into WordPress Backend.
+ */
+require get_template_directory() . '/inc/admin-template-functions.php';
+
+/**
  * Functions which enhance the theme by hooking into WordPress.
  */
 // require get_template_directory() . '/inc/fpusa-free-gifts.php';
@@ -725,4 +730,14 @@ function fpusa_get_image_html( $id, $active = false, $size = 'woocommerce_galler
 		<img src="<?php echo $src[$size][0]; ?>" src-full="<?php echo $src['full'][0]; ?>" <?php if( $active ) echo 'class="thumb-active"' ?> />
 	</p>
 	<?php
+}
+
+function fpusa_get_video_html( $url ){
+	$v_id = str_replace( 'https://www.youtube.com/watch?v=', '', $url );
+	$embed = 'https://www.youtube.com/embed/' . $v_id . '?iv_load_policy=3&autoplay=1';
+	if( ! empty( $v_id ) ) : ?>
+		<p class="img-xs fpusa-woocommerce_gallery_thumbnail">
+			<img class="fpusa_video_link" src="<?php echo 'https://img.youtube.com/vi/' . $v_id . '/default.jpg'; ?>" vid-url="<?php echo $embed; ?>" />
+		</p>
+	<?php endif;
 }
