@@ -82,6 +82,7 @@ jQuery(document).ready(function($){
        // instead of a settings object
      ]
   });
+
   fpusa_find_attributes_without_value( $('table.variations select') );
 
   $('#fpusa_form').change(function(){
@@ -114,12 +115,30 @@ jQuery(document).ready(function($){
 
   });
 
-  $('#var_btn button').click(function(){
-    let attribute = $(this).attr('data-key');
-    let option = $(this).attr('data-value');
-    // console.log( attribute, option );
-    $('#' + attribute).val( option ).change();
+
+  // Single product images - start
+
+  $('.fpusa-woocommerce_gallery_thumbnail img').mouseenter(function(){
+    // remove all .thumb-active from thumbnails
+    if( ! $(this).hasClass('thumb-active') ){
+      $('.fpusa-woocommerce_gallery_thumbnail img').each(function(){
+        $(this).removeClass('thumb-active');
+      });
+
+      $(this).addClass('thumb-active');
+      fpusa_change_main_img( $(this) );
+    }
+
   });
+
+  function fpusa_change_main_img( thumb ){
+    $main = $('#main a.product-image-link img');
+    $main.attr('src', thumb.attr('src-full') );
+  }
+
+  // Single product images - end
+
+
 
   // This is a mess
 
@@ -156,8 +175,6 @@ jQuery(document).ready(function($){
   });
 
   // This is a mess
-
-
 
   function fpusa_get_report_options( awnser ){
     let options = [];
@@ -268,6 +285,7 @@ function fpusa_find_attributes_without_value( options ){
     }
   });
 }
+
 
 
 });

@@ -1431,6 +1431,32 @@ p.stock{
 	width: 50px;
 	height: 50px;
 }
+
+#gallery{
+	display: flex;
+	flex-direction: column;
+	width: 50px;
+}
+
+.fpusa-woocommerce_gallery_thumbnail{
+	border: 1px solid rgba(0,0,0,0.1);
+}
+
+#main{
+	width: 100%;
+}
+
+#main a.product-image-link{
+	height: 600px;
+}
+
+#main a.product-image-link img{
+	max-height: 100%;
+}
+
+.thumb-active{
+	box-shadow: 0 0 8px #ee1927;
+}
 /*--------------------------------------------------------------
 ## Cart
 --------------------------------------------------------------*/

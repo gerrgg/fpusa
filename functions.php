@@ -148,6 +148,7 @@ function fpusa_scripts() {
 	}
 }
 
+
 add_action( 'wp_enqueue_scripts', 'fpusa_scripts' );
 add_action( 'admin_post_nopriv_fpusa_update_zip', 'fpusa_update_zip' );
 remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10 );
@@ -165,6 +166,18 @@ add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_p
 remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20 );
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 35 );
 
+remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20 );
+add_action( 'woocommerce_before_single_product_summary', 'fpusa_show_product_images', 20 );
+
+add_action( 'fpusa_template_product_gallery', 'fpusa_get_product_gallery' );
+
+function fpusa_get_product_gallery(){
+	wc_get_template('single-product/fpusa-product-gallery.php');
+}
+
+function fpusa_show_product_images(){
+	wc_get_template('single-product/fpusa-product-image.php');
+}
 // remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40 );
 
 function fpusa_template_single_divider(){
@@ -683,3 +696,33 @@ function wpdocs_set_html_mail_content_type() {
     return 'text/html';
 }
 add_filter( 'wp_mail_content_type', 'wpdocs_set_html_mail_content_type' );
+
+// function fpusa_get_image_srcset( $id, $sizes = NULL ){
+// 	$srcset = array();
+//
+// 	if( is_null( $sizes ) ){
+// 		$sizes = array('gallery_thumbnail', 'thumbnail', 'large', 'full');
+// 	}
+//
+// 	foreach( $sizes as $size ){
+// 		$src_arr = wp_get_attachment_image_src($id, $size);
+// 		$srcset[$size] = $src_arr[0];
+// 		// if( ! in_array( $src_arr[0], $srcset ) ) $srcset[$size] = $src_arr[0];
+// 	}
+//
+// 	return $srcset;
+// }
+
+function fpusa_get_image_html( $id, $active = false, $size = 'woocommerce_gallery_thumbnail' ){
+	// $srcset = fpusa_get_image_srcset( $id );
+	// $src_str = implode(', ', $srcset);
+	$src = array(
+		$size => wp_get_attachment_image_src($id, $size),
+		'full' => wp_get_attachment_image_src($id, 'full'),
+	);
+	?>
+	<p class="img-xs fpusa-<?php echo $size ?>">
+		<img src="<?php echo $src[$size][0]; ?>" src-full="<?php echo $src['full'][0]; ?>" <?php if( $active ) echo 'class="thumb-active"' ?> />
+	</p>
+	<?php
+}
