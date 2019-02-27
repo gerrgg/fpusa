@@ -1456,14 +1456,31 @@ p.stock{
 }
 
 #for_vid{
-	/* position: absolute; */
-	/* top: 0; */
 	display: none;
+}
+
+#for_img{
+	position: relative;
+	overflow: hidden;
 }
 
 .thumb-active{
 	box-shadow: 0 0 8px #ee1927;
 }
+
+#summary-main{
+	position: relative;
+}
+
+#zoom-overlay{
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	left: 5px;
+	z-index: 1;
+}
+
 /*--------------------------------------------------------------
 ## Cart
 --------------------------------------------------------------*/

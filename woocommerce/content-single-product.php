@@ -37,14 +37,14 @@ if ( post_password_required() ) {
 					 * Hook: woocommerce_before_single_product_summary.
 					 *
 					 * @hooked woocommerce_show_product_sale_flash - 10
-					 * @hooked woocommerce_show_product_images - 20
+					 * @hooked fpusa_show_product_images - 20
 					 */
 					do_action( 'woocommerce_before_single_product_summary' );
 				?>
 
 			</div>
 		</div>
-		<div class="summary entry-summary col">
+		<div id="summary-main" class="summary entry-summary col">
 			<?php
 				/**
 				 * Hook: woocommerce_single_product_summary.

@@ -84,6 +84,7 @@ jQuery(document).ready(function($){
   });
 
   fpusa_find_attributes_without_value( $('table.variations select') );
+  $('#for_img').zoom();
 
   $('#fpusa_form').change(function(){
     let options = $('table.variations select');
@@ -137,6 +138,7 @@ jQuery(document).ready(function($){
     $video = $('#for_vid');
     if( ! thumb.hasClass('fpusa_video_link') ){
       $video.hide();
+      $video.find('iframe').attr('src', '' );
       $image.find('img').attr('src', thumb.attr('src-full') );
       $image.show();
     } else {
@@ -148,7 +150,11 @@ jQuery(document).ready(function($){
 
   // Single product images - end
 
-
+  $('#for_img img').hover(function(){
+    $('#for_img').zoom({
+      url: $(this).attr('src')
+    });
+  });
 
   // This is a mess
 

@@ -137,6 +137,8 @@ function fpusa_scripts() {
 	wp_enqueue_script( 'js-functions', get_template_directory_uri() . '/js/functions.js', array('jquery'), filemtime(get_template_directory() . '/js/functions.js'), true );
 
 	wp_enqueue_script( 'slick-js', get_template_directory_uri() . '/js/slick.min.js', array('jquery'), '4.9', true );
+
+	wp_enqueue_script( 'zoom-js', get_template_directory_uri() . '/js/jquery.zoom.js', array('jquery'), '4.9', true );
 	// wp_enqueue_script( 'fpusa-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151217', true );
 
 	// wp_enqueue_script( 'fpusa-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
@@ -562,7 +564,7 @@ function fpusa_single_product_price_right(){
 add_action( 'fpusa_single_product_right', 'fpusa_single_product_shipping_upsell', 10 );
 function fpusa_single_product_shipping_upsell(){
 	?>
-	<p>fpusa_single_product_shipping_upsell();</p>
+	<p style="overflow: hidden;">fpusa_single_product_shipping_upsell();</p>
 	<?php
 }
 
@@ -737,7 +739,7 @@ function fpusa_get_video_html( $url ){
 	$embed = 'https://www.youtube.com/embed/' . $v_id . '?iv_load_policy=3&autoplay=1';
 	if( ! empty( $v_id ) ) : ?>
 		<p class="img-xs fpusa-woocommerce_gallery_thumbnail">
-			<img class="fpusa_video_link" src="<?php echo 'https://img.youtube.com/vi/' . $v_id . '/default.jpg'; ?>" vid-url="<?php echo $embed; ?>" />
+			<img class="fpusa_video_link" src="<?php echo 'https://img.youtube.com/vi/' . $v_id . '/default.jpg'; ?>" vid-url="<?php echo $embed; ?>"/>
 		</p>
 	<?php endif;
 }
