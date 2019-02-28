@@ -1481,6 +1481,19 @@ p.stock{
 	z-index: 1;
 }
 
+.single_add_to_cart_button, .simple input.qty{
+	/* display: none; */
+}
+
+.woocommerce-product-details__short-description ul{
+	/* margin: 0px; */
+	padding: 0px;
+}
+
+.fpusa-single-product-right .price{
+	font-size: 28px;
+}
+
 /*--------------------------------------------------------------
 ## Cart
 --------------------------------------------------------------*/

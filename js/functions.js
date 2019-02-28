@@ -190,6 +190,11 @@ jQuery(document).ready(function($){
     });
   });
 
+  $('.fpusa-single-product-right .quantity input.qty').change(function(){
+    console.log( this.value );
+    $('.cart input.qty').val( this.value );
+  });
+
   // This is a mess
 
   function fpusa_get_report_options( awnser ){
