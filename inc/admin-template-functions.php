@@ -1,4 +1,41 @@
 <?php
+// https://codex.wordpress.org/Adding_Administration_Menus
+/** Step 1. */
+function fpusa_theme_options() {
+	add_theme_page( 'Theme Options', 'Theme Options', 'manage_options', 'fpusa_options', 'fpusa_options_callback' );
+  add_action( 'admin_init', 'fpusa_register_settings' );
+}
+add_action('admin_menu', 'fpusa_theme_options');
+
+/**
+* Registers a text field setting for Wordpress 4.7 and higher.
+**/
+function fpusa_register_settings() {
+    // register_setting( 'fpusa_theme_options', 'my_option_name' );
+}
+
+function fpusa_options_callback(){
+  ?>
+  <div class="wrap">
+    <h1><?php echo bloginfo('sitename'); ?> Theme Options</h1>
+    <form method="post" action="options.php">
+      <?php settings_fields( 'fpusa_theme_options' ); ?>
+      <?php do_settings_sections( 'fpusa_theme_options' ); ?>
+      <h2>Social Media Connections</h2>
+      <table class="form-table">
+        <tr valign="top">
+          <th scope="row">New Option Name</th>
+          <td><input type="text" name="new_option_name" value="<?php echo esc_attr( get_option('new_option_name') ); ?>" /></td>
+        </tr>
+      </table>
+    <?php submit_button(); ?>
+    </form>
+  </div>
+  <?php
+}
+
+
+
 
 function my_enqueue($hook) {
     // Only add to the edit.php admin page.
