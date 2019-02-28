@@ -743,3 +743,8 @@ function fpusa_get_video_html( $url ){
 		</p>
 	<?php endif;
 }
+
+function fpusa_product_specifications(){
+	wc_get_template( 'single-product/product-specifications.php' );
+}
+add_action( 'fpusa_after_product_attributes', 'fpusa_product_specifications' );

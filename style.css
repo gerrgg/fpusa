@@ -1482,7 +1482,7 @@ p.stock{
 }
 
 .single_add_to_cart_button, .simple input.qty{
-	/* display: none; */
+	display: none;
 }
 
 .woocommerce-product-details__short-description ul{
@@ -1492,6 +1492,15 @@ p.stock{
 
 .fpusa-single-product-right .price{
 	font-size: 28px;
+}
+
+.woocommerce-tabs h2{
+	font-size: 24px;
+	color: #333 !important;
+  line-height: 1.3;
+  padding-bottom: 4px;
+  font-weight: bold;
+  margin: 0px;
 }
 
 /*--------------------------------------------------------------

@@ -22,25 +22,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<table class="shop_attributes">
+<ul class="shop_attributes list-group">
 	<?php if ( $display_dimensions && $product->has_weight() ) : ?>
-		<tr>
-			<th><?php _e( 'Weight', 'woocommerce' ) ?></th>
-			<td class="product_weight"><?php echo esc_html( wc_format_weight( $product->get_weight() ) ); ?></td>
-		</tr>
+		<li class="">
+			<label><?php _e( 'Weight:', 'woocommerce' ) ?></label>
+			<span class="product_weight"><?php echo esc_html( wc_format_weight( $product->get_weight() ) ); ?></td>
+		</li>
 	<?php endif; ?>
 
 	<?php if ( $display_dimensions && $product->has_dimensions() ) : ?>
-		<tr>
-			<th><?php _e( 'Dimensions', 'woocommerce' ) ?></th>
-			<td class="product_dimensions"><?php echo esc_html( wc_format_dimensions( $product->get_dimensions( false ) ) ); ?></td>
-		</tr>
+	<li class="">
+		<label><?php _e( 'Dimensions:', 'woocommerce' ) ?></th>
+		<span class="product_dimensions"><?php echo esc_html( wc_format_dimensions( $product->get_dimensions( false ) ) ); ?></span>
+	</li>
 	<?php endif; ?>
 
 	<?php foreach ( $attributes as $attribute ) : ?>
-		<tr>
-			<th><?php echo wc_attribute_label( $attribute->get_name() ); ?></th>
-			<td><?php
+		<li>
+			<label><?php echo wc_attribute_label( $attribute->get_name() ); ?>:</label>
+			<span class=""><?php
 				$values = array();
 
 				if ( $attribute->is_taxonomy() ) {
@@ -58,18 +58,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 					}
 				} else {
 					$values = $attribute->get_options();
-
 					foreach ( $values as &$value ) {
 						$value = make_clickable( esc_html( $value ) );
 					}
 				}
 
-				echo apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values );
-			?></td>
-		</tr>
+				echo apply_filters( 'woocommerce_attribute', wptexturize( implode( ', ', $values ) ), $attribute, $values );
+			?></span>
+		</li>
 	<?php endforeach; ?>
 
-	<?php
-	fpusa_tags_to_specs();
-	?>
-</table>
+</ul>
+<?php do_action( 'fpusa_after_product_attributes' ); ?>

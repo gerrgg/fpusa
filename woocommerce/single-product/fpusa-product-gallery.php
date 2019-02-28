@@ -6,7 +6,7 @@ global $product;
 global $post;
 
 $attachment_ids = $product->get_gallery_image_ids();
-$video_urls = fpusa_get_product_video_urls( $post );
+$video_urls = json_decode(get_post_meta( $post->ID, 'product_videos', true ));
 
 if( !empty( $attachment_ids ) ){
   foreach( $attachment_ids as $id ) :

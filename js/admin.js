@@ -1,16 +1,42 @@
 jQuery(document).ready(function(){
-  $('#fpusa_product_video_input_table tbody').on('blur', 'input.fpusa_product_video_input', function(){
-    $table = $('#fpusa_product_video_input_table tbody');
-    let id = this.id.replace('fpusa_input_', '');
-    let next_id = +id + 1;
-    let $next_selector = 'fpusa_input_' + next_id;
-    if( $('#' + $next_selector).length === 0 ){
-      console.log($next_selector + ' doesnt exist');
-      $table.append(
-        $('<tr/>')
-        .append('<td>#' + next_id + '</td>')
-        .append('<td><input id="'+ $next_selector +'" class="fpusa_product_video_input" name="product_video_url[' + next_id + ']"/></td>')
+
+  fpusa_dynamic_input_table(
+    $('#fpusa_product_video_input_table'),
+    [
+      { type: 'url', name: 'product_videos', class: 'fpusa_product_video_input', },
+    ]
+   );
+
+  fpusa_dynamic_input_table(
+    $('#fpusa_admin_product_specifications'),
+    [
+      { type: 'text', name: 'spec_name'},
+      { type: 'text', name: 'spec_value'}
+    ]
+  );
+
+  function fpusa_dynamic_input_table( $target, $row ){
+    $target
+    .on('click', 'button.add', function(){
+      $next_row = ( +$target.find('tr').last().attr('class') + 1 ) || 0;
+      // console.log( $next_row );
+      $target.find('table').append(
+        $('<tr/>', { class: $next_row }).append(
+          $('<td/>').append( function(){
+            let str = '';
+            for(let i = 0; i < $row.length; i++){
+              str += '<input type="'+ $row[i].type +'" name="'+ $row[i].name +'['+ $next_row +']" />';
+            }
+            return str;
+          }),
+          $('<td/>').append('<button type="button" class="remove">&times;</button>'),
+        ),
       );
-    }
-  });
+    })
+    .on('click', 'button.remove', function(){
+      $(this).parent().parent().remove();
+    });
+  }
+
+
 });
