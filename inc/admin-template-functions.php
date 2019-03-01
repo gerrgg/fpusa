@@ -95,7 +95,7 @@ function fpusa_save_product_meta( $post_id, $meta_key ){
 		if( isset( $_POST[$key] ) ){
 			$package = array();
 			foreach( $_POST[$key] as $url ){
-				if( ! empty( $url ) ) array_push( $package, $url );
+				( ! empty( $url ) ) ? array_push( $package, $url ) : delete_post_meta($post_id, $key);
 		  }
 			if( ! empty( $package ) ){
 				update_post_meta( $post_id, $key, json_encode( $package ) );
