@@ -1535,6 +1535,10 @@ table.table-half th{
 #comment-meta p{
  margin: 0px;
 }
+/*
+## Dropzone
+*/
+
 /*--------------------------------------------------------------
 ## Cart
 --------------------------------------------------------------*/
@@ -1556,4 +1560,19 @@ td.product-name > a, td.product-price{
 
 .click-star{
 	cursor: pointer;
+}
+
+span.verified{
+	font-weight: 500;
+	color: orange;
+}
+
+.comment-actions a, .comment-actions a:visited{
+	color: rgba(0,0,0,0.75);
+	text-decoration: underline;
+	margin: 0 .75rem;
+}
+
+.comment_actions a{
+	border-left: 1px solid #333;
 }

@@ -132,6 +132,8 @@ function fpusa_scripts() {
 
 	wp_enqueue_style( 'slick-theme', get_template_directory_uri() . '/css/slick-theme.css' );
 
+	wp_enqueue_style( 'dropzone-css', get_template_directory_uri() . '/css/dropzone.css' );
+
 	wp_enqueue_script( 'bs4-js', get_template_directory_uri() . '/js/bootstrap.min.js', array('jquery'), '4.2', true );
 
 	wp_enqueue_script( 'js-functions', get_template_directory_uri() . '/js/functions.js', array('jquery'), filemtime(get_template_directory() . '/js/functions.js'), true );
@@ -140,9 +142,14 @@ function fpusa_scripts() {
 
 	wp_enqueue_script( 'zoom-js', get_template_directory_uri() . '/js/jquery.zoom.js', array('jquery'), '4.9', true );
 
+	wp_enqueue_script( 'dropzone-js', get_template_directory_uri() . '/js/dropzone.js', array('jquery'));
+
 	add_rewrite_endpoint( 'yith-my-wishlist', EP_ROOT | EP_PAGES );
 
-	wp_localize_script( 'js-functions', 'ajax_object', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
+	wp_localize_script( 'js-functions', 'ajax_object', array(
+		'ajax_url' => admin_url( 'admin-ajax.php' ),
+		'dropParam' => admin_url( 'admin-post.php?action=fpusa_process_product_review' ),
+	));
 
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
@@ -309,6 +316,8 @@ add_action( 'wp_ajax_nopriv_fpusa_get_variation_data', 'fpusa_get_product_data_c
 add_action( 'wp_ajax_fpusa_get_buy_again_data', 'fpusa_get_product_data_callback' );
 add_action( 'wp_ajax_fpusa_single_product_feedback', 'fpusa_single_product_feedback_callback' );
 add_action( 'wp_ajax_nopriv_fpusa_single_product_feedback', 'fpusa_single_product_feedback_callback' );
+add_action( 'admin_post_handle_dropped_media', 'fpusa_handle_dropped_media' );
+
 function fpusa_get_product_data_callback(){
 	$product = wc_get_product( $_POST['p_id'] );
 	if( ! empty( $product ) ){
@@ -788,9 +797,11 @@ function fpusa_get_rating_histogram( $ratings, $count ){
 function fpusa_cr_get_review_btn(){
 	global $product;
 	?>
-	<h4>Write a review</h4>
-	<p>Share your thoughts with other customers.</p>
-	<a type="button" href="/review?p_id=<?php echo $product->get_id(); ?>" class="btn btn-default btn-block">Write a customer review</a>
+	<div id="fpusa-review-btn">
+		<h4>Write a review</h4>
+		<p>Share your thoughts with other customers.</p>
+		<a type="button" href="/review?p_id=<?php echo $product->get_id(); ?>" class="btn btn-default btn-block">Write a customer review</a>
+	</div>
 	<?php
 }
 add_action( 'fpusa_customer_review_left', 'fpusa_cr_get_review_btn', 20 );
@@ -801,8 +812,36 @@ function fpusa_get_reviews(){
 
 	$args = array('post_type' => 'product', 'post_id' => get_the_ID());
 	$comments = get_comments( $args );
-	wp_list_comments( array( 'callback' => 'woocommerce_comments' ), $comments);
+	wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div' ), $comments);
 }
+
+function fpusa_comments( $comment ){
+	// var_dump( $comment );
+	$rating = get_metadata( 'comment', $comment->comment_ID, 'rating', true );
+	$headline = get_metadata( 'comment', $comment->comment_ID, 'headline', true );
+	$verified = get_metadata( 'comment', $comment->comment_ID, 'verified', true );
+	?>
+	<div id="<?php echo $comment->comment_ID; ?>" class="comment my-4">
+		<div class="comment-top d-flex align-items-center">
+			<span class="pr-2">
+				<?php echo get_avatar($comment->comment_author_email, 50); ?>
+			</span>
+			<b><?php echo $comment->comment_author ?></b>
+		</div>
+		<div class="comment-meta">
+			<div class="d-flex">
+				<?php echo wc_get_rating_html($rating); ?>
+				<?php if( ! empty( $headline ) ) echo '<b class="pl-2">' . $headline . '</b>'; ?>
+			</div>
+			<?php if( $verified ) echo '<span class="verified">Verified Purchase</span>'; ?>
+			<p><?php echo $comment->comment_content ?></p>
+		</div>
+		<div class="comment-actions" role="group">
+			<?php do_action('fpusa_comment_actions', array($comment->comment_ID)) ?>
+		</div>
+		<?php
+}
+
 add_action( 'fpusa_customer_review_right', 'fpusa_get_reviews', 10 );
 
 add_shortcode( 'create_review', 'fpusa_create_review_template' );
@@ -814,7 +853,7 @@ function fpusa_create_review_template(){
 function fpusa_create_review_product_preview( $product ){
 	$src = wp_get_attachment_image_src( $product->get_image_id() );
 	?>
-	<div class="product-preview d-flex align-items-center">
+	<div class="product-preview d-flex align-items-center form-group">
     <img src="<?php echo $src[0]; ?>" class="img-xs" />
     <p class="m-0"><?php echo $product->get_name(); ?></p>
   </div>
@@ -823,14 +862,162 @@ function fpusa_create_review_product_preview( $product ){
 
 function fpusa_get_overall_star_rating_form(){
 	?>
-	<div class="create-review-star-rating">
+	<div class="create-review-star-rating form-group">
 		<h5>Overall rating</h5>
 		<div class="d-flex">
 			<?php for( $i = 1; $i <= 5; $i++ ) : ?>
-				<i id="star-<?php echo $i ?>" class="far fa-star fa-3x click-star" data-rating="<?php echo $i; ?>"></i>
+				<i id="star-<?php echo $i ?>" class="far fa-star fa-2x click-star" data-rating="<?php echo $i; ?>"></i>
 			<?php endfor; ?>
 		</div>
-		<input id="product-rating" type="hidden" />
+		<input id="product-rating" name="rating" type="hidden" />
 	</div>
 	<?php
+}
+
+function fpusa_add_headline(){
+	?>
+	<div class="form-group">
+		<h5>Add a headline</h5>
+		<input type="text" class="form-control" name="headline">
+	</div>
+	<?php
+}
+
+function fpusa_add_comment(){
+	?>
+	<div class="form-group">
+		<h5>Write your review</h5>
+		<textarea rows="4" name="comment" class="form-control" placeholder="What did you like or dislike? What did you use this product for?"></textarea>
+	</div>
+	<?php
+}
+
+function fpusa_drop_zone(){
+	//https://stackoverflow.com/questions/29411257/how-to-integrate-dropzonejs-with-wordpress-media-handler-in-frontend
+	?>
+		<div class="form-group">
+			<h5>Add a photo</h5>
+			<p>A picture speaks a thousand words.</p>
+			<input type="file" name="files">
+		</div>
+	<?php
+}
+
+
+function fpusa_handle_dropped_media(){
+		// Dropzone.js integration to handle media upload
+		status_header(200);
+
+		$num_files = count( $_FILES['files']['tmp_name'] );
+		$attachments = array();
+		$attachment_id = 0;
+
+		if ( !empty($_FILES) ) {
+        $files = $_FILES;
+        foreach($files as $file) {
+            $newfile = array (
+                    'name' => $file['name'],
+                    'type' => $file['type'],
+                    'tmp_name' => $file['tmp_name'],
+                    'error' => $file['error'],
+                    'size' => $file['size']
+            );
+
+            $_FILES = array('upload' => $newfile);
+            foreach($_FILES as $file => $array) {
+							//https://codex.wordpress.org/Function_Reference/media_handle_upload
+                $attachment_id = media_handle_upload( $file, $_POST['product_id'] );
+								array_push( $attachments, $attachment_id );
+            }
+        }
+    }
+
+    return $attachments;
+    die();
+}
+
+add_action( 'admin_post_fpusa_process_product_review', 'fpusa_process_review' );
+add_action( 'admin_post_nopriv_fpusa_process_product_review', 'fpusa_process_review' );
+function fpusa_process_review(){
+	// create the comment, connect it to the product
+	$comment_id = fpusa_create_comment( $_POST );
+	// upload the attachments, collect the attachment ids
+	$attachment_ids = fpusa_handle_dropped_media();
+	//foreach attachment, create a postmeta pointing to the comment the attachment belongs to.
+	foreach( $attachment_ids as $id ){
+		update_post_meta( $id, '_wp_attachment_comment', $comment_id );
+	}
+	// TODO: redirect to other products to review;
+	// wp_redirect('/');
+}
+
+function fpusa_create_comment( $data ){
+	global $wpdb;
+	$user = wp_get_current_user();
+
+	$comment_id = wp_insert_comment(
+		array(
+			'comment_post_ID' => $data['product_id'],
+			'comment_author'	=> $user->user_login,
+			'comment_author_email'	=> $user->user_email,
+			'comment_author_url'	=> $user->user_url,
+			'comment_content' =>  $data['comment'],
+			'comment_type'			=> 'review',
+			'comment_author_IP' => $_SERVER['REMOTE_ADDR'],
+      'comment_agent' => $_SERVER['HTTP_USER_AGENT'],
+			'comment_date' => current_time( 'mysql', $gmt = 0 ),
+			'user_id' => get_current_user_id(),
+			'comment_approved' => 0,
+		)
+	);
+
+	update_comment_meta( $comment_id, 'rating', $data['rating'] );
+	update_comment_meta( $comment_id, 'headline', $data['headline'] );
+
+	//https://docs.woocommerce.com/wc-apidocs/function-wc_customer_bought_product.html
+	update_comment_meta( $comment_id, 'verified',
+		wc_customer_bought_product( $user->user_email, get_current_user_id(), $data['product_id'] )
+	);
+
+	return $comment_id;
+}
+
+add_action('fpusa_customer_review_right', 'fpusa_get_user_product_images', 1);
+function fpusa_get_user_product_images(){
+	$srcs = fpusa_get_user_content_src();
+	if( ! empty( $srcs ) ) : ?>
+		<h5>Customer Images</h5>
+		<div class="">
+			<?php foreach( $srcs as $src ) : ?>
+				<a href="<?php echo $src[1][0] ?>">
+					<img src="<?php echo $src[0][0] ?>" class="mx-1"/>
+				</a>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	endif;
+}
+
+function fpusa_get_user_content_src(){
+	global $product;
+	global $wpdb;
+	$good_srcs = array();
+	$p_id = $product->get_id();
+
+	$results = $wpdb->get_results("SELECT ID
+																 FROM $wpdb->posts
+																 WHERE post_type = 'attachment'
+																 AND post_parent = $p_id");
+
+	foreach( $results as $attachment ){
+		$comment_id = get_post_meta( $attachment->ID, '_wp_attachment_comment', true );
+		$comment = get_comment( $comment_id ) ;
+		if( ! empty( $comment_id ) && $comment->comment_approved == 1 ){
+			array_push( $good_srcs, array(
+					wp_get_attachment_image_src( $attachment->ID, 'thumbnail', false ),
+					wp_get_attachment_image_src( $attachment->ID, 'full', false )
+			));
+		}
+	}
+	return $good_srcs;
 }
