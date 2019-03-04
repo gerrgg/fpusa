@@ -1,4 +1,11 @@
 jQuery(document).ready(function($){
+  //userUpload
+  Dropzone.autoDiscover = false;
+
+  $("#media-uploader").dropzone({
+    url: ajax_object.dropParam,
+    paramName: 'file'
+  });
 
 
   $('#cat-btn').click(function(){
