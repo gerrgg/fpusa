@@ -39,9 +39,6 @@ jQuery(document).ready(function($){
       }
     });
 
-    //present data
-
-
   });
 
 
@@ -306,6 +303,18 @@ function fpusa_find_attributes_without_value( options ){
     }
   });
 }
+
+
+$('i.click-star').click(function(){
+  $('i.click-star').removeClass('fas');
+
+  let rating = $(this).attr('data-rating');
+  for( var i = 1; i <= rating; i++ ){
+    $('#star-' + i).addClass('fas');
+  }
+
+  $('input#product-rating').val( rating );
+});
 
 
 

@@ -106,7 +106,7 @@ function fpusa_save_product_meta( $post_id, $meta_key ){
 
 add_action( 'save_post', 'fpusa_save_product_specifications', 20, 2 );
 
-add_action( 'woocommerce_product_options_advanced', 'fpusa_admin_product_specifications' );
+add_action( 'woocommerce_product_options_advanced', 'fpusa_admin_product_specifications', 40 );
 function fpusa_admin_product_specifications(){
 	global $product;
 	$spec_name = json_decode( get_post_meta( get_the_ID(), 'spec_name', true ) );

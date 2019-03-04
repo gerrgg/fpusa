@@ -139,9 +139,8 @@ function fpusa_scripts() {
 	wp_enqueue_script( 'slick-js', get_template_directory_uri() . '/js/slick.min.js', array('jquery'), '4.9', true );
 
 	wp_enqueue_script( 'zoom-js', get_template_directory_uri() . '/js/jquery.zoom.js', array('jquery'), '4.9', true );
-	// wp_enqueue_script( 'fpusa-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151217', true );
 
-	// wp_enqueue_script( 'fpusa-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
+	add_rewrite_endpoint( 'yith-my-wishlist', EP_ROOT | EP_PAGES );
 
 	wp_localize_script( 'js-functions', 'ajax_object', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
 
@@ -149,7 +148,6 @@ function fpusa_scripts() {
 		wp_enqueue_script( 'comment-reply' );
 	}
 }
-
 
 add_action( 'wp_enqueue_scripts', 'fpusa_scripts' );
 add_action( 'admin_post_nopriv_fpusa_update_zip', 'fpusa_update_zip' );
@@ -704,25 +702,7 @@ function wpdocs_set_html_mail_content_type() {
 }
 add_filter( 'wp_mail_content_type', 'wpdocs_set_html_mail_content_type' );
 
-// function fpusa_get_image_srcset( $id, $sizes = NULL ){
-// 	$srcset = array();
-//
-// 	if( is_null( $sizes ) ){
-// 		$sizes = array('gallery_thumbnail', 'thumbnail', 'large', 'full');
-// 	}
-//
-// 	foreach( $sizes as $size ){
-// 		$src_arr = wp_get_attachment_image_src($id, $size);
-// 		$srcset[$size] = $src_arr[0];
-// 		// if( ! in_array( $src_arr[0], $srcset ) ) $srcset[$size] = $src_arr[0];
-// 	}
-//
-// 	return $srcset;
-// }
-
 function fpusa_get_image_html( $id, $active = false, $size = 'woocommerce_gallery_thumbnail' ){
-	// $srcset = fpusa_get_image_srcset( $id );
-	// $src_str = implode(', ', $srcset);
 	$src = array(
 		$size => wp_get_attachment_image_src($id, $size),
 		'full' => wp_get_attachment_image_src($id, 'full'),
@@ -744,7 +724,113 @@ function fpusa_get_video_html( $url ){
 	<?php endif;
 }
 
-function fpusa_product_specifications(){
-	wc_get_template( 'single-product/product-specifications.php' );
+function fpusa_after_woocommerce_product_additional_information_start(){
+	echo '<div class="row">';
 }
-add_action( 'fpusa_after_product_attributes', 'fpusa_product_specifications' );
+//add_action( 'after_woocommerce_product_additional_information', 'fpusa_after_woocommerce_product_additional_information_start', 1 );
+
+function fpusa_product_specifications(){
+	wc_get_template( 'single-product/tabs/product-specifications.php' );
+}
+add_action( 'before_woocommerce_product_additional_information', 'fpusa_product_specifications', 5 );
+
+function fpusa_product_datasheet(){
+	wc_get_template( 'single-product/tabs/product-datasheet.php' );
+}
+add_action( 'after_woocommerce_product_additional_information', 'fpusa_product_datasheet', 10 );
+
+function fpusa_after_woocommerce_product_additional_information_end(){
+	echo '</div>';
+}
+
+add_filter( 'woocommerce_product_tabs', 'fpusa_custom_review_tab', 98 );
+function fpusa_custom_review_tab( $tabs ) {
+	// change the callback for the reviews tab
+	$tabs['reviews']['callback'] = 'fpusa_get_comments_template';
+	return $tabs;
+}
+
+function fpusa_get_comments_template(){
+	// looks for a file in /yourtheme/woocommerce/single-product/customer_reviews.php
+	wc_get_template('single-product/customer_reviews.php');
+}
+
+function fpusa_cr_get_stars(){
+	wc_get_template( 'single-product/review/rating.php' );
+}
+add_action( 'fpusa_customer_review_left', 'fpusa_cr_get_stars', 10 );
+
+
+
+function fpusa_get_rating_histogram( $ratings, $count ){
+	?>
+	<table class="product-rating-histogram">
+	<?php for( $i = 5; $i > 0; $i-- ) :
+		$now = ( isset( $ratings[$i] ) ) ? intval( ( $ratings[$i] / $count ) * 100 ) : 0;
+	?>
+		<tr>
+			<td>
+				<a href=""><?php echo $i ?> stars</a>
+			</td>
+			<td style="width: 80%">
+				<a class="progress">
+					<div class="progress-bar" role="progressbar" style="width: <?php echo $now; ?>%"aria-valuenow="<?php echo $now ?>%" aria-valuemin="0" aria-valuemax="100"></div>
+				</a>
+			</td>
+			<td>
+				<a href=""><?php echo $now ?>%</a>
+			</td>
+		</tr>
+	<?php endfor; ?>
+	</table> <?php
+}
+
+function fpusa_cr_get_review_btn(){
+	global $product;
+	?>
+	<h4>Write a review</h4>
+	<p>Share your thoughts with other customers.</p>
+	<a type="button" href="/review?p_id=<?php echo $product->get_id(); ?>" class="btn btn-default btn-block">Write a customer review</a>
+	<?php
+}
+add_action( 'fpusa_customer_review_left', 'fpusa_cr_get_review_btn', 20 );
+
+
+function fpusa_get_reviews(){
+	global $product;
+
+	$args = array('post_type' => 'product', 'post_id' => get_the_ID());
+	$comments = get_comments( $args );
+	wp_list_comments( array( 'callback' => 'woocommerce_comments' ), $comments);
+}
+add_action( 'fpusa_customer_review_right', 'fpusa_get_reviews', 10 );
+
+add_shortcode( 'create_review', 'fpusa_create_review_template' );
+
+function fpusa_create_review_template(){
+	wc_get_template('single-product/review/create.php');
+}
+
+function fpusa_create_review_product_preview( $product ){
+	$src = wp_get_attachment_image_src( $product->get_image_id() );
+	?>
+	<div class="product-preview d-flex align-items-center">
+    <img src="<?php echo $src[0]; ?>" class="img-xs" />
+    <p class="m-0"><?php echo $product->get_name(); ?></p>
+  </div>
+	<?php
+}
+
+function fpusa_get_overall_star_rating_form(){
+	?>
+	<div class="create-review-star-rating">
+		<h5>Overall rating</h5>
+		<div class="d-flex">
+			<?php for( $i = 1; $i <= 5; $i++ ) : ?>
+				<i id="star-<?php echo $i ?>" class="far fa-star fa-3x click-star" data-rating="<?php echo $i; ?>"></i>
+			<?php endfor; ?>
+		</div>
+		<input id="product-rating" type="hidden" />
+	</div>
+	<?php
+}

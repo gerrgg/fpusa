@@ -67,6 +67,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?></span>
 		</li>
 	<?php endforeach; ?>
-
 </ul>
-<?php do_action( 'fpusa_after_product_attributes' ); ?>

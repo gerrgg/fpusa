@@ -23,12 +23,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $product;
 
 $heading = esc_html( apply_filters( 'woocommerce_product_additional_information_heading', __( 'Product Information', 'woocommerce' ) ) );
-
 ?>
-<div class="col-12 col-sm-6">
-<?php if ( $heading ) : ?>
-	<h2><?php echo $heading; ?></h2>
-<?php endif; ?>
+<?php do_action( 'before_woocommerce_product_additional_information', $product ); ?>
+	<div class="col-6">
+		<?php if ( $heading ) : ?>
+			<h2><?php echo $heading; ?></h2>
+		<?php endif; ?>
 
-<?php do_action( 'woocommerce_product_additional_information', $product ); ?>
-</div>
+		<?php do_action( 'woocommerce_product_additional_information', $product ); ?>
+	</div>

@@ -1503,10 +1503,57 @@ p.stock{
   margin: 0px;
 }
 
+table.table-half th{
+	background-color: rgba(0,0,0,0.1);
+	border-bottom: 1px solid #fff;
+}
+
+#specifications-table{
+	width: 75%;
+}
+
+.commentlist{
+	margin: 0px;
+	padding: 0px;
+}
+
+#review{
+	position: relative;
+}
+
+.fixed-left{
+	width: 300px;
+	margin-left: 300px;
+	position: fixed;
+	left: 15px;
+}
+
+.padding-right-300{
+	padding-left: 300px;
+}
+
+#comment-meta p{
+ margin: 0px;
+}
 /*--------------------------------------------------------------
 ## Cart
 --------------------------------------------------------------*/
 td.product-name > a, td.product-price{
 	font-size: 1.5rem;
 	font-weight: 600;
+}
+
+/*--------------------------------------------------------------
+## Create Review
+--------------------------------------------------------------*/
+#create_review{
+	max-width: 750px;
+}
+
+.product-preview{
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.click-star{
+	cursor: pointer;
 }
