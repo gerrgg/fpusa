@@ -178,6 +178,365 @@ add_action( 'woocommerce_before_single_product_summary', 'fpusa_show_product_ima
 
 add_action( 'fpusa_template_product_gallery', 'fpusa_get_product_gallery' );
 
+function fpusa_get_header_right(){
+	$user = wp_get_current_user();
+	$login_msg = ( ! empty( $user->display_name ) ) ? "Hello, $user->display_name" : "Hello, Sign in";
+	?>
+	<ul class="navbar-nav d-flex align-items-end">
+		<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<?php echo $login_msg; ?>
+			</a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+				<?php if( ( empty( $user->ID ) ) ) : ?>
+				<a class="dropdown-item" href="/my-account/">Login/Register</a>
+				<?php endif; ?>
+				<a class="dropdown-item" href="/my-account/orders/">My Orders</a>
+				<a class="dropdown-item" href="/my-account/edit-account/">My Account</a>
+				<a class="dropdown-item" href="/my-account/edit-address/">Edit Address</a>
+				<?php if( ( ! empty( $user->ID ) ) ) : ?>
+				<div class="dropdown-divider"></div>
+				<a class="dropdown-item" href="/my-account/customer-logout">Logout</a>
+				<?php endif; ?>
+			</div>
+		</li>
+		<li class="nav-item">
+      <a class="nav-link" href="/my-account/orders/">Orders</a>
+    </li>
+		<li class="nav-item">
+      <a class="nav-link" href="/cart/"><i class="fas fa-shopping-cart fa-2x"></i></a>
+    </li>
+	</ul>
+	<?php
+}
+
+function fpusa_choose_location_btn(){
+	$user = wp_get_current_user();
+	$loc_str = fpusa_get_ship_address_str( $user );
+	?>
+	<a id="user-navigation" class="nav-link align-items-center" data-toggle="modal" data-target="#fpusa_choose_loc">
+		<i class="fas fa-map-marker-alt fa-2x pr-2"></i>
+		<div class="d-flex flex-column">
+			<span id="deliver-name">
+				Deliver to <?php echo $user->user_nicename; ?>
+			</span>
+			<span id="deliver-loc" class="highlight-text">
+				<?php echo $loc_str; ?>
+			</span>
+		</div>
+	</a>
+	<?php
+}
+
+function fpusa_get_ship_address_str( $user = '' ){
+	if( empty( $user ) ) $user = wp_get_current_user();
+
+	if( ! empty($user) ){
+		$customer = new WC_Customer( $user->ID );
+		if( ! empty( $customer->get_shipping_city() ) && $customer->get_shipping_postcode() ){
+			$loc_str = $customer->get_shipping_city() . ' ' . $customer->get_shipping_postcode();
+		} else {
+			$loc_str = "Login to select location";
+		}
+	} else {
+		$loc_str = "Login to select location";
+	}
+	return $loc_str;
+}
+
+function fpusa_make_modal( $args = '' ){
+	 $defaults = array(
+		 'id' 					=> 'defaultModal',
+		 'labelledby' 	=> '',
+		 'inner_class' 	=> 'modal-dialog',
+		 'header' 			=> 'Modal Title',
+		 'body' 				=> 'Body',
+		 'footer' 			=> '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        								<button type="button" class="btn btn-primary">Save changes</button>',
+	 );
+
+	 $args = wp_parse_args( $args, $defaults );
+	?>
+	<!-- Modal -->
+	<div class="modal fade" id="<?php echo $args['id'] ?>" tabindex="-1" role="dialog" aria-labelledby="<?php echo $args['labelledby'] ?>" aria-hidden="true">
+	  <div class="modal-dialog <?php echo $args['inner_class'] ?>" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalCenterTitle"><?php echo $args['header'] ?></h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <?php echo $args['body'] ?>
+	      </div>
+	      <div class="modal-footer">
+	        <?php echo $args['footer'] ?>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	<?php
+}
+
+function fpusa_edit_location_modal(){
+	?>
+	<div class="modal fade" id="fpusa_choose_loc" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="fpusa_choose_loc">Edit your location</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<?php ( is_user_logged_in() ) ? fpusa_get_user_loc_html() : fpusa_get_guest_loc_html(); ?>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary text-white" data-dismiss="modal">Done</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php
+}
+
+function fpusa_get_guest_loc_html(){
+	?>
+	<p class='text-muted'>Delivery options and speeds may vary based on your location.</p>
+	<a role="button" href="/my-account/" class='btn btn-primary btn-block text-white'>Sign in to edit your address</a>
+	<?php
+}
+
+function fpusa_get_user_loc_html(){
+	$address = fpusa_get_customer_location_details( 'shipping' );
+	if( ! empty( $address ) ) : ?>
+		<p class="text-muted">Delivery options and speeds can vary based differant locations</p>
+		<label>Current Shipping Address:</label>
+		<button role="button" class="text-left mb-2">
+			<address>
+				<b><?php echo $address['shipto']; ?></b>
+				<span><?php echo $address['address_1']; ?>,</span><br>
+				<span><?php echo $address['address_2']; ?></span>
+				<span><?php echo $address['city']; ?> </span>
+				<span><?php echo $address['state']; ?></span>
+				<span><?php echo $address['postcode']; ?></span>
+			</address>
+		</button><br><br>
+		<a href="/edit-address/">Edit Addresses</a>
+	<?php else :
+		 fpusa_get_guest_loc_html();
+	endif;
+}
+
+function fpusa_get_customer_location_details( $type = 'shipping' ){
+	$user = wp_get_current_user();
+	$address = array(
+		'shipto' => get_user_meta( $user->ID, 'first_name', true ) . ' ' . get_user_meta( $user->ID, 'last_name', true ),
+		'address_1' => get_user_meta( $user->ID, $type.'_address_1', true ),
+		'address_2' => get_user_meta( $user->ID, $type.'_address_2', true ),
+		'city' => get_user_meta( $user->ID, $type.'_city', true ),
+		'state' => get_user_meta( $user->ID, $type.'_state', true ),
+		'postcode' => get_user_meta( $user->ID, $type.'_postcode', true ),
+	);
+	return $address;
+}
+
+function fpusa_get_myaccount_icons( $endpoint ){
+	$icon = '';
+
+	switch( $endpoint ){
+		case 'dashboard':
+			$icon =  'tachometer-alt';
+		break;
+
+		case 'orders':
+			$icon =  'file-invoice-dollar';
+		break;
+
+		case 'downloads':
+			$icon =  'file-download';
+		break;
+
+		case 'edit-address':
+		 	$icon =  'address-book';
+		break;
+
+		case 'edit-account':
+			$icon =  'user';
+		break;
+
+		case 'customer-logout':
+			$icon =  'sign-out-alt';
+		break;
+	}
+
+	return "<i class='fas fa-$icon fa-3x'></i>";
+}
+
+function fpusa_buy_again_modal(){
+	?>
+	<div class="modal fade" id="fpusa_buy_again" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">Buy Again</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+				<div class="row">
+					<div class="col-12 col-sm-4">
+						<a id="fpusa_ba_img_link" href="#" class="product-image-link product-image-link-sm"></a>
+					</div>
+					<div class="col">
+						<a id="fpusa_ba_title" href=""></a>
+						<div class="d-flex">
+							<span class="pr-1">Current Price:</span>
+							<span id="fpusa_ba_price" class="price"></span>
+						</div>
+						<div id="fpusa_ba_stock"></div>
+						<div id="fpusa_ba_qty"></div>
+						<form id="fpusa_ba_form" class="cart" action="" method="post" enctype="multipart/form-data">
+							<input type="number" id="<?php echo uniqid( 'quantity_' ) ?>" class="input-text qty text" step="1" min="1" max="" name="quantity" value="1" title="Qty" size="4" pattern="[0-9]*" inputmode="numeric">
+							<button type="submit" name="add-to-cart" value="" class="single_add_to_cart_button button alt">Add to cart</button>
+						</form>
+					</div>
+				</div>
+			</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+	<?php
+}
+
+function fpusa_tags_to_specs(){
+	global $product;
+	$tags = fpusa_split_tags( get_the_terms( $product->get_id(), 'product_tag' ) );
+
+	if( empty( $tags ) ) return 0;
+
+	foreach( $tags as $tag ) : ?>
+	<tr>
+		<th><?php echo $tag[0] ?></th>
+		<td><p><?php echo $tag[1] ?></p></td>
+	</tr>
+	<?php endforeach;
+}
+
+add_shortcode( 'yourstore', 'fpusa_your_store_callback' );
+
+function fpusa_your_store_callback(){
+	if( isset( $_GET['fpusa_action'] ) ){
+		$action = 'fpusa_yourstore_' . $_GET['fpusa_action'];
+		$action();
+	}
+}
+
+function fpusa_yourstore_buy_it_again(){
+	$items = fpusa_get_wc_customer_unique_item_purchases(); ?>
+	<div class="row">
+		<?php
+		foreach( $items as $id ) :
+			$product = wc_get_product( $id );
+			if( $product ) : ?>
+				<div class="col-6 col-sm-2">
+						<div class="p-2">
+						<a class="product-image-link-sm" href="<?php echo $product->get_permalink(); ?>">
+							<?php echo $product->get_image(); ?>
+						</a>
+						<a href="<?php echo $product->get_permalink(); ?>">
+							<?php echo $product->get_name(); ?>
+						</a>
+						<?php echo wc_get_rating_html( $product->get_average_rating(), $product->get_rating_count() ); ?>
+						<p class="price"><?php echo $product->get_price_html() ?></p>
+						<a class="btn btn-warning" href="<?php echo $product->add_to_cart_url() ?>">Add to cart</a>
+					</div>
+				</div>
+				<?php
+			endif;
+		endforeach; ?>
+	</div><?php
+}
+
+function fpusa_slick_query($header, $args){
+	/**
+	 * Used to get the children of a product category
+	 * @param string $header - The TITLE of the slider
+	 * @param array $args - a query used to display differant information.
+	 */
+	$children  = fpusa_get_cat_children();
+	if( $children ){
+		$wc_query = new WP_Query( $args );
+		?>
+		<h3><?php echo $header; ?></h3>
+		<div class="slick">
+		<?php
+		if( $wc_query->have_posts() ) :
+			while( $wc_query->have_posts() ) :
+				$wc_query->the_post();
+				wc_get_template_part('content', 'product');
+			endwhile;
+		endif;
+		wp_reset_postdata();
+		?>
+		</div>
+		<?php
+	}
+}
+
+function fpusa_shop_by_category( ){
+	$cats = fpusa_get_cats_w_img();
+	if( ! empty( $cats ) ){
+		?>
+		<h3>Shop by Category</h3>
+		<div class="row">
+			<?php foreach( $cats as $cat ) : ?>
+				<div class="col-6 col-sm-2">
+					<a href="<?php echo $cat['link']; ?>">
+						<img src="<?php echo $cat['image_src']?>" />
+						<p class="text-center"><?php echo $cat['name']; ?></p>
+					</a>
+				</div>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+}
+
+function fpusa_cat_sub_nav_cat_menu(){
+	/**
+	*
+	*
+	*/
+		if( fpusa_is_cat() ) : // needed when on shop page
+			$siblings = fpusa_get_cat_siblings( fpusa_get_department() );
+			if( sizeof( $siblings ) > 1 ) : ?>
+				<nav class="navbar navbar-expand-lg navbar-light bg-dark">
+			    <div class="navbar-nav">
+			      <?php foreach( $siblings as $term ) : ?>
+							<li class="nav-item">
+								<a class="nav-link" href="<?php echo get_term_link( (int)$term->term_id ) ?>"><?php echo $term->name; ?></a>
+							</li>
+						<?php endforeach; ?>
+			    </div>
+				</nav>
+			<?php
+			endif;
+		endif;
+}
+
+add_filter('woocommerce_edit_account_form_start', function(){
+	?>
+	<div class="row">
+	<?php
+});
+
 function fpusa_get_product_gallery(){
 	wc_get_template('single-product/fpusa-product-gallery.php');
 }
@@ -796,16 +1155,21 @@ function fpusa_get_rating_histogram( $ratings, $count ){
 
 function fpusa_cr_get_review_btn(){
 	global $product;
+	$action = ( empty( fpusa_get_user_product_review( $product->get_id() ) ) ) ? 'post' : 'edit';
 	?>
 	<div id="fpusa-review-btn">
 		<h4>Write a review</h4>
 		<p>Share your thoughts with other customers.</p>
-		<a type="button" href="/review?p_id=<?php echo $product->get_id(); ?>" class="btn btn-default btn-block">Write a customer review</a>
+		<a type="button" href="<?php echo fpusa_get_product_review_link( $product->get_id(), $action ) ?>" class="btn btn-default btn-block">Write a customer review</a>
 	</div>
 	<?php
 }
 add_action( 'fpusa_customer_review_left', 'fpusa_cr_get_review_btn', 20 );
 
+function fpusa_get_product_review_link( $id, $action = 'post'){
+	$url = "/review?action=$action&p_id=$id";
+	return $url;
+}
 
 function fpusa_get_reviews(){
 	global $product;
@@ -847,7 +1211,98 @@ add_action( 'fpusa_customer_review_right', 'fpusa_get_reviews', 10 );
 add_shortcode( 'create_review', 'fpusa_create_review_template' );
 
 function fpusa_create_review_template(){
-	wc_get_template('single-product/review/create.php');
+	$action = $_GET['action'];
+
+	switch( $action ){
+		case 'post':
+			wc_get_template('single-product/review/create.php');
+			break;
+		case 'review-more':
+			fpusa_get_more_to_review();
+			break;
+		case 'edit':
+			wc_get_template('single-product/review/create.php');
+			break;
+	}
+}
+
+function fpusa_get_more_to_review(){
+	$items = fpusa_get_wc_customer_unique_item_purchases();
+	echo '<h3>Review other purchases!</h3>';
+	echo '<div class="row">';
+	foreach( $items as $id ){
+		$product = wc_get_product( $id );
+		$comment = fpusa_get_user_product_review( $id );
+		$rating = get_metadata('comment', $comment['comment_ID'], 'rating', true);
+		if( $product ) : ?>
+			<div class="col-6 col-sm-3 my-3">
+				<?php if ( $rating > 0 ) : ?>
+				<a href="<?php echo fpusa_get_product_review_link( $id, 'edit' ); ?>" class="text-center">
+					<?php echo $product->get_image(); ?>
+					<?php fpusa_get_stars_review_link( $id, $rating, 'edit', 1 ) ?>
+				</a>
+			<?php else : ?>
+				<a href="<?php echo fpusa_get_product_review_link( $id ); ?>" class="text-center">
+					<?php echo $product->get_image(); ?>
+					<?php fpusa_get_stars_review_link( $id, $rating, 'post', 1 ) ?>
+				</a>
+			<?php endif; ?>
+			</div>
+		<?php endif;
+
+	}
+	echo '</div>';
+}
+
+function fpusa_get_overall_star_rating_form( $id, $rating, $action = 'post', $link ){
+	?>
+	<div class="create-review-star-rating form-group">
+		<h5>Overall rating</h5>
+		<?php fpusa_get_stars_review_link( $id, $rating, $action, $link ) ?>
+		<input id="product-rating" name="rating" type="hidden" value="<?php echo $rating; ?>" />
+	</div>
+	<?php
+}
+
+
+
+function fpusa_get_stars_review_link( $id, $rating, $action = 'post', $link = 1){
+	$max = 5;
+	$empty = $max - $rating;
+	?>
+	<div class="d-flex my-1">
+
+		<?php for( $i = 1; $i <= $rating; $i++ ) : ?>
+			<?php if( $link != 0 ) : ?><a class="link-color-normal" href="<?php echo fpusa_get_product_review_link( $id, $action ) ?>"><?php endif; ?>
+				<i id="star-<?php echo $i ?>" class="fas fa-star fa-2x click-star" data-rating="<?php echo $i; ?>"></i>
+			<?php if( $link != 0  ) : ?></a><?php endif; ?>
+		<?php endfor; ?>
+
+		<?php for( $i = $rating + 1; $i <= $max; $i++ ) : ?>
+			<?php if( $link != 0  ) : ?><a class="link-color-normal" href="<?php echo fpusa_get_product_review_link( $id, $action ) ?>"><?php endif; ?>
+				<i id="star-<?php echo $i ?>" class="far fa-star fa-2x click-star" data-rating="<?php echo $i; ?>"></i>
+			<?php if( $link != 0  ) : ?></a><?php endif; ?>
+		<?php endfor; ?>
+
+	</div><?php
+}
+
+
+
+function fpusa_get_wc_customer_unique_item_purchases( $user_id = NULL ){
+	if( is_null( $user_id ) ) $user_id = get_current_user_id();
+	$orders = wc_get_orders( array( 'customer_id' => $user_id ) );
+	$unique_items = array();
+	foreach( $orders as $order ){
+		foreach( $order->get_items() as $item ){
+			$product = $item->get_product();
+			if( ! empty( $product ) && ! in_array( $product->get_id(), $unique_items ) ){
+				array_push( $unique_items, $product->get_id() );
+			}
+		}
+	}
+
+	return $unique_items;
 }
 
 function fpusa_create_review_product_preview( $product ){
@@ -860,34 +1315,34 @@ function fpusa_create_review_product_preview( $product ){
 	<?php
 }
 
-function fpusa_get_overall_star_rating_form(){
-	?>
-	<div class="create-review-star-rating form-group">
-		<h5>Overall rating</h5>
-		<div class="d-flex">
-			<?php for( $i = 1; $i <= 5; $i++ ) : ?>
-				<i id="star-<?php echo $i ?>" class="far fa-star fa-2x click-star" data-rating="<?php echo $i; ?>"></i>
-			<?php endfor; ?>
-		</div>
-		<input id="product-rating" name="rating" type="hidden" />
-	</div>
-	<?php
+function fpusa_get_user_product_review( $p_id ){
+
+	$comments = get_comments(array(
+		'post_id' 						=> $p_id,
+		'user_id' 						=> get_current_user_id(),
+		'include_unapproved'  => false,
+	));
+
+	$comment = get_comment( $comments[0]->comment_ID , ARRAY_A );
+
+	return $comment;
 }
 
-function fpusa_add_headline(){
+function fpusa_add_headline( $headline = null ){
 	?>
 	<div class="form-group">
 		<h5>Add a headline</h5>
-		<input type="text" class="form-control" name="headline">
+		<input type="text" class="form-control" name="headline" value="<?php if( ! is_null( $headline ) ) echo $headline; ?>">
 	</div>
 	<?php
 }
 
-function fpusa_add_comment(){
+function fpusa_add_comment( $content = '' ){
+	echo $content;
 	?>
 	<div class="form-group">
 		<h5>Write your review</h5>
-		<textarea rows="4" name="comment" class="form-control" placeholder="What did you like or dislike? What did you use this product for?"></textarea>
+		<textarea rows="4" name="comment" class="form-control" placeholder="What did you like or dislike? What did you use this product for?" ><?php if( ! empty( $content ) ) echo $content; ?></textarea>
 	</div>
 	<?php
 }
@@ -937,44 +1392,63 @@ function fpusa_handle_dropped_media(){
 }
 
 add_action( 'admin_post_fpusa_process_product_review', 'fpusa_process_review' );
-add_action( 'admin_post_nopriv_fpusa_process_product_review', 'fpusa_process_review' );
+// add_action( 'admin_post_nopriv_fpusa_process_product_review', 'fpusa_process_review' );
+
 function fpusa_process_review(){
 	// create the comment, connect it to the product
 	$comment_id = fpusa_create_comment( $_POST );
-	// upload the attachments, collect the attachment ids
-	$attachment_ids = fpusa_handle_dropped_media();
-	//foreach attachment, create a postmeta pointing to the comment the attachment belongs to.
-	foreach( $attachment_ids as $id ){
-		update_post_meta( $id, '_wp_attachment_comment', $comment_id );
+
+	if( ! empty( $_FILES ) ){
+		// upload the attachments, collect the attachment ids
+		$attachment_ids = fpusa_handle_dropped_media();
+		//foreach attachment, create a postmeta pointing to the comment the attachment belongs to.
+		foreach( $attachment_ids as $id ){
+			update_post_meta( $id, '_wp_attachment_comment', $comment_id );
+		}
 	}
-	// TODO: redirect to other products to review;
-	// wp_redirect('/');
+
+	wp_redirect( fpusa_get_review_more_link() );
+}
+
+function fpusa_get_review_more_link(){
+	return '/review?action=review-more';
 }
 
 function fpusa_create_comment( $data ){
 	global $wpdb;
 	$user = wp_get_current_user();
 
-	$comment_id = wp_insert_comment(
-		array(
-			'comment_post_ID' => $data['product_id'],
-			'comment_author'	=> $user->user_login,
-			'comment_author_email'	=> $user->user_email,
-			'comment_author_url'	=> $user->user_url,
-			'comment_content' =>  $data['comment'],
-			'comment_type'			=> 'review',
-			'comment_author_IP' => $_SERVER['REMOTE_ADDR'],
-      'comment_agent' => $_SERVER['HTTP_USER_AGENT'],
-			'comment_date' => current_time( 'mysql', $gmt = 0 ),
-			'user_id' => get_current_user_id(),
-			'comment_approved' => 0,
-		)
+	$comment = fpusa_get_user_product_review( $data['product_id'] );
+
+	$args = array(
+		'comment_post_ID' => $data['product_id'],
+		'comment_author'	=> $user->user_login,
+		'comment_author_email'	=> $user->user_email,
+		'comment_author_url'	=> $user->user_url,
+		'comment_content' =>  $data['comment'],
+		'comment_type'			=> 'review',
+		'comment_author_IP' => $_SERVER['REMOTE_ADDR'],
+		'comment_agent' => $_SERVER['HTTP_USER_AGENT'],
+		'comment_date' => current_time( 'mysql', $gmt = 0 ),
+		'user_id' => get_current_user_id(),
+		'comment_approved' => 0,
 	);
+
+	if( ! empty( $comment ) ){
+		// careful of character case!
+		$comment_id = $comment['comment_ID'];
+		$args['comment_ID'] = $comment_id;
+		wp_update_comment($args);
+	} else {
+		$comment_id = wp_insert_comment($args);
+	}
+
+
 
 	update_comment_meta( $comment_id, 'rating', $data['rating'] );
 	update_comment_meta( $comment_id, 'headline', $data['headline'] );
 
-	//https://docs.woocommerce.com/wc-apidocs/function-wc_customer_bought_product.html
+	// https://docs.woocommerce.com/wc-apidocs/function-wc_customer_bought_product.html
 	update_comment_meta( $comment_id, 'verified',
 		wc_customer_bought_product( $user->user_email, get_current_user_id(), $data['product_id'] )
 	);
@@ -1011,8 +1485,8 @@ function fpusa_get_user_content_src(){
 
 	foreach( $results as $attachment ){
 		$comment_id = get_post_meta( $attachment->ID, '_wp_attachment_comment', true );
-		$comment = get_comment( $comment_id ) ;
-		if( ! empty( $comment_id ) && $comment->comment_approved == 1 ){
+		$comment = get_comment( $comment_id, ARRAY_A ) ;
+		if( ! empty( $comment_id ) && $comment['comment_approved'] == 1 ){
 			array_push( $good_srcs, array(
 					wp_get_attachment_image_src( $attachment->ID, 'thumbnail', false ),
 					wp_get_attachment_image_src( $attachment->ID, 'full', false )

@@ -118,6 +118,10 @@ a, a:active, a:link, a:visited, a:hover {
 	/* color: #0066c0 !important; */
 }
 
+a.link-color-normal, a.link-color-normal:visited, a.link-color-normal:hover{
+	color: inherit;
+}
+
 /**
  * 1. Remove the bottom border in Chrome 57-
  * 2. Add the correct text decoration in Chrome, Edge, IE, Opera, and Safari.
