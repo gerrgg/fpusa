@@ -312,7 +312,7 @@ function fpusa_find_attributes_without_value( options ){
 }
 
 
-$('i.click-star').click(function(){
+$('.create-review-star-rating i.click-star').click(function(){
   $('i.click-star').removeClass('fas').addClass('far');
 
   let rating = $(this).attr('data-rating');

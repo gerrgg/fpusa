@@ -7,7 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 if( ! is_user_logged_in() ) :
 	woocommerce_login_form( array(
 		'message' => 'You must login before posting a review!',
-		'redirect' => '/my-account',
 		'hidden' => false,
 	) );
 else :
@@ -19,7 +18,6 @@ $rating = ( $comment ) ? get_metadata('comment', $comment['comment_ID'], 'rating
 $headline = ( $comment ) ? get_metadata('comment', $comment['comment_ID'], 'headline', true) : '';
 $content = ( $comment ) ? $comment['comment_content'] : '';
 
-echo $content;
 
 if( isset( $product ) && $product ) : ?>
 

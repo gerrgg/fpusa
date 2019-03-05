@@ -179,6 +179,12 @@ add_action( 'woocommerce_before_single_product_summary', 'fpusa_show_product_ima
 add_action( 'fpusa_template_product_gallery', 'fpusa_get_product_gallery' );
 
 function fpusa_get_header_right(){
+	/**
+	*
+	* Gets the right side of the header
+	* TODO: Make less static
+	*
+	*/
 	$user = wp_get_current_user();
 	$login_msg = ( ! empty( $user->display_name ) ) ? "Hello, $user->display_name" : "Hello, Sign in";
 	?>
@@ -211,6 +217,12 @@ function fpusa_get_header_right(){
 }
 
 function fpusa_choose_location_btn(){
+	/*
+	*
+	* Allows the user to choose which address they would like to use.
+	* TODO: Currently lacks the functionality for multiple addresses - Needs an address table?
+	*
+	*/
 	$user = wp_get_current_user();
 	$loc_str = fpusa_get_ship_address_str( $user );
 	?>
@@ -229,6 +241,14 @@ function fpusa_choose_location_btn(){
 }
 
 function fpusa_get_ship_address_str( $user = '' ){
+	/**
+	*
+	* Gets the shipping address of a user and converts to string.
+	* @param WP_User
+	* @return string $loc_star
+	* TODO: Currently lacks the functionality for multiple addresses - Needs an address table?
+	*
+	*/
 	if( empty( $user ) ) $user = wp_get_current_user();
 
 	if( ! empty($user) ){
@@ -244,42 +264,13 @@ function fpusa_get_ship_address_str( $user = '' ){
 	return $loc_str;
 }
 
-function fpusa_make_modal( $args = '' ){
-	 $defaults = array(
-		 'id' 					=> 'defaultModal',
-		 'labelledby' 	=> '',
-		 'inner_class' 	=> 'modal-dialog',
-		 'header' 			=> 'Modal Title',
-		 'body' 				=> 'Body',
-		 'footer' 			=> '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        								<button type="button" class="btn btn-primary">Save changes</button>',
-	 );
-
-	 $args = wp_parse_args( $args, $defaults );
-	?>
-	<!-- Modal -->
-	<div class="modal fade" id="<?php echo $args['id'] ?>" tabindex="-1" role="dialog" aria-labelledby="<?php echo $args['labelledby'] ?>" aria-hidden="true">
-	  <div class="modal-dialog <?php echo $args['inner_class'] ?>" role="document">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <h5 class="modal-title" id="exampleModalCenterTitle"><?php echo $args['header'] ?></h5>
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-	          <span aria-hidden="true">&times;</span>
-	        </button>
-	      </div>
-	      <div class="modal-body">
-	        <?php echo $args['body'] ?>
-	      </div>
-	      <div class="modal-footer">
-	        <?php echo $args['footer'] ?>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-	<?php
-}
 
 function fpusa_edit_location_modal(){
+	/**
+	*
+	* Creates the html for the location modal
+	*
+	*/
 	?>
 	<div class="modal fade" id="fpusa_choose_loc" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered" role="document">
@@ -303,6 +294,11 @@ function fpusa_edit_location_modal(){
 }
 
 function fpusa_get_guest_loc_html(){
+	/**
+	*
+	* Displays html within the location modal for non-logged in users.
+	*
+	*/
 	?>
 	<p class='text-muted'>Delivery options and speeds may vary based on your location.</p>
 	<a role="button" href="/my-account/" class='btn btn-primary btn-block text-white'>Sign in to edit your address</a>
@@ -310,6 +306,11 @@ function fpusa_get_guest_loc_html(){
 }
 
 function fpusa_get_user_loc_html(){
+	/**
+	*
+	* Displays html within the location modal for logged in users.
+	*
+	*/
 	$address = fpusa_get_customer_location_details( 'shipping' );
 	if( ! empty( $address ) ) : ?>
 		<p class="text-muted">Delivery options and speeds can vary based differant locations</p>
@@ -331,6 +332,12 @@ function fpusa_get_user_loc_html(){
 }
 
 function fpusa_get_customer_location_details( $type = 'shipping' ){
+	/**
+	*
+	* Displays html within the location modal for non-logged in users.
+	* @param string $type - specifies which address to return
+	* @return array $address - collection of user address data
+	*/
 	$user = wp_get_current_user();
 	$address = array(
 		'shipto' => get_user_meta( $user->ID, 'first_name', true ) . ' ' . get_user_meta( $user->ID, 'last_name', true ),
@@ -344,6 +351,12 @@ function fpusa_get_customer_location_details( $type = 'shipping' ){
 }
 
 function fpusa_get_myaccount_icons( $endpoint ){
+	/**
+	* Displays specified icons for each endpoint
+	* @param string $endpoint - the woocommerce endpoint we are talking about
+	* @return string html markup based on the value of $endpoint.
+	*
+	*/
 	$icon = '';
 
 	switch( $endpoint ){
@@ -376,67 +389,13 @@ function fpusa_get_myaccount_icons( $endpoint ){
 }
 
 function fpusa_buy_again_modal(){
-	?>
-	<div class="modal fade" id="fpusa_buy_again" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalCenterTitle">Buy Again</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-				<div class="row">
-					<div class="col-12 col-sm-4">
-						<a id="fpusa_ba_img_link" href="#" class="product-image-link product-image-link-sm"></a>
-					</div>
-					<div class="col">
-						<a id="fpusa_ba_title" href=""></a>
-						<div class="d-flex">
-							<span class="pr-1">Current Price:</span>
-							<span id="fpusa_ba_price" class="price"></span>
-						</div>
-						<div id="fpusa_ba_stock"></div>
-						<div id="fpusa_ba_qty"></div>
-						<form id="fpusa_ba_form" class="cart" action="" method="post" enctype="multipart/form-data">
-							<input type="number" id="<?php echo uniqid( 'quantity_' ) ?>" class="input-text qty text" step="1" min="1" max="" name="quantity" value="1" title="Qty" size="4" pattern="[0-9]*" inputmode="numeric">
-							<button type="submit" name="add-to-cart" value="" class="single_add_to_cart_button button alt">Add to cart</button>
-						</form>
-					</div>
-				</div>
-			</div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-	<?php
+	/**
+	* grabs a php file and displays its html contents.
+	*/
+	wc_get_template('global/buy-again-modal.php');
 }
 
-function fpusa_tags_to_specs(){
-	global $product;
-	$tags = fpusa_split_tags( get_the_terms( $product->get_id(), 'product_tag' ) );
-
-	if( empty( $tags ) ) return 0;
-
-	foreach( $tags as $tag ) : ?>
-	<tr>
-		<th><?php echo $tag[0] ?></th>
-		<td><p><?php echo $tag[1] ?></p></td>
-	</tr>
-	<?php endforeach;
-}
-
-add_shortcode( 'yourstore', 'fpusa_your_store_callback' );
-
-function fpusa_your_store_callback(){
-	if( isset( $_GET['fpusa_action'] ) ){
-		$action = 'fpusa_yourstore_' . $_GET['fpusa_action'];
-		$action();
-	}
-}
+add_shortcode( 'yourstore', 'fpusa_yourstore_buy_it_again' );
 
 function fpusa_yourstore_buy_it_again(){
 	$items = fpusa_get_wc_customer_unique_item_purchases(); ?>
@@ -910,17 +869,28 @@ add_action( 'fpusa_single_product_right', 'fpusa_single_right_wrapper_start', 5 
 add_action( 'fpusa_single_product_right', 'fpusa_single_right_wrapper_end', 100 );
 
 function fpusa_single_right_wrapper_start(){
+	/**
+	 * outputs the opening tab for the div on the far right on the single product page.
+	 */
 	echo '<div class="fpusa-single-product-right mt-1">';
 }
 
 function fpusa_single_right_wrapper_end(){
+	/**
+	 * outputs the ending tab for the div on the far right on the single product page.
+	 */
 	echo '</div>';
 }
 
+// TODO: Include place on options page to setup links to social media.
+// TODO: Social media integration - share buttons
 add_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_sharing', 1 );
 
 add_action( 'fpusa_single_product_right', 'fpusa_single_product_price_right', 5 );
 function fpusa_single_product_price_right(){
+	/**
+	 * Simply displays price above the add to cart button
+	 */
 	global $product;
 	?>
 	<div class="<?php echo $product->get_type(); ?> price"><?php echo $product->get_price_html(); ?></div>
@@ -928,6 +898,10 @@ function fpusa_single_product_price_right(){
 }
 
 add_action( 'fpusa_single_product_right', 'fpusa_single_product_shipping_upsell', 10 );
+/**
+ * outputs html for shipping upsells, need it tommorow?
+ * TODO: Need to integrate with cart, checkout and Shipping? Are we going to use Shippo?
+ */
 function fpusa_single_product_shipping_upsell(){
 	?>
 	<p style="overflow: hidden;">fpusa_single_product_shipping_upsell();</p>
@@ -935,13 +909,22 @@ function fpusa_single_product_shipping_upsell(){
 }
 
 add_action( 'fpusa_single_product_right', 'fpusa_single_product_stock', 15 );
+
 function fpusa_single_product_stock(){
+	/**
+	 * outputs product stock status on the far right column.
+	 */
 	global $product;
 	echo wc_get_stock_html( $product );
 }
 
 add_action( 'fpusa_single_product_right', 'fpusa_add_to_cart_btn', 50 );
 function fpusa_add_to_cart_btn(){
+	/**
+	 * Outputs the html for the add to cart button.
+	 * Currently, this is rigged to simulate the add to cart button and qty, but the
+	 * real elements are in the woocommerce_single_product_summary();
+	 */
 	global $product;
 	?> <label>QTY:</label> <?php
 	woocommerce_quantity_input( array(
@@ -956,103 +939,25 @@ function fpusa_add_to_cart_btn(){
 
 add_action( 'fpusa_single_product_right', 'fpusa_single_product_address', 70 );
 function fpusa_single_product_address(){
+	/**
+	 * Outputs the html for the add to cart button.
+	 */
 	$loc_str = fpusa_get_ship_address_str( );
 	echo '<button class="btn" data-toggle="modal" data-target="#fpusa_choose_loc"><i class="fas fa-map-marker-alt pr-2 text-dark"></i>Deliver to ' . $loc_str . '</button>';
 }
 
-function fpusa_product_attribute_button( $options, $attribute_name, $product ){
-	$possible_variations = fpusa_get_variations( $product );
-	if( ! empty( $options ) ) : ?>
-		<div id="var_btn" class="d-flex">
-			<?php foreach( $options as $option ): ?>
-				<button type="button" class="d-flex btn justify-content-center align-items-center border mx-1" data-key="<?php echo $attribute_name ?>" data-value="<? echo $option ?>">
-					<?php fpusa_get_pa_btn_data( $possible_variations, $attribute_name, $option ) ?>
-				</button>
-			<?php endforeach; ?>
-		</div> <?php
-	endif;
-}
-
-function fpusa_get_pa_btn_data( $possible_variations, $attribute_name, $option ){
-	foreach( $possible_variations as $id => $options ){
-		foreach( $options as $attr => $value ){
-			if( $attr == 'attribute_' . $attribute_name && $value == $option ){
-				$product = wc_get_product( $id );
-				$image_src = wp_get_attachment_image_src( $product->get_image_id() );
-				?>
-				<div class="text-center">
-					<?php if( ! empty( $image_src[0] ) ) : ?>
-						<img class="img-xs" src="<?php echo $image_src[0] ?>" />
-					<?php endif; ?>
-					<p class="price text-small">$<?php echo $product->get_price(); ?></p>
-				</div>
-				<?php
-			}
-		}
-	}
-}
-
-function fpusa_get_variations( $product ){
-	$children = $product->get_children();
-	$var_arr = array();
-	foreach( $children as $child ){
-		$product = wc_get_product( $child );
-		$var_arr[$child] = $product->get_variation_attributes();
-	}
-	return $var_arr;
-}
-
 add_action( 'woocommerce_single_product_summary', 'fpusa_report_product_info_btn', 100 );
 function fpusa_report_product_info_btn(){
-	?>
-	<a href="javascript:void(0)"data-toggle="modal" data-target="#fpusa_product_feedback"><i class="far fa-flag pr-1"></i> Report incorrect product information.</a>
-	<div class="modal fade" id="fpusa_product_feedback" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Report an issue</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div id="report-problem-form" class="modal-body">
-					<div class="form-group">
-						<label>Please tell us about an issue.</label>
-						<select id="report_where" class="form-control report-problem-option mb-2" name="report_where">
-							<option value="0">Which part of the page?</option>
-							<option value="images">Images</option>
-							<option value="name">Product Name</option>
-							<option value="bullet_points">Bullet Points</option>
-							<option value="other">Other Product Details</option>
-						</select>
-						<select id="report_issue" class="form-control report-problem-option" name="report_issue" disabled>
-							<option value="0">What is the issue?</option>
-						</select>
-					</div>
-
-					<div class="form-group">
-						<label>Comments (optional)</label>
-						<textarea id="report-comments" name="comments"></textarea>
-					</div>
-					<small class="text-muted d-flex align-items-center">
-						<i class="fas fa-exclamation pr-3"></i>
-						<span>
-							Please do not enter personal information. For questions about an order, go to <a href="/my-account">Your Account</a>.
-						</span>
-					</small>
-      </div>
-      <div class="modal-footer">
-        <button id="report-submit" type="button" class="btn btn-primary" disabled>Submit</button>
-				<button id="report-done" type="button" class="btn btn-primary" data-dismiss="modal" style="display: none;">Done</button>
-      </div>
-    </div>
-  </div>
-</div>
-	<?php
+	/**
+   * Output the report problem link and modal
+   */
+	wc_get_template('single-product/report-problem.php');
 }
 
 function fpusa_single_product_feedback_callback(){
-	// var_dump( $_POST );
+	/**
+   * Email user reported problem to admin.
+   */
 	// TODO: Maybe we could add this somewhere on the backend for the theme author to fix, todo list?
 	$header = "Issue Report: " . $_POST['where'] . ' - ' . $_POST['issue'];
 
@@ -1066,11 +971,20 @@ function fpusa_single_product_feedback_callback(){
 }
 
 function wpdocs_set_html_mail_content_type() {
+	/**
+   * Send emails in HTML format.
+   */
     return 'text/html';
 }
 add_filter( 'wp_mail_content_type', 'wpdocs_set_html_mail_content_type' );
 
 function fpusa_get_image_html( $id, $active = false, $size = 'woocommerce_gallery_thumbnail' ){
+	/**
+		* outs puts an image and includes markup for the full-size version of the image.
+    * @param int $id - The ID of the attachment
+	  * @param bool $active - determines whether or now the returned html should include the class thumb-active
+		* @param string $size - determines the size the image should return
+   */
 	$src = array(
 		$size => wp_get_attachment_image_src($id, $size),
 		'full' => wp_get_attachment_image_src($id, 'full'),
@@ -1083,8 +997,18 @@ function fpusa_get_image_html( $id, $active = false, $size = 'woocommerce_galler
 }
 
 function fpusa_get_video_html( $url ){
+	/**
+		* takes in a url, converts the url to work with youtube API and generates markup for the thumbnail.
+		* @param string $url
+   */
+
+	 // remove the uneeded url parts
 	$v_id = str_replace( 'https://www.youtube.com/watch?v=', '', $url );
+
+	// alter url to properly embed the video - Must work with youtube API
 	$embed = 'https://www.youtube.com/embed/' . $v_id . '?iv_load_policy=3&autoplay=1';
+
+	// display html for with video thumbnail img and url to video at vid-url html attribute.
 	if( ! empty( $v_id ) ) : ?>
 		<p class="img-xs fpusa-woocommerce_gallery_thumbnail">
 			<img class="fpusa_video_link" src="<?php echo 'https://img.youtube.com/vi/' . $v_id . '/default.jpg'; ?>" vid-url="<?php echo $embed; ?>"/>
@@ -1092,34 +1016,28 @@ function fpusa_get_video_html( $url ){
 	<?php endif;
 }
 
-function fpusa_after_woocommerce_product_additional_information_start(){
-	echo '<div class="row">';
-}
-//add_action( 'after_woocommerce_product_additional_information', 'fpusa_after_woocommerce_product_additional_information_start', 1 );
-
 function fpusa_product_specifications(){
+	/*
+	* Gets the html for product specifications
+	*/
 	wc_get_template( 'single-product/tabs/product-specifications.php' );
 }
 add_action( 'before_woocommerce_product_additional_information', 'fpusa_product_specifications', 5 );
 
-function fpusa_product_datasheet(){
-	wc_get_template( 'single-product/tabs/product-datasheet.php' );
-}
-add_action( 'after_woocommerce_product_additional_information', 'fpusa_product_datasheet', 10 );
-
-function fpusa_after_woocommerce_product_additional_information_end(){
-	echo '</div>';
-}
 
 add_filter( 'woocommerce_product_tabs', 'fpusa_custom_review_tab', 98 );
 function fpusa_custom_review_tab( $tabs ) {
-	// change the callback for the reviews tab
+	/*
+	* sets the callback for the review tab to a custom function
+	*/
 	$tabs['reviews']['callback'] = 'fpusa_get_comments_template';
 	return $tabs;
 }
 
 function fpusa_get_comments_template(){
-	// looks for a file in /yourtheme/woocommerce/single-product/customer_reviews.php
+	/*
+		looks for a file in /yourtheme/woocommerce/single-product/customer_reviews.php
+	*/
 	wc_get_template('single-product/customer_reviews.php');
 }
 
@@ -1154,24 +1072,28 @@ function fpusa_get_rating_histogram( $ratings, $count ){
 }
 
 function fpusa_cr_get_review_btn(){
-	global $product;
-	$action = ( empty( fpusa_get_user_product_review( $product->get_id() ) ) ) ? 'post' : 'edit';
-	?>
-	<div id="fpusa-review-btn">
-		<h4>Write a review</h4>
-		<p>Share your thoughts with other customers.</p>
-		<a type="button" href="<?php echo fpusa_get_product_review_link( $product->get_id(), $action ) ?>" class="btn btn-default btn-block">Write a customer review</a>
-	</div>
-	<?php
+	/*
+	* output html for review button
+	*/
+	wc_get_template('/single-product/review/button.php');
 }
 add_action( 'fpusa_customer_review_left', 'fpusa_cr_get_review_btn', 20 );
 
 function fpusa_get_product_review_link( $id, $action = 'post'){
+	/**
+	* returns the appropirate url based on the ID and action parameters
+	* @param int $id - The id of the product trying to review
+	* @param string $action - post is for creating new reviews, edit is for updating reviews
+	*/
 	$url = "/review?action=$action&p_id=$id";
 	return $url;
 }
 
 function fpusa_get_reviews(){
+	/**
+	* uses the wp_list_comments() function to setup args and use a custom callback function
+	*/
+
 	global $product;
 
 	$args = array('post_type' => 'product', 'post_id' => get_the_ID());
@@ -1180,6 +1102,9 @@ function fpusa_get_reviews(){
 }
 
 function fpusa_comments( $comment ){
+	/**
+	* @
+	*/
 	// var_dump( $comment );
 	$rating = get_metadata( 'comment', $comment->comment_ID, 'rating', true );
 	$headline = get_metadata( 'comment', $comment->comment_ID, 'headline', true );
@@ -1189,7 +1114,7 @@ function fpusa_comments( $comment ){
 		<div class="comment-top d-flex align-items-center">
 			<span class="pr-2">
 				<?php echo get_avatar($comment->comment_author_email, 50); ?>
-			</span>
+			</span>kj
 			<b><?php echo $comment->comment_author ?></b>
 		</div>
 		<div class="comment-meta">
@@ -1338,7 +1263,6 @@ function fpusa_add_headline( $headline = null ){
 }
 
 function fpusa_add_comment( $content = '' ){
-	echo $content;
 	?>
 	<div class="form-group">
 		<h5>Write your review</h5>
