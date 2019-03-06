@@ -1110,6 +1110,7 @@ function fpusa_comments( $comment ){
 	$rating = get_metadata( 'comment', $comment->comment_ID, 'rating', true );
 	$headline = get_metadata( 'comment', $comment->comment_ID, 'headline', true );
 	$verified = get_metadata( 'comment', $comment->comment_ID, 'verified', true );
+	$srcs = fpusa_get_user_content_src( get_current_user_id() );
 	?>
 	<div id="<?php echo $comment->comment_ID; ?>" class="comment my-4">
 		<div class="comment-top d-flex align-items-center">
@@ -1124,7 +1125,12 @@ function fpusa_comments( $comment ){
 				<?php if( ! empty( $headline ) ) echo '<b class="pl-2">' . $headline . '</b>'; ?>
 			</div>
 			<?php if( $verified ) echo '<span class="verified">Verified Purchase</span>'; ?>
-			<p><?php echo $comment->comment_content ?></p>
+			<div class="d-flex">
+				<?php
+				foreach( $srcs as $src ) fpusa_img_link_to_full_show_thumb( $src[1][0], $src[0][0], 'img-xs' );
+				?>
+			</div>
+			<p class="pt-3"><?php echo $comment->comment_content ?></p>
 		</div>
 		<div class="comment-actions" role="group">
 			<?php do_action('fpusa_comment_actions', $comment->comment_ID ); ?>
@@ -1404,30 +1410,41 @@ function fpusa_create_comment( $data ){
 
 add_action('fpusa_customer_review_right', 'fpusa_get_user_product_images', 1);
 function fpusa_get_user_product_images(){
+	$col = 4;
 	$srcs = fpusa_get_user_content_src();
 	if( ! empty( $srcs ) ) : ?>
-		<h5>Customer Images</h5>
-		<div class="">
-			<?php foreach( $srcs as $src ) : ?>
-				<a href="<?php echo $src[1][0] ?>">
-					<img src="<?php echo $src[0][0] ?>" class="mx-1"/>
-				</a>
-			<?php endforeach; ?>
+		<h5><?php echo sizeof( $srcs ) ?> Customer Images</h5>
+		<div id="user-product-img-overview">
+			<?php foreach( $srcs as $src ) fpusa_img_link_to_full_show_thumb( $src[1][0], $src[0][0] ); ?>
 		</div>
-		<?php
+		<?php // TODO: Colorbox! http://www.jacklmoore.com/colorbox/  ?>
+		<?php if( sizeof( $srcs ) > $col ) echo '<a href="#">See all product images</a>';
 	endif;
 }
 
-function fpusa_get_user_content_src(){
+function fpusa_img_link_to_full_show_thumb( $full, $thumb, $img_class = 'img-md' ){
+	?>
+	<a href="<?php echo $full ?>">
+		<img src="<?php echo $thumb ?>" class="mx-1 <?php echo $img_class; ?>"/>
+	</a>
+	<?php
+}
+
+
+function fpusa_get_user_content_src( $user = null ){
 	global $product;
 	global $wpdb;
 	$good_srcs = array();
 	$p_id = $product->get_id();
 
-	$results = $wpdb->get_results("SELECT ID
-																 FROM $wpdb->posts
-																 WHERE post_type = 'attachment'
-																 AND post_parent = $p_id");
+	// add another condition if the user ID is defined.
+	$qry_str = "SELECT ID
+							FROM $wpdb->posts
+							WHERE post_type = 'attachment'
+							AND post_parent = $p_id";
+	if( ! is_null( $user ) ) $qry_str .= " AND post_author = $user";
+
+	$results = $wpdb->get_results("$qry_str");
 
 	foreach( $results as $attachment ){
 		$comment_id = get_post_meta( $attachment->ID, '_wp_attachment_comment', true );

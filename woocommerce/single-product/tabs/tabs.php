@@ -32,7 +32,7 @@ if ( ! empty( $tabs ) ) : ?>
 
 	<div class="woocommerce-tabs wc-tabs-wrapper">
 		<?php foreach ( $tabs as $key => $tab ) : ?>
-			<div class="fpusa-single-section row">
+			<div class="fpusa-single-section mb-5 row">
 				<?php if ( isset( $tab['callback'] ) ) { call_user_func( $tab['callback'], $key, $tab ); } ?>
 			</div>
 		<?php endforeach; ?>

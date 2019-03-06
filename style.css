@@ -1436,6 +1436,16 @@ p.stock{
 	height: 50px;
 }
 
+.img-md{
+	width: 150px;
+	height: 150px;
+}
+
+.img-lg{
+	width: 250px;
+	height: 250px;
+}
+
 #gallery{
 	display: flex;
 	flex-direction: column;
@@ -1539,9 +1549,6 @@ table.table-half th{
 #comment-meta p{
  margin: 0px;
 }
-/*
-## Dropzone
-*/
 
 /*--------------------------------------------------------------
 ## Cart
@@ -1581,6 +1588,11 @@ span.verified{
 	border-left: 1px solid #333;
 }
 
-.comment-actions{
-	border-top: 1px solid rgba(0,0,0,0.1);
+.comment{
+	padding-bottom: 1rem;
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+#user-product-img-overview{
+	border-bottom: 1px solid rgba(0,0,0,0.1);
 }
