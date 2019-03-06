@@ -325,15 +325,93 @@ $('.create-review-star-rating i.click-star').click(function(){
 
 
 $('.comment-helpful-btn').click(function(){
-  let comment_id = $(this).attr('data-comment-id');
+  let comment_id = $(this).parent().parent().attr('id');
+  let $badge = $(this).find('.badge');
   let data = {
     action: 'fpusa_comment_helpful',
     id: comment_id
   }
   $.post( ajax_object.ajax_url, data, function( response ){
-    console.log( response );
+    $badge.text( response );
   });
 });
+
+
+$('.comment')
+
+  .on('click', '.comment-helpful-btn', function(){
+    let comment_id = $(this).parent().parent().attr('id');
+    let $badge = $(this).find('.badge');
+    let data = {
+      action: 'fpusa_comment_helpful',
+      id: comment_id,
+      increment: 1
+    }
+    $.post( ajax_object.ajax_url, data, function( response ){
+      $badge.text( response );
+    });
+  })
+
+  .on('click', '.reply-karma i', function(){
+    let parent = $(this).parent().parent().parent();
+    let increment = $(this).attr('data-increment');
+    let karma_score = $('#' + parent.attr('id') + '_comment_karma' )
+    console.log( karma_score );
+    let data = {
+      action: 'fpusa_comment_helpful',
+      id: parent.attr('id'),
+      increment: increment
+    }
+
+    $.post(ajax_object.ajax_url, data, function( response ){
+      karma_score.text( response );
+    });
+  })
+
+  .on('click', '.comment-on-comment', function(){
+    $comment = $(this).parent().parent();
+    textarea_id = 'comment_on_' + $comment.attr('id');
+    if( ! $( '#' + textarea_id ).length ) {
+      $comment.append(
+        $( '<div/>', { id: textarea_id, class: 'mt-3 coc-wrapper' } ).append(
+          '<textarea class="form-control my-2"></textarea>',
+          '<button type="button" class="btn btn-info" style="float: right">Submit</button>',
+          '<span class="word-counter text-mute text-small"></span>'
+        ));
+    } else {
+      $( '#' + textarea_id ).remove();
+    }
+
+    set_submit_comment_event( textarea_id, $comment.attr('id') );
+  })
+
+  function set_submit_comment_event( textarea_id, comment_id ){
+    textarea = $('#' + textarea_id).find('textarea');
+
+    // $(textarea).keyup(function(){
+    //   let count = textarea.val().length;
+    //   let word_count = textarea.next().next();
+    //   if( count < 15 ){
+    //     word_count.text( 15 - count + ' more characters to go!' );
+    //   } else {
+    //     word_count.text( 'Your comment is long enough to post.' );
+    //   }
+    // });
+
+    $('#' + textarea_id + ' button').click(function(){
+
+      let data = {
+        action: 'fpusa_comment_on_comment',
+        parent_comment: comment_id,
+        comment: textarea.val(),
+      }
+
+      $.post(ajax_object.ajax_url, data, function( response ){
+        console.log( response );
+      });
+    });
+  }
+
 
 
 });

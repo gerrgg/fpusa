@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 
-<div id="reviews" class="col-12 col-sm-6">
+<div id="reviews" class="">
   <?php
     /**
      * Hook: fpusa_customer_review_left.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
      do_action('fpusa_customer_review_left');
   ?>
 </div>
-<div class="col-12 col-sm-6">
+<div id="after-reviews">
   <?php
     /**
      * Hook: fpusa_customer_review_right.

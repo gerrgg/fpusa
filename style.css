@@ -66,9 +66,14 @@ html {
  * Remove the margin in all browsers.
  */
 
+ #header {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 body {
 	margin: 0;
-	background: #EAEDED!important;
+	background: #fff!important;
 }
 
 /**
@@ -481,10 +486,8 @@ body {
 }
 
 hr {
-	background-color: #ccc;
-	border: 0;
-	height: 1px;
-	margin-bottom: 1.5em;
+	background-color: rgba(0,0,0,0.1);
+	margin: 0 .75rem;
 }
 
 ul, ol {
@@ -1590,9 +1593,39 @@ span.verified{
 
 .comment{
 	padding-bottom: 1rem;
-	border-bottom: 1px solid rgba(0,0,0,0.1);
+	/* border-bottom: 1px solid rgba(0,0,0,0.1); */
 }
 
 #user-product-img-overview{
 	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+#reviews{
+	width: 400px;
+}
+
+#after-reviews{
+	max-width: 700px;
+	padding-left: 2rem;
+}
+
+.product-rating-histogram a{
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.comment-reply{
+	padding: 1rem;
+	/* border-bottom: 1px solid rgba(0,0,0,0.1); */
+}
+
+.comment-thread{
+	max-height: 600px;
+	overflow: hidden;
+}
+
+.reply-karma{
+	font-size: 18px;
+	color: rgba(0,0,0,.5);
+	cursor: pointer;
 }

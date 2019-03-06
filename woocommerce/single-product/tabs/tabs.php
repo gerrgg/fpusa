@@ -32,9 +32,11 @@ if ( ! empty( $tabs ) ) : ?>
 
 	<div class="woocommerce-tabs wc-tabs-wrapper">
 		<?php foreach ( $tabs as $key => $tab ) : ?>
-			<div class="fpusa-single-section mb-5 row">
+			<?php //echo $key; ?>
+			<div class="fpusa-single-section mb-5 <?php echo ( $key != 'reviews' ) ? 'row' : 'd-flex'; ?>">
 				<?php if ( isset( $tab['callback'] ) ) { call_user_func( $tab['callback'], $key, $tab ); } ?>
 			</div>
+			<hr>
 		<?php endforeach; ?>
 	</div>
 

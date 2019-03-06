@@ -150,10 +150,6 @@ function fpusa_scripts() {
 		'ajax_url' => admin_url( 'admin-ajax.php' ),
 		'dropParam' => admin_url( 'admin-post.php?action=fpusa_process_product_review' ),
 	));
-
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-		wp_enqueue_script( 'comment-reply' );
-	}
 }
 
 add_action( 'wp_enqueue_scripts', 'fpusa_scripts' );
@@ -409,8 +405,9 @@ function fpusa_yourstore_buy_it_again(){
 						<a class="product-image-link-sm" href="<?php echo $product->get_permalink(); ?>">
 							<?php echo $product->get_image(); ?>
 						</a>
+
 						<a href="<?php echo $product->get_permalink(); ?>">
-							<?php echo $product->get_name(); ?>
+							<p class="m-0"><?php echo $product->get_name(); ?></p>
 						</a>
 						<?php echo wc_get_rating_html( $product->get_average_rating(), $product->get_rating_count() ); ?>
 						<p class="price"><?php echo $product->get_price_html() ?></p>
@@ -1131,31 +1128,120 @@ function fpusa_comments( $comment ){
 				?>
 			</div>
 			<p class="pt-3"><?php echo $comment->comment_content ?></p>
+
 		</div>
 		<div class="comment-actions" role="group">
 			<?php do_action('fpusa_comment_actions', $comment->comment_ID ); ?>
 		</div>
+		<div class="comment-thread ml-5 pl-5">
+			<?php fpusa_get_comments_thread( $comment->comment_ID ); ?>
+		</div>
 		<?php
 }
 
-add_action( 'fpusa_comment_actions', 'fpusa_comment_helpful_button', 10, 1 );
-add_action( 'wp_ajax_fpusa_comment_helpful', 'fpusa_add_to_comment_karma' );
+function fpusa_get_comments_thread( $comment_id ){
+	$args = array(
+		'post_id' => 0,
+		'parent' => $comment_id,
+		'type' => 'response'
+	);
 
-function fpusa_add_to_comment_karma(){
-	$comment = get_comment( $_POST['id'], ARRAY_A );
-	$comment['comment_karma'] = intval($comment['comment_karma']) + 1;
-	wp_update_comment( $comment );
-	echo intval($comment['comment_karma']) + 1;
-	// update_comment_meta( $comment['comment_ID'], 'found_helpful',  )
-	// keep track of who has clicked helpful, keep json of users who clicked in comment_meta.
-	wp_die();
+	$comments = get_comments( $args );
 
+	wp_list_comments( array( 'callback' => 'fpusa_comments_thread_callback', 'style' => 'div' ), $comments);
 }
 
+function fpusa_comments_thread_callback( $comment ){
+	?>
+	<div id="<?php echo $comment->comment_ID ?>" class="comment-reply">
+		<div class="comment-top d-flex align-items-center">
+			<div class="reply-karma d-flex flex-column justify-content-center align-items center text-center">
+				<i class="fas fa-chevron-up" data-increment="1"></i>
+				<span id="<?php echo $comment->comment_ID ?>_comment_karma" class="text-center"><?php echo $comment->comment_karma ?></span>
+				<i class="fas fa-chevron-down" data-increment="-1"></i>
+			</div>
+			<span class="pr-2 border-right">
+				<?php echo get_avatar($comment->comment_author_email, 50); ?>
+			</span>
+			<div class="pl-2">
+				<p class="m-0"><b><?php echo $comment->comment_author ?></b></p>
+				<p class="text-small"><?php echo $comment->comment_content; ?></p>
+			</div>
+		</div>
+
+	<?php
+}
+
+add_action( 'fpusa_comment_actions', 'fpusa_comment_helpful_button', 10, 1 );
 function fpusa_comment_helpful_button( $comment_id ){
 	// if user has clicked, switch to unhelpful btn
+	$comment = get_comment( $comment_id );
 	?>
-	<button type="button" class="btn btn-primary comment-helpful-btn" data-comment-id="<?php echo $comment_id; ?>">Helpful</button>
+	<button type="button" class="btn btn-outline-success comment-helpful-btn" data-comment-id="<?php echo $comment_id; ?>">
+		Helpful
+		<span class="badge badge-success"><?php echo $comment->comment_karma ?></span>
+	</button>
+	<?php
+}
+
+add_action( 'wp_ajax_fpusa_comment_helpful', 'fpusa_add_to_comment_karma' );
+function fpusa_add_to_comment_karma(){
+	// set values
+	$comment = get_comment( $_POST['id'], ARRAY_A );
+	$comment['comment_karma'] = intval($comment['comment_karma']) + intval( $_POST['increment'] );
+	wp_update_comment( $comment );
+
+	// TODO: Figure out karma given, how to serialize and unserialize data from // DEBUG:
+	// OR: create table for karma - user relation.
+
+	echo $comment['comment_karma'];
+
+	// keep track of who has clicked helpful, keep json of users who clicked in comment_meta.
+	wp_die();
+}
+
+
+
+add_action( 'fpusa_comment_actions', 'fpusa_comment_on_comment', 20, 1 );
+function fpusa_comment_on_comment( $parent_id ){
+	?>
+	<button type="button" class="btn btn-outline-secondary comment-on-comment">
+		Comment
+		<i class="far fa-comment"></i>
+	</button>
+	<?php
+}
+
+add_action( 'wp_ajax_fpusa_comment_on_comment', 'fpusa_comment_on_comment_callback' );
+function fpusa_comment_on_comment_callback(){
+	$user = wp_get_current_user();
+	$comment = get_comment( $_POST['parent_comment'] );
+
+	$comment_id = wp_insert_comment( array(
+    'comment_author' => $user->user_login,
+    'comment_author_email' => $user->user_email,
+    'comment_content' => $_POST['comment'],
+    'comment_type' => 'response',
+    'comment_parent' => $_POST['parent_comment'],
+    'user_id' => $user->ID,
+		'comment_author_IP' => $_SERVER['REMOTE_ADDR'],
+		'comment_agent' => $_SERVER['HTTP_USER_AGENT'],
+    'comment_date' => current_time('mysql'),
+    'comment_approved' => 1,
+	));
+
+	echo $comment_id;
+
+	wp_die();
+}
+
+add_action( 'fpusa_comment_actions', 'fpusa_report_comment', 30, 1 );
+function fpusa_report_comment( $parent_id ){
+	?>
+	<button type="button" class="btn btn-outline-danger comment-report">
+		Report Abuse
+		<i class="fas fa-bullhorn"></i>
+	</button>
 	<?php
 }
 
@@ -1383,7 +1469,7 @@ function fpusa_create_comment( $data ){
 		'comment_agent' => $_SERVER['HTTP_USER_AGENT'],
 		'comment_date' => current_time( 'mysql', $gmt = 0 ),
 		'user_id' => get_current_user_id(),
-		'comment_approved' => 0,
+		'comment_approved' => 1,
 	);
 
 	if( ! empty( $comment ) ){
