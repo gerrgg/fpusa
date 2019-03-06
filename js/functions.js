@@ -324,5 +324,16 @@ $('.create-review-star-rating i.click-star').click(function(){
 });
 
 
+$('.comment-helpful-btn').click(function(){
+  let comment_id = $(this).attr('data-comment-id');
+  let data = {
+    action: 'fpusa_comment_helpful',
+    id: comment_id
+  }
+  $.post( ajax_object.ajax_url, data, function( response ){
+    console.log( response );
+  });
+});
+
 
 });

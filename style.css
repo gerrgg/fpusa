@@ -1580,3 +1580,7 @@ span.verified{
 .comment_actions a{
 	border-left: 1px solid #333;
 }
+
+.comment-actions{
+	border-top: 1px solid rgba(0,0,0,0.1);
+}

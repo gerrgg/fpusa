@@ -1103,7 +1103,8 @@ function fpusa_get_reviews(){
 
 function fpusa_comments( $comment ){
 	/**
-	* @
+	* provides the html markup for each individual comment a product may have.
+	* @param WP_Comment $comment
 	*/
 	// var_dump( $comment );
 	$rating = get_metadata( 'comment', $comment->comment_ID, 'rating', true );
@@ -1114,7 +1115,7 @@ function fpusa_comments( $comment ){
 		<div class="comment-top d-flex align-items-center">
 			<span class="pr-2">
 				<?php echo get_avatar($comment->comment_author_email, 50); ?>
-			</span>kj
+			</span>
 			<b><?php echo $comment->comment_author ?></b>
 		</div>
 		<div class="comment-meta">
@@ -1126,9 +1127,30 @@ function fpusa_comments( $comment ){
 			<p><?php echo $comment->comment_content ?></p>
 		</div>
 		<div class="comment-actions" role="group">
-			<?php do_action('fpusa_comment_actions', array($comment->comment_ID)) ?>
+			<?php do_action('fpusa_comment_actions', $comment->comment_ID ); ?>
 		</div>
 		<?php
+}
+
+add_action( 'fpusa_comment_actions', 'fpusa_comment_helpful_button', 10, 1 );
+add_action( 'wp_ajax_fpusa_comment_helpful', 'fpusa_add_to_comment_karma' );
+
+function fpusa_add_to_comment_karma(){
+	$comment = get_comment( $_POST['id'], ARRAY_A );
+	$comment['comment_karma'] = intval($comment['comment_karma']) + 1;
+	wp_update_comment( $comment );
+	echo intval($comment['comment_karma']) + 1;
+	// update_comment_meta( $comment['comment_ID'], 'found_helpful',  )
+	// keep track of who has clicked helpful, keep json of users who clicked in comment_meta.
+	wp_die();
+
+}
+
+function fpusa_comment_helpful_button( $comment_id ){
+	// if user has clicked, switch to unhelpful btn
+	?>
+	<button type="button" class="btn btn-primary comment-helpful-btn" data-comment-id="<?php echo $comment_id; ?>">Helpful</button>
+	<?php
 }
 
 add_action( 'fpusa_customer_review_right', 'fpusa_get_reviews', 10 );
