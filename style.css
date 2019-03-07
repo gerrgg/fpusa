@@ -918,9 +918,6 @@ object {
 }
 
 /* Make sure logo link wraps around logo image. */
-.custom-logo-link {
-	display: inline-block;
-}
 
 /*--------------------------------------------------------------
 ## Captions
@@ -998,7 +995,7 @@ object {
 ## Header
 --------------------------------------------------------------*/
 #header-wrapper{
-		background-color: #232F3E!important;
+		background-color: #333!important;
 }
 #header * {
     box-sizing: border-box;
@@ -1010,11 +1007,28 @@ object {
 	align-items: flex-end;
 }
 
-.custom-logo-link{
-	height: 100%;
-	width: 100%;
-	margin: auto;
+#header-bottom *{
+	white-space: nowrap;
+	overflow: hidden;
 }
+
+#menu-item-dropdown-298{
+	white-space: nowrap;
+}
+
+#header-top form label{
+	margin: 0px;
+}
+
+#header-top{
+	padding: 0 1rem .5rem 1rem;
+}
+
+#search-form{
+	white-space: nowrap;
+	overflow: hidden;
+}
+
 nav.navbar{
 	color: #fff!important;
 }
@@ -1027,18 +1041,8 @@ nav.navbar a.nav-link, nav.navbar i{
 	border: 1px solid rgba(255,255,255,0.5)!important;
 }
 
-.custom-logo-link{
-	text-align: center;
-}
-
 .nav-left{
-	position: relative;
-	float: left;
-	display: flex;
-	padding-right: 1rem;
-	/* overflow: hidden; */
-	white-space: nowrap;
-	width: 250px;
+	width: 300px;
 }
 
 #header-bottom a.nav-link{
@@ -1057,6 +1061,14 @@ nav.navbar a.nav-link, nav.navbar i{
 	padding-left: 0px;
 }
 
+#search-bar, #search-form button{
+	border-radius: 0px;
+}
+
+#search-form button{
+	width: 75px;
+}
+
 .nav-center{
 	width: 800px;
 	overflow: hidden;
@@ -1064,6 +1076,10 @@ nav.navbar a.nav-link, nav.navbar i{
 
 .nav-center li a.nav-link{
 	overflow: hidden;
+}
+
+form{
+	/* width: 100%; */
 }
 
 /*--------------------------------------------------------------
@@ -1146,7 +1162,7 @@ nav.navbar a.nav-link, nav.navbar i{
 --------------------------------------------------------------*/
 #mobile-menu-top-wrapper{
 	font-size: 24px;
-	background-color: #232F3E;
+	background-color: #333;
 	color: #fff;
 }
 
@@ -1166,7 +1182,7 @@ nav.navbar a.nav-link, nav.navbar i{
 }
 
 #sidenav-inner ul li a.nav-link:hover{
-	background-color: rgba(35,47,62,.2);
+	background-color: rgb(19,221,8, 0.2);
 	color: #333;
 }
 

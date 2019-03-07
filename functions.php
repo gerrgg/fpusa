@@ -47,6 +47,9 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 		// This theme uses wp_nav_menu() in one location.
 		register_nav_menus( array(
 			'category_menu' => esc_html__( 'Categories', 'fpusa' ),
+			'header_top_right' => esc_html__( 'Header Top Right', 'fpusa' ),
+			'header_bottom_mid' => esc_html__( 'Header Bottom Mid', 'fpusa' ),
+			'header_bottom_right' => esc_html__( 'Header Bottom Right', 'fpusa' ),
 		) );
 
 		/*
@@ -67,8 +70,6 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 			'default-image' => '',
 		) ) );
 
-		// Add theme support for selective refresh for widgets.
-		add_theme_support( 'customize-selective-refresh-widgets' );
 
 		/**
 		 * Add support for core custom logo.
@@ -76,8 +77,8 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 		 * @link https://codex.wordpress.org/Theme_Logo
 		 */
 		add_theme_support( 'custom-logo', array(
-			'height'      => 250,
-			'width'       => 250,
+			'height'      => 100,
+			'width'       => 100,
 			'flex-width'  => true,
 			'flex-height' => true,
 		) );
@@ -115,6 +116,15 @@ function fpusa_widgets_init() {
 		'before_title'  => '<h2 class="widget-title">',
 		'after_title'   => '</h2>',
 	) );
+
+	register_sidebar( array(
+		'name'          => 'Header-top-right',
+		'id'            => 'header_top_right',
+		'before_widget' => '<div>',
+		'after_widget'  => '</div>',
+		'before_title'  => '<h2 class="rounded">',
+		'after_title'   => '</h2>',
+	) );
 }
 add_action( 'widgets_init', 'fpusa_widgets_init' );
 
@@ -143,8 +153,6 @@ function fpusa_scripts() {
 	wp_enqueue_script( 'zoom-js', get_template_directory_uri() . '/js/jquery.zoom.js', array('jquery'), '4.9', true );
 
 	wp_enqueue_script( 'dropzone-js', get_template_directory_uri() . '/js/dropzone.js', array('jquery'));
-
-	add_rewrite_endpoint( 'yith-my-wishlist', EP_ROOT | EP_PAGES );
 
 	wp_localize_script( 'js-functions', 'ajax_object', array(
 		'ajax_url' => admin_url( 'admin-ajax.php' ),

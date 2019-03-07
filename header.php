@@ -25,24 +25,26 @@
 	<a class="skip-link screen-reader-text" href="#content"><?php esc_html_e( 'Skip to content', 'fpusa' ); ?></a>
 	<header id="header-wrapper">
 		<!-- <div class=""> -->
-			<nav id="header-top" class="navbar navbar-light">
-					<div class="nav-left">
-						<button id="cat-btn" class="btn cat-btn mr-3"><i class="fas fa-bars fa-2x"></i></button>
-					  <?php the_custom_logo(); ?>
-					</div>
-
-					<form role="search" method="get" class="d-flex justify-content-center" action="<?php echo home_url( '/' ); ?>">
-				    <label class="">
-				        <span class="screen-reader-text"><?php echo _x( 'Search for:', 'label' ) ?></span>
-				        <input type="search" class="form-control" placeholder="<?php echo esc_attr_x( 'Search …', 'placeholder' ) ?>" value="<?php echo get_search_query() ?>" name="s" title="<?php echo esc_attr_x( 'Search for:', 'label' ) ?>" />
-				    </label>
-				    <button type="submit" class="btn btn-danger"><i class="fas fa-search"></i></button>
+			<nav id="header-top" class="d-flex align-items-end">
+				<div class="nav-left d-flex align-items-end">
+					<button id="cat-btn" class="btn cat-btn mr-2"><i class="fas fa-bars fa-2x text-white"></i></button>
+					<?php the_custom_logo(); ?>
+				</div>
+				<div class="flex-grow-1 mr-5">
+					<form id="search-form" role="search" method="get" class="d-flex" action="<?php echo home_url( '/' ); ?>">
+				    <span class="screen-reader-text"><?php echo _x( 'Search for:', 'label' ) ?></span>
+				    <input id="search-bar" type="search" class="form-control" placeholder="Search <?php echo bloginfo('sitename') ?>.com" value="<?php echo get_search_query() ?>" name="s" title="<?php echo esc_attr_x( 'Search for:', 'label' ) ?>" />
+				    <button type="submit" class="btn btn-success"><i class="fas fa-search"></i></button>
 				    <input type="hidden" value="product" name="post_type" id="post_type" />
 					</form>
+				</div>
 
-					<div id="top-right" class="ml-auto">
-						<img src="http://fpusa.drunk.kiwi/wp-content/uploads/2019/02/Amazon_GW_DesktopSWM_AVD10238_PrimeVideo_400x39._CB487601461_.jpg"/>
-					</div>
+				<?php if ( is_active_sidebar( 'header_top_right' ) ) : ?>
+					<div id="primary-sidebar" class="primary-sidebar widget-area" role="complementary">
+						<?php dynamic_sidebar( 'header_top_right' ); ?>
+					</div><!-- #primary-sidebar -->
+				<?php endif; ?>
+
 			</nav>
 
 			<nav id="header-bottom" class="navbar navbar-expand-lg navbar-light">
@@ -50,34 +52,29 @@
 					<?php fpusa_choose_location_btn(); ?>
 				</div>
 
-				<ul id="header-mid" class="navbar-nav m-0 nav-center">
-					<li class="nav-item">
-						<a class="nav-link" href="/your-store?fpusa_action=buy_it_again">Buy Again</a>
-					</li>
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							Browsing History
-						</a>
-						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-							<a class="dropdown-item" href="#">Action</a>
-							<a class="dropdown-item" href="#">Another action</a>
-							<div class="dropdown-divider"></div>
-							<a class="dropdown-item" href="#">Something else here</a>
-						</div>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">Greg's FallProtectionUSA.com</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="/promo-codes/">Promo Codes</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">Help</a>
-					</li>
-				</ul>
+				<?php
+					wp_nav_menu( array(
+						'menu_id'						=> 'header-mid',
+						'menu_class'				=> 'navbar-nav m-0 nav-center',
+						'theme_location'    => 'header_bottom_mid',
+						'depth'							=> 2,
+						'container_id'			=> 'mobile-nav-container',
+						'fallback_cb'       => 'WP_Bootstrap_Navwalker::fallback',
+						'walker'            => new WP_Bootstrap_Navwalker(),
+					) );
+				?>
 
 				<div class="ml-auto">
-					<?php fpusa_get_header_right(); ?>
+					<?php
+					wp_nav_menu( array(
+						'menu_id'						=> 'header-bottom-right',
+						'menu_class'				=> 'navbar-nav d-flex align-items-end',
+						'theme_location'    => 'header_bottom_right',
+						'depth'							=> 2,
+						'fallback_cb'       => 'WP_Bootstrap_Navwalker::fallback',
+						'walker'            => new WP_Bootstrap_Navwalker(),
+					) );
+					?>
 				</div>
 			</nav>
 		<!-- </div> -->
