@@ -1007,14 +1007,11 @@ object {
 	align-items: flex-end;
 }
 
-#header-bottom *{
+#header-bottom{
 	white-space: nowrap;
 	overflow: hidden;
 }
 
-#menu-item-dropdown-298{
-	white-space: nowrap;
-}
 
 #header-top form label{
 	margin: 0px;
@@ -1636,12 +1633,15 @@ span.verified{
 }
 
 .comment-thread{
-	max-height: 600px;
-	overflow: hidden;
+	display: none;
 }
 
 .reply-karma{
 	font-size: 18px;
 	color: rgba(0,0,0,.5);
 	cursor: pointer;
+}
+
+i.karma-highlight{
+	color: orange;
 }
