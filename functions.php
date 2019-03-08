@@ -82,9 +82,32 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 			'flex-width'  => true,
 			'flex-height' => true,
 		) );
+
+		fpusa_create_comment_karma_table();
+
 	}
 endif;
 add_action( 'after_setup_theme', 'fpusa_setup' );
+
+function fpusa_create_comment_karma_table(){
+	// Add one library admin function for next function
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'karma';
+	$charset_collate = $wpdb->get_charset_collate();
+
+	$sql = "CREATE TABLE $table_name (
+		karma_id mediumint(9) NOT NULL AUTO_INCREMENT,
+		karma_user_id mediumint(9) NOT NULL,
+		karma_comment_id mediumint(9) NOT NULL,
+		karma_value mediumint(9) NOT NULL,
+		PRIMARY KEY  (karma_id)
+	) $charset_collate;";
+
+	maybe_create_table( $table_name, $sql );
+}
 
 /**
  * Set the content width in pixels, based on the theme's design and stylesheet.
@@ -1084,15 +1107,51 @@ function fpusa_cr_get_review_btn(){
 }
 add_action( 'fpusa_customer_review_left', 'fpusa_cr_get_review_btn', 20 );
 
-function fpusa_get_product_review_link( $id, $action = 'post'){
-	/**
-	* returns the appropirate url based on the ID and action parameters
-	* @param int $id - The id of the product trying to review
-	* @param string $action - post is for creating new reviews, edit is for updating reviews
-	*/
-	$url = "/review?action=$action&p_id=$id";
-	return $url;
+add_action( 'fpusa_customer_review_right', 'fpusa_get_user_product_images', 10 );
+function fpusa_get_user_product_images(){
+	$col = 4;
+	$srcs = fpusa_get_user_content_src();
+	if( ! empty( $srcs ) ) : ?>
+		<h5><?php echo sizeof( $srcs ) ?> Customer Images</h5>
+		<div id="user-product-img-overview">
+			<?php foreach( $srcs as $src ) fpusa_img_link_to_full_show_thumb( $src[1][0], $src[0][0] ); ?>
+		</div>
+		<?php // TODO: Colorbox! http://www.jacklmoore.com/colorbox/  ?>
+		<?php if( sizeof( $srcs ) > $col ) echo '<a href="#">See all product images</a>';
+	endif;
 }
+
+add_action( 'fpusa_customer_review_right', 'fpusa_sort_comments_by', 15 );
+
+function fpusa_sort_comments_by(){
+	global $product;
+	?>
+	<div class="form-group float-right mt-3">
+		<label><b>Sort by</b></label>
+		<select class="" id="sort_comments_by" data-product-id="<?php echo $product->get_id(); ?>">
+			<option value="meta_value">Top Reviews</option>
+			<option value="comment_karma">Most Helpful</option>
+			<option value="comment_date">Most Recent</option>
+		</select>
+	</div>
+	<?php
+}
+
+add_action('wp_ajax_fpusa_sort_product_reviews', 'fpusa_sort_product_reviews_by');
+
+function fpusa_sort_product_reviews_by(){
+	$args = array(
+		'post_type' => 'product',
+		'post_id'		=> $_POST['p_id'],
+		'orderby'		=> $_POST['sortby']
+	);
+	$comments = get_comments( $args );
+
+	$html = wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div' ), $comments);
+	var_dump( $html );
+}
+
+add_action( 'fpusa_customer_review_right', 'fpusa_get_reviews', 20 );
 
 function fpusa_get_reviews(){
 	/**
@@ -1103,7 +1162,11 @@ function fpusa_get_reviews(){
 
 	$args = array('post_type' => 'product', 'post_id' => get_the_ID());
 	$comments = get_comments( $args );
-	wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div' ), $comments);
+	?>
+	<div id="comments-wrapper">
+		<?php wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div' ), $comments); ?>
+	</div>
+	<?php
 }
 
 function fpusa_comments( $comment ){
@@ -1115,6 +1178,7 @@ function fpusa_comments( $comment ){
 	$rating = get_metadata( 'comment', $comment->comment_ID, 'rating', true );
 	$headline = get_metadata( 'comment', $comment->comment_ID, 'headline', true );
 	$verified = get_metadata( 'comment', $comment->comment_ID, 'verified', true );
+
 	$srcs = fpusa_get_user_content_src( get_current_user_id() );
 	?>
 	<div id="<?php echo $comment->comment_ID; ?>" class="comment my-4">
@@ -1136,37 +1200,59 @@ function fpusa_comments( $comment ){
 				?>
 			</div>
 			<p class="pt-3"><?php echo $comment->comment_content ?></p>
+			<p>
+			</p>
 
 		</div>
 		<div class="comment-actions" role="group">
 			<?php do_action('fpusa_comment_actions', $comment->comment_ID ); ?>
 		</div>
-		<div class="comment-thread ml-5 pl-5">
-			<?php fpusa_get_comments_thread( $comment->comment_ID ); ?>
-		</div>
+		<a role="button" class="show-comments-thread">
+		<?php fpusa_get_comments_thread( $comment->comment_ID ); ?>
+
 		<?php
+}
+
+function fpusa_get_product_review_link( $id, $action = 'post'){
+	/**
+	* returns the appropirate url based on the ID and action parameters
+	* @param int $id - The id of the product trying to review
+	* @param string $action - post is for creating new reviews, edit is for updating reviews
+	*/
+	$url = "/review?action=$action&p_id=$id";
+	return $url;
 }
 
 function fpusa_get_comments_thread( $comment_id ){
 	$args = array(
 		'post_id' => 0,
 		'parent' => $comment_id,
-		'type' => 'response'
+		'type' => 'response',
+		'orderby' => 'comment_karma',
 	);
 
 	$comments = get_comments( $args );
 
-	wp_list_comments( array( 'callback' => 'fpusa_comments_thread_callback', 'style' => 'div' ), $comments);
+	// var_dump( $comments );
+
+	if( ! empty( $comments ) ){
+		echo '<a href="javascript:void(0);" role="button" class="show-comments-thread">Show all ' . sizeof( $comments ) . ' comments</a>';
+		echo '<div class="comment-thread">';
+		wp_list_comments( array( 'callback' => 'fpusa_comments_thread_callback', 'style' => 'div' ), $comments);
+		echo '</div>';
+	}
 }
 
 function fpusa_comments_thread_callback( $comment ){
+	$prev_vote = fpusa_get_previous_karma_vote( $comment->comment_ID );
+	$value = ( isset($prev_vote->karma_value) ) ? $prev_vote->karma_value : 0;
 	?>
 	<div id="<?php echo $comment->comment_ID ?>" class="comment-reply">
 		<div class="comment-top d-flex align-items-center">
 			<div class="reply-karma d-flex flex-column justify-content-center align-items center text-center">
-				<i class="fas fa-chevron-up" data-increment="1"></i>
+				<i class="fas fa-chevron-up <?php if( $value == 1 ) echo 'karma-highlight'; ?>" data-increment="1"></i>
 				<span id="<?php echo $comment->comment_ID ?>_comment_karma" class="text-center"><?php echo $comment->comment_karma ?></span>
-				<i class="fas fa-chevron-down" data-increment="-1"></i>
+				<i class="fas fa-chevron-down <?php if( $value == -1 ) echo 'karma-highlight'; ?>" data-increment="-1"></i>
 			</div>
 			<span class="pr-2 border-right">
 				<?php echo get_avatar($comment->comment_author_email, 50); ?>
@@ -1184,28 +1270,82 @@ add_action( 'fpusa_comment_actions', 'fpusa_comment_helpful_button', 10, 1 );
 function fpusa_comment_helpful_button( $comment_id ){
 	// if user has clicked, switch to unhelpful btn
 	$comment = get_comment( $comment_id );
+	fpusa_get_helpful_button_html( $comment_id, $comment->comment_karma );
+}
+
+function fpusa_get_helpful_button_html( $comment_id, $karma ){
+	$args = array(
+		'class' => 'success',
+		'text' => 'Helpful'
+	);
+
+	$prev_vote = fpusa_get_previous_karma_vote( $comment_id );
+
+	if( ! empty( $prev_vote ) ){
+		$args['class'] = ( $prev_vote->karma_value != 1 ) ? 'success' : 'danger';
+		$args['text'] = ( $prev_vote->karma_value != 1 ) ? 'Helpful' : 'Not Helpful';
+	}
+
 	?>
-	<button type="button" class="btn btn-outline-success comment-helpful-btn" data-comment-id="<?php echo $comment_id; ?>">
-		Helpful
-		<span class="badge badge-success"><?php echo $comment->comment_karma ?></span>
+	<button type="button" class="btn comment-helpful-btn btn-<?php echo $args['class'] ?>">
+		<span class="btn-text"><?php echo $args['text'] ?></span>
+		<span class="badge badge-<?php echo $args['class'] ?>"><?php echo $karma ?></span>
 	</button>
 	<?php
 }
 
 add_action( 'wp_ajax_fpusa_comment_helpful', 'fpusa_add_to_comment_karma' );
 function fpusa_add_to_comment_karma(){
-	// set values
+	// get comment, increment karma, and update in DB.
 	$comment = get_comment( $_POST['id'], ARRAY_A );
 	$comment['comment_karma'] = intval($comment['comment_karma']) + intval( $_POST['increment'] );
-	wp_update_comment( $comment );
 
-	// TODO: Figure out karma given, how to serialize and unserialize data from // DEBUG:
-	// OR: create table for karma - user relation.
+	$prev_vote = fpusa_get_previous_karma_vote( $_POST['id'] );
 
-	echo $comment['comment_karma'];
+	if( $prev_vote->karma_value != $_POST['increment'] ){
+		wp_update_comment( $comment );
+		echo $comment['comment_karma'];
+	}
 
+	fpusa_update_user_karma_link( $_POST['id'], $_POST['increment'] );
 	// keep track of who has clicked helpful, keep json of users who clicked in comment_meta.
 	wp_die();
+}
+
+function fpusa_update_user_karma_link( $comment_id, $karma ){
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'karma';
+
+	$args = array(
+		'karma_user_id' => get_current_user_id(),
+		'karma_comment_id' => $comment_id,
+		'karma_value' => $karma
+	);
+
+	//returns id of prev vote;
+	$prev_vote = fpusa_get_previous_karma_vote( $comment_id );
+
+	if( empty( $prev_vote ) ){
+		$wpdb->insert( $table_name, $args );
+	} else {
+		$wpdb->update( $table_name, $args, array( 'karma_id' => $prev_vote->karma_id ) );
+	}
+
+	return $prev_vote;
+
+}
+
+function fpusa_get_previous_karma_vote( $comment_id ){
+	global $wpdb;
+	$user_id = get_current_user_id();
+	$table_name = $wpdb->prefix . 'karma';
+	$result = $wpdb->get_row( "SELECT *
+														 FROM $table_name
+														 WHERE karma_user_id = $user_id
+														 AND karma_comment_id = $comment_id" );
+
+	// var_dump( $result );
+	return $result;
 }
 
 
@@ -1253,7 +1393,8 @@ function fpusa_report_comment( $parent_id ){
 	<?php
 }
 
-add_action( 'fpusa_customer_review_right', 'fpusa_get_reviews', 10 );
+
+
 
 add_shortcode( 'create_review', 'fpusa_create_review_template' );
 
@@ -1500,20 +1641,6 @@ function fpusa_create_comment( $data ){
 	);
 
 	return $comment_id;
-}
-
-add_action('fpusa_customer_review_right', 'fpusa_get_user_product_images', 1);
-function fpusa_get_user_product_images(){
-	$col = 4;
-	$srcs = fpusa_get_user_content_src();
-	if( ! empty( $srcs ) ) : ?>
-		<h5><?php echo sizeof( $srcs ) ?> Customer Images</h5>
-		<div id="user-product-img-overview">
-			<?php foreach( $srcs as $src ) fpusa_img_link_to_full_show_thumb( $src[1][0], $src[0][0] ); ?>
-		</div>
-		<?php // TODO: Colorbox! http://www.jacklmoore.com/colorbox/  ?>
-		<?php if( sizeof( $srcs ) > $col ) echo '<a href="#">See all product images</a>';
-	endif;
 }
 
 function fpusa_img_link_to_full_show_thumb( $full, $thumb, $img_class = 'img-md' ){
