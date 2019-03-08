@@ -436,9 +436,15 @@ $('.comment')
     }
 
     $.post(ajax_object.ajax_url, data, function( response ){
-      console.log( response );
+      displayed_sorted_comments( response );
     });
 
   });
+
+  function displayed_sorted_comments( comment ){
+    for( let i = 0; i < comment.length; i++ ){
+      console.log( comment[i].comment_ID );
+    }
+  }
 
 });

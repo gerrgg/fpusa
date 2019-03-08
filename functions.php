@@ -1137,19 +1137,22 @@ function fpusa_sort_comments_by(){
 	<?php
 }
 
-add_action('wp_ajax_fpusa_sort_product_reviews', 'fpusa_sort_product_reviews_by');
+add_action('wp_ajax_fpusa_sort_product_reviews', 'fpusa_get_reviews');
 
-function fpusa_sort_product_reviews_by(){
-	$args = array(
-		'post_type' => 'product',
-		'post_id'		=> $_POST['p_id'],
-		'orderby'		=> $_POST['sortby']
-	);
-	$comments = get_comments( $args );
-
-	$html = wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div' ), $comments);
-	var_dump( $html );
-}
+// function fpusa_sort_product_reviews_by(){
+// 	$args = array(
+// 		'post_type' => 'product',
+// 		'post_id'		=> $_POST['p_id'],
+// 		'meta_key'  => 'rating',
+// 		'orderby'		=> $_POST['sortby']
+// 	);
+// 	$comments = get_comments( $args );
+//
+// 	wp_send_json( $comments );
+//
+// 	// $html = wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div' ), $comments);
+// 	// var_dump( $html );
+// }
 
 add_action( 'fpusa_customer_review_right', 'fpusa_get_reviews', 20 );
 
@@ -1160,11 +1163,18 @@ function fpusa_get_reviews(){
 
 	global $product;
 
-	$args = array('post_type' => 'product', 'post_id' => get_the_ID());
+
+	$args = array(
+		'post_type' => 'product',
+		'post_id' => get_the_ID(),
+		'meta_key' => 'rating',
+		'order_by' => 'meta_value',
+	 );
 	$comments = get_comments( $args );
+	// var_dump( $comments );
 	?>
 	<div id="comments-wrapper">
-		<?php wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div' ), $comments); ?>
+		<?php wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div', 'echo' => 'false' ), $comments); ?>
 	</div>
 	<?php
 }
@@ -1178,8 +1188,8 @@ function fpusa_comments( $comment ){
 	$rating = get_metadata( 'comment', $comment->comment_ID, 'rating', true );
 	$headline = get_metadata( 'comment', $comment->comment_ID, 'headline', true );
 	$verified = get_metadata( 'comment', $comment->comment_ID, 'verified', true );
+	$srcs = fpusa_get_user_content_src( $comment->user_id );
 
-	$srcs = fpusa_get_user_content_src( get_current_user_id() );
 	?>
 	<div id="<?php echo $comment->comment_ID; ?>" class="comment my-4">
 		<div class="comment-top d-flex align-items-center">
@@ -1195,9 +1205,7 @@ function fpusa_comments( $comment ){
 			</div>
 			<?php if( $verified ) echo '<span class="verified">Verified Purchase</span>'; ?>
 			<div class="d-flex">
-				<?php
-				foreach( $srcs as $src ) fpusa_img_link_to_full_show_thumb( $src[1][0], $src[0][0], 'img-xs' );
-				?>
+				<?php foreach( $srcs as $src ) fpusa_img_link_to_full_show_thumb( $src[1][0], $src[0][0], 'img-xs' );?>
 			</div>
 			<p class="pt-3"><?php echo $comment->comment_content ?></p>
 			<p>
@@ -1657,6 +1665,8 @@ function fpusa_get_user_content_src( $user = null ){
 	global $wpdb;
 	$good_srcs = array();
 	$p_id = $product->get_id();
+
+	// var_dump( $user );
 
 	// add another condition if the user ID is defined.
 	$qry_str = "SELECT ID
