@@ -323,48 +323,49 @@ $('.create-review-star-rating i.click-star').click(function(){
   $('input#product-rating').val( rating );
 });
 
-
-$('.comment-helpful-btn').click(function(){
-  let comment_id = $(this).parent().parent().attr('id');
-  let $badge = $(this).find('.badge');
-  let data = {
-    action: 'fpusa_comment_helpful',
-    id: comment_id
-  }
-  $.post( ajax_object.ajax_url, data, function( response ){
-    $badge.text( response );
-  });
-});
+$()
 
 
 $('.comment')
 
   .on('click', '.comment-helpful-btn', function(){
+    let $btn = $(this);
     let comment_id = $(this).parent().parent().attr('id');
     let $badge = $(this).find('.badge');
+    let increment = ( $(this).hasClass( 'btn-success' ) ) ? 1 : -1;
+    let switch_class = ( $(this).hasClass( 'btn-success' ) ) ? 'danger' : 'success';
+    let btn_txt = ( $(this).hasClass( 'btn-success' ) ) ? 'Not helpful' : 'Helpful';
     let data = {
       action: 'fpusa_comment_helpful',
       id: comment_id,
-      increment: 1
+      increment: increment,
     }
     $.post( ajax_object.ajax_url, data, function( response ){
-      $badge.text( response );
+      console.log( response );
+      $btn.removeClass( 'btn-danger btn-success' ).addClass( 'btn-' + switch_class );
+      $badge.removeClass( 'badge-danger badge-success' ).addClass( 'badge-' + switch_class );
+      $btn.find('span.btn-text').text( btn_txt );
+      if( response.length ) $badge.text( response );
     });
   })
 
   .on('click', '.reply-karma i', function(){
-    let parent = $(this).parent().parent().parent();
+    let comment = $(this).parent().parent().parent();
+    let $parent = $(this).parent();
     let increment = $(this).attr('data-increment');
-    let karma_score = $('#' + parent.attr('id') + '_comment_karma' )
-    console.log( karma_score );
+    let btn_pressed = $(this);
+    let karma_score = $('#' + comment.attr('id') + '_comment_karma' );
     let data = {
       action: 'fpusa_comment_helpful',
-      id: parent.attr('id'),
+      id: comment.attr('id'),
       increment: increment
     }
 
     $.post(ajax_object.ajax_url, data, function( response ){
-      karma_score.text( response );
+      if( response.length ) karma_score.text( response );
+      $parent.find('i').removeClass('karma-highlight');
+      btn_pressed.addClass('karma-highlight');
+
     });
   })
 
@@ -384,6 +385,11 @@ $('.comment')
 
     set_submit_comment_event( textarea_id, $comment.attr('id') );
   })
+
+  .on( 'click', '.show-comments-thread', function(){
+    let $thread = $(this).next();
+    ( $thread.is( ':visible' ) ) ? $thread.hide() : $thread.show();
+  });
 
   function set_submit_comment_event( textarea_id, comment_id ){
     textarea = $('#' + textarea_id).find('textarea');
@@ -407,11 +413,32 @@ $('.comment')
       }
 
       $.post(ajax_object.ajax_url, data, function( response ){
-        console.log( response );
+        window.location.reload('');
       });
     });
   }
 
+  $.fn.ignore = function(sel){
+    return this.clone().find(sel||">*").remove().end();
+  };
 
+  $('#sort_comments_by').change(function(){
+    let product_id = $(this).attr('data-product-id');
+    let sortby = $(this).val();
+    let $comments = $('#comments-wrapper');
+
+    // console.log( product_id, sortby, $comments );
+
+    let data = {
+      action: 'fpusa_sort_product_reviews',
+      p_id: product_id,
+      sortby: sortby,
+    }
+
+    $.post(ajax_object.ajax_url, data, function( response ){
+      console.log( response );
+    });
+
+  });
 
 });
