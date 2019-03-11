@@ -1611,6 +1611,7 @@ span.verified{
 
 #user-product-img-overview{
 	border-bottom: 1px solid rgba(0,0,0,0.1);
+	padding-bottom: 1rem;
 }
 
 #reviews{
@@ -1618,7 +1619,7 @@ span.verified{
 }
 
 #after-reviews{
-	max-width: 700px;
+	width: 800px;
 	padding-left: 2rem;
 }
 

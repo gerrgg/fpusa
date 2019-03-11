@@ -1109,8 +1109,9 @@ add_action( 'fpusa_customer_review_left', 'fpusa_cr_get_review_btn', 20 );
 
 add_action( 'fpusa_customer_review_right', 'fpusa_get_user_product_images', 10 );
 function fpusa_get_user_product_images(){
+	global $product;
 	$col = 4;
-	$srcs = fpusa_get_user_content_src();
+	$srcs = fpusa_get_user_content_src( null, $product->get_id() );
 	if( ! empty( $srcs ) ) : ?>
 		<h5><?php echo sizeof( $srcs ) ?> Customer Images</h5>
 		<div id="user-product-img-overview">
@@ -1137,46 +1138,44 @@ function fpusa_sort_comments_by(){
 	<?php
 }
 
-add_action('wp_ajax_fpusa_sort_product_reviews', 'fpusa_get_reviews');
-
-// function fpusa_sort_product_reviews_by(){
-// 	$args = array(
-// 		'post_type' => 'product',
-// 		'post_id'		=> $_POST['p_id'],
-// 		'meta_key'  => 'rating',
-// 		'orderby'		=> $_POST['sortby']
-// 	);
-// 	$comments = get_comments( $args );
-//
-// 	wp_send_json( $comments );
-//
-// 	// $html = wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div' ), $comments);
-// 	// var_dump( $html );
-// }
-
 add_action( 'fpusa_customer_review_right', 'fpusa_get_reviews', 20 );
 
 function fpusa_get_reviews(){
 	/**
 	* uses the wp_list_comments() function to setup args and use a custom callback function
 	*/
-
 	global $product;
-
 
 	$args = array(
 		'post_type' => 'product',
-		'post_id' => get_the_ID(),
+		'post_id' => $product->get_id(),
 		'meta_key' => 'rating',
-		'order_by' => 'meta_value',
+		'orderby' => 'meta_value',
 	 );
 	$comments = get_comments( $args );
 	// var_dump( $comments );
 	?>
 	<div id="comments-wrapper">
-		<?php wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div', 'echo' => 'false' ), $comments); ?>
+		<?php wp_list_comments( array( 'callback' => 'fpusa_comments', 'style' => 'div' ), $comments); ?>
 	</div>
 	<?php
+}
+
+add_action('wp_ajax_fpusa_sort_product_reviews', 'fpusa_sort_product_reviews_by');
+add_action('wp_ajax_nopriv_fpusa_sort_product_reviews', 'fpusa_sort_product_reviews_by');
+
+function fpusa_sort_product_reviews_by(){
+	$args = array(
+		'post_type' => 'product',
+		'post_id'		=> $_POST['p_id'],
+		'meta_key'  => 'rating',
+		'orderby'		=> $_POST['sortby']
+	);
+
+	$comments = get_comments( $args );
+	wp_send_json( $comments );
+
+	wp_die();
 }
 
 function fpusa_comments( $comment ){
@@ -1184,13 +1183,14 @@ function fpusa_comments( $comment ){
 	* provides the html markup for each individual comment a product may have.
 	* @param WP_Comment $comment
 	*/
-	// var_dump( $comment );
 	$rating = get_metadata( 'comment', $comment->comment_ID, 'rating', true );
 	$headline = get_metadata( 'comment', $comment->comment_ID, 'headline', true );
 	$verified = get_metadata( 'comment', $comment->comment_ID, 'verified', true );
-	$srcs = fpusa_get_user_content_src( $comment->user_id );
+	$srcs = fpusa_get_user_content_src( $comment->user_id, get_the_id() );
 
+	// var_dump( $srcs );
 	?>
+
 	<div id="<?php echo $comment->comment_ID; ?>" class="comment my-4">
 		<div class="comment-top d-flex align-items-center">
 			<span class="pr-2">
@@ -1651,22 +1651,25 @@ function fpusa_create_comment( $data ){
 	return $comment_id;
 }
 
-function fpusa_img_link_to_full_show_thumb( $full, $thumb, $img_class = 'img-md' ){
-	?>
-	<a href="<?php echo $full ?>">
-		<img src="<?php echo $thumb ?>" class="mx-1 <?php echo $img_class; ?>"/>
-	</a>
+function fpusa_img_link_to_full_show_thumb( $full, $thumb, $img_class = 'img-md', $echo = true ){
+	if( $echo ) : ?>
+		<a href="<?php echo $full ?>">
+			<img src="<?php echo $thumb ?>" class="mx-1 <?php echo $img_class; ?>"/>
+		</a>
 	<?php
+	else :
+		$html = '';
+		$html .= "<a href='$full'>";
+		$html .= "<img src='$thumb' class='mx-1 $img_class'>";
+		$html .= "</a>";
+		return $html;
+  endif;
 }
 
 
-function fpusa_get_user_content_src( $user = null ){
-	global $product;
+function fpusa_get_user_content_src( $user = null, $p_id = '' ){
 	global $wpdb;
 	$good_srcs = array();
-	$p_id = $product->get_id();
-
-	// var_dump( $user );
 
 	// add another condition if the user ID is defined.
 	$qry_str = "SELECT ID

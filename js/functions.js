@@ -425,7 +425,6 @@ $('.comment')
   $('#sort_comments_by').change(function(){
     let product_id = $(this).attr('data-product-id');
     let sortby = $(this).val();
-    let $comments = $('#comments-wrapper');
 
     // console.log( product_id, sortby, $comments );
 
@@ -436,15 +435,32 @@ $('.comment')
     }
 
     $.post(ajax_object.ajax_url, data, function( response ){
-      displayed_sorted_comments( response );
+      console.log( response );
+      reorder_comments( response )
     });
 
   });
 
-  function displayed_sorted_comments( comment ){
-    for( let i = 0; i < comment.length; i++ ){
-      console.log( comment[i].comment_ID );
-    }
+  function reorder_comments( data ){
+    // get all the comment ids
+    let arr = $.map(data, function(comment) {
+      return comment.comment_ID
+    });
+
+    // get children
+    var wrapper = $('#comments-wrapper');
+    var items = wrapper.children('div.comment');
+
+    // map the index of items where comment id and item id match
+    var newOrder = $.map(arr, function(comment_id) {
+      for( var i = 0; i < items.length; i++ ){
+        if( comment_id == items[i].id ){
+          return $(items).clone(true,true).get(i);
+        }
+      }
+    });
+
+    wrapper.empty().html(newOrder);
   }
 
 });
