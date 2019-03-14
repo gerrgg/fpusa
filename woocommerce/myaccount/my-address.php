@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 <?php foreach ( $get_addresses as $id => $address ) : ?>
 	<div class="col-6 col-sm-4">
-		<div id="<?php echo $id; ?>" class="woocommerce-Address p-5 mx-3">
+		<div id="<?php echo $address->address_id; ?>" class="woocommerce-Address p-5 mx-3">
 			<header class="woocommerce-Address-title title d-flex justify-content-between">
 			</header>
 			<address>
@@ -45,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				?>
 			</address>
 
-				<a href="" class="edit link-color-normal"><?php _e( 'Edit', 'woocommerce' ); ?></a> |
+				<a href="/edit-address/<?php echo $address->address_id ?>" class="edit link-color-normal"><?php _e( 'Edit', 'woocommerce' ); ?></a> |
 				<a href="#" class="delete link-color-normal"><?php _e( 'Delete', 'woocommerce' ); ?></a> |
 				<a href="#" class="set-as-default link-color-normal"><?php _e( 'Set as Default', 'woocommerce' ); ?></a>
 		</div>

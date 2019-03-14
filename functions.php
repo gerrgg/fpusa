@@ -91,19 +91,8 @@ endif;
 add_action( 'after_setup_theme', 'fpusa_setup' );
 // Register the rest route here.
 
- add_action( 'rest_api_init', function () {
-      register_rest_route( 'fpusa/v1', 'address/(?P<address_id>\d+)' ,array(
-          'methods'  => 'GET',
-          'callback' => 'fpusa_get_address'
-      ) );
- } );
 
-function fpusa_get_address( $request ){
-	$args = array( 'id' => $request['address_id'] );
-	$address = new Address( $args['id'] );
 
-	return $address;
-}
 
 function fpusa_create_user_address_table(){
 	global $wpdb;
@@ -1798,6 +1787,7 @@ function fpusa_get_cart_subtotal(){
 }
 
 add_action( 'admin_post_edit_address', 'fpusa_edit_address' );
+
 function fpusa_edit_address(){
 	if ( ! isset( $_POST['woocommerce-edit-address-nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce-edit-address-nonce'], 'woocommerce-edit_address' ) ) {
    print 'Sorry, your nonce did not verify.';
@@ -1826,8 +1816,8 @@ function fpusa_edit_address(){
 		// 	$args
 		// );
 
-		update_metadata( 'user', get_current_user_id(), 'default_address', $wpdb->insert_id );
+		// update_metadata( 'user', get_current_user_id(), 'default_address', $wpdb->insert_id );
 
-		wp_redirect( '/edit-address/' );
+		// wp_redirect( '/edit-address/' );
 	}
 }

@@ -16,7 +16,7 @@ class Address
   public function __construct( $id ){
     global $wpdb;
     $data = $this->get_data( $id );
-    $this->shipto = $data->address_shipto;
+    $this->ship_to = $data->address_shipto;
     $this->address_1 = $data->address_1;
     $this->address_2 = $data->address_2;
     $this->city = $data->address_city;
@@ -52,5 +52,4 @@ class Address
   public function get_address_as_default_link(){
     return '';
   }
-
 }
