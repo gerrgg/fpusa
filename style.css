@@ -118,15 +118,25 @@ pre {
  */
 
 a, a:active, a:link, a:visited, a:hover {
-	background-color: transparent;
+	/* background-color: transparent; */
 	text-decoration: none;
-	/* color: #0066c0 !important; */
+	color: #0066c0;
 }
 
 a.link-color-normal, a.link-color-normal:visited, a.link-color-normal:hover{
-	color: inherit;
+	color: #0066c0;
 }
 
+.form-row-wide input{
+	width: 100%;
+}
+.form-row-wide label{
+	font-weight: 600;
+}
+
+p#shipping_company_field{
+	display: none !important;
+}
 /**
  * 1. Remove the bottom border in Chrome 57-
  * 2. Add the correct text decoration in Chrome, Edge, IE, Opera, and Safari.
@@ -1472,16 +1482,16 @@ p.stock{
 	border: 1px solid rgba(0,0,0,0.1);
 }
 
-#main{
+#main_img{
 	position: relative;
 	width: 100%;
 }
 
-#main a.product-image-link{
+#main-image a.product-image-link{
 	height: 600px;
 }
 
-#main a.product-image-link img{
+#main-image a.product-image-link img{
 	max-height: 100%;
 }
 
@@ -1572,6 +1582,22 @@ table.table-half th{
 td.product-name > a, td.product-price{
 	font-size: 1.5rem;
 	font-weight: 600;
+}
+
+button[name='update_cart'] {
+	display: none !important;
+}
+
+.cart_totals .card{
+	background-color: rgba(0,0,0,0.1);
+}
+
+/*--------------------------------------------------------------
+## Checkout
+--------------------------------------------------------------*/
+a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
+	color: #333;
+	text-decoration: none;
 }
 
 /*--------------------------------------------------------------

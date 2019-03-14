@@ -21,33 +21,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 	$customer_id = get_current_user_id();
-
-	if ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) {
-		$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
-			'billing' => __( 'Billing address', 'woocommerce' ),
-			'shipping' => __( 'Shipping address', 'woocommerce' ),
-		), $customer_id );
-	} else {
-		$get_addresses = apply_filters( 'woocommerce_my_account_get_addresses', array(
-			'billing' => __( 'Billing address', 'woocommerce' ),
-		), $customer_id );
-	}
+	$get_addresses = fpusa_get_customer_addresses( get_current_user_id() );
 ?>
 
 
 <h2 class="pb-3">Edit your address</h2>
 <div class="row">
-<?php foreach ( $get_addresses as $name => $title ) : ?>
-	<div class="col-12 col-sm-6">
-		<div class="woocommerce-Address p-5 mx-3">
+	<div class="col-6 col-sm-4">
+		<div class="woocommerce-Address p-5 mx-3 d-flex flex-column justify-content-center align-items-center">
+			<i class="fas fa-plus fa-3x"></i>
+			<h3>Add Address</h3>
+		</div>
+	</div>
+<?php foreach ( $get_addresses as $id => $address ) : ?>
+	<div class="col-6 col-sm-4">
+		<div id="<?php echo $id; ?>" class="woocommerce-Address p-5 mx-3">
 			<header class="woocommerce-Address-title title d-flex justify-content-between">
-				<h3><?php echo $title; ?></h3>
-				<a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit"><?php _e( 'Edit', 'woocommerce' ); ?></a>
 			</header>
-			<address><?php
-				$address = wc_get_account_formatted_address( $name );
-				echo $address ? wp_kses_post( $address ) : esc_html_e( 'You have not set up this type of address yet.', 'woocommerce' );
-			?></address>
+			<address>
+				<?php
+					$formatted_address = fpusa_get_formatted_address( $address );
+					echo ( ! empty( $formatted_address ) ) ? $formatted_address : 'An address has not been setup yet!';
+				?>
+			</address>
+
+				<a href="" class="edit link-color-normal"><?php _e( 'Edit', 'woocommerce' ); ?></a> |
+				<a href="#" class="delete link-color-normal"><?php _e( 'Delete', 'woocommerce' ); ?></a> |
+				<a href="#" class="set-as-default link-color-normal"><?php _e( 'Set as Default', 'woocommerce' ); ?></a>
 		</div>
 	</div>
 

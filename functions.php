@@ -28,7 +28,7 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 		add_theme_support( 'automatic-feed-links' );
 
 		require_once get_template_directory() . '/inc/class-wp-bootstrap-navwalker.php';
-
+		require_once get_template_directory() . '/inc/class-wc-address.php';
 		/*
 		 * Let WordPress manage the document title.
 		 * By adding theme support, we declare that this theme does not use a
@@ -84,20 +84,57 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 		) );
 
 		fpusa_create_comment_karma_table();
+		fpusa_create_user_address_table();
 
 	}
 endif;
 add_action( 'after_setup_theme', 'fpusa_setup' );
+// Register the rest route here.
 
-function fpusa_create_comment_karma_table(){
-	// Add one library admin function for next function
-	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+ add_action( 'rest_api_init', function () {
+      register_rest_route( 'fpusa/v1', 'address/(?P<address_id>\d+)' ,array(
+          'methods'  => 'GET',
+          'callback' => 'fpusa_get_address'
+      ) );
+ } );
 
+function fpusa_get_address( $request ){
+	$args = array( 'id' => $request['address_id'] );
+	$address = new Address( $args['id'] );
+
+	return $address;
+}
+
+function fpusa_create_user_address_table(){
 	global $wpdb;
-
-	$table_name = $wpdb->prefix . 'karma';
 	$charset_collate = $wpdb->get_charset_collate();
 
+	$table_name = $wpdb->prefix . 'address';
+	$forign_table_name = $wpdb->prefix . 'address';
+	$sql = "CREATE TABLE $table_name (
+		address_id mediumint(9) NOT NULL AUTO_INCREMENT,
+		address_shipto varchar(255) NOT NULL,
+		address_1 varchar(255) NOT NULL,
+		address_2 varchar(255) NULL,
+		address_city varchar(255) NULL,
+		address_state varchar(100) NOT NULL,
+		address_postal varchar(25) NOT NULL,
+		address_country varchar(100) NOT NULL,
+		address_phone varchar(100) NOT NULL,
+		address_delivery_notes text NOT NULL,
+		address_user_id mediumint(9) NOT NULL,
+		PRIMARY KEY (address_id),
+		FOREIGN KEY ( address_user_id ) REFERENCES $wpdb->users (ID)
+	) $charset_collate;";
+
+	fpusa_maybe_create_table( $table_name, $sql );
+}
+
+function fpusa_create_comment_karma_table(){
+	global $wpdb;
+	$charset_collate = $wpdb->get_charset_collate();
+
+	$table_name = $wpdb->prefix . 'karma';
 	$sql = "CREATE TABLE $table_name (
 		karma_id mediumint(9) NOT NULL AUTO_INCREMENT,
 		karma_user_id mediumint(9) NOT NULL,
@@ -106,8 +143,43 @@ function fpusa_create_comment_karma_table(){
 		PRIMARY KEY  (karma_id)
 	) $charset_collate;";
 
+	fpusa_maybe_create_table( $table_name, $sql );
+}
+
+function fpusa_maybe_create_table( $table_name, $sql ){
+	// Add one library admin function for next function
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	maybe_create_table( $table_name, $sql );
 }
+
+function fpusa_get_customer_addresses( $id ){
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'address';
+	$addresses = $wpdb->get_results(
+			"SELECT *
+			 FROM $table_name
+			 WHERE address_user_id = $id"
+	);
+
+	return $addresses;
+}
+
+function fpusa_get_formatted_address( $address ){
+	return sprintf("<ul class='list-unstyled m-0 p-0'>
+									<li><b>%s</b></li>
+									<li>%s <br>
+											%s
+									</li>
+									<li>%s, %s  %s</li>
+									<li>Phone number: +%s</li>
+									<ul>
+									",
+									$address->address_shipto, $address->address_1, $address->address_2,
+									$address->address_city, $address->address_state, $address->address_postal,
+									$address->address_phone, $address->address_delivery_notes);
+}
+
+
 
 /**
  * Set the content width in pixels, based on the theme's design and stylesheet.
@@ -204,6 +276,9 @@ remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_pr
 add_action( 'woocommerce_before_single_product_summary', 'fpusa_show_product_images', 20 );
 
 add_action( 'fpusa_template_product_gallery', 'fpusa_get_product_gallery' );
+
+remove_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals', 10 );
+add_action( 'woocommerce_after_cart_table', 'woocommerce_cart_totals', 10 );
 
 function fpusa_get_header_right(){
 	/**
@@ -614,22 +689,39 @@ function fpusa_update_zip(){
 }
 
 // Hook in
-add_filter( 'woocommerce_default_address_fields' , 'fpusa_custom_address_fields' );
+add_filter( 'woocommerce_default_address_fields' , 'fpusa_custom_address_fields', 100 );
 
 // Our hooked in function - $address_fields is passed via the filter!
 function fpusa_custom_address_fields( $address_fields ) {
-     $address_fields['first_name']['class'][] = 'col-6';
-		 $address_fields['last_name']['class'][] = 'col-6';
-		 $address_fields['company']['class'][] = 'col-6';
-		 $address_fields['country']['class'][] = 'col-6';
-		 $address_fields['address_1']['class'][] = 'col-12';
-		 $address_fields['address_2']['class'][] = 'col-12';
-		 $address_fields['city']['class'][] = 'col-4';
-		 $address_fields['state']['class'][] = 'col-4';
-		 $address_fields['postcode']['class'][] = 'col';
+     $address_fields['first_name']['class'][] = 'form-row-wide';
+		 $address_fields['last_name']['class'][] = 'form-row-wide';
+
+		 // var_dump( $address_fields['last_name'] );
+
+		 $address_fields['phone'] = array(
+			 'label' => 'Phone',
+			 'required' => false,
+			 'class' => array(
+				 'form-row-last',
+				 'form-row-wide'
+			 ),
+			 'autocomplete' => false,
+			 'priority' => 100,
+		 );
 
      return $address_fields;
 }
+
+function fpusa_get_delivery_notes_form(){
+	?>
+	<p class="form-row form-row-last form-row-wide">
+	<h5>Add delivery instructions</h5>
+	<p>Do we need additional information to help us find this address?</p>
+	<textarea id="delivery_instructions" name="delivery_instructions" class="m-0" placeholder="Provide details such as building description, nearby landmarks or other instructions."></textarea>
+	<p>
+	<?php
+}
+
 
 add_filter( 'woocommerce_checkout_fields', 'fpusa_custom_checkout_fields' );
 
@@ -1391,7 +1483,7 @@ function fpusa_comment_on_comment_callback(){
 	wp_die();
 }
 
-add_action( 'fpusa_comment_actions', 'fpusa_report_comment', 30, 1 );
+// add_action( 'fpusa_comment_actions', 'fpusa_report_comment', 30, 1 );
 function fpusa_report_comment( $parent_id ){
 	?>
 	<button type="button" class="btn btn-outline-danger comment-report">
@@ -1418,6 +1510,9 @@ function fpusa_create_review_template(){
 			break;
 		case 'edit':
 			wc_get_template('single-product/review/create.php');
+			break;
+		case 'show':
+			wc_get_template('single-product/review/show.php');
 			break;
 	}
 }
@@ -1691,4 +1786,48 @@ function fpusa_get_user_content_src( $user = null, $p_id = '' ){
 		}
 	}
 	return $good_srcs;
+}
+
+function fpusa_get_cart_subtotal(){
+	global $woocommerce;
+	?>
+		<label>Subtotal (<?php echo $woocommerce->cart->get_cart_contents_count() ?> items):</label>
+		<span class="price">$<?php echo $woocommerce->cart->get_subtotal() ?></span>
+	<?php
+
+}
+
+add_action( 'admin_post_edit_address', 'fpusa_edit_address' );
+function fpusa_edit_address(){
+	if ( ! isset( $_POST['woocommerce-edit-address-nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce-edit-address-nonce'], 'woocommerce-edit_address' ) ) {
+   print 'Sorry, your nonce did not verify.';
+   exit;
+	} else {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'address';
+
+		$args = array(
+			'address_shipto' => $_POST['shipping_first_name'] . ' ' . $_POST['shipping_last_name'],
+			'address_1' => $_POST['shipping_address_1'],
+			'address_2' => $_POST['shipping_address_2'],
+			'address_city' => $_POST['shipping_city'],
+			'address_state' => $_POST['shipping_state'],
+			'address_postal' => $_POST['shipping_postcode'],
+			'address_country' => $_POST['shipping_country'],
+			'address_phone' => $_POST['shipping_phone'],
+			'address_delivery_notes' => $_POST['delivery_instructions'],
+			'address_user_id' => get_current_user_id(),
+		);
+
+		var_dump( $_POST );
+
+		// $wpdb->insert(
+		// 	$table_name,
+		// 	$args
+		// );
+
+		update_metadata( 'user', get_current_user_id(), 'default_address', $wpdb->insert_id );
+
+		wp_redirect( '/edit-address/' );
+	}
 }

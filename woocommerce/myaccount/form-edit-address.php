@@ -25,14 +25,14 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 	<?php wc_get_template( 'myaccount/my-address.php' ); ?>
 <?php else : ?>
 
-	<form id="fpusa_edit_address" method="post" class="form center-small">
+	<form id="fpusa_edit_address" method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>" class="form center-small">
 
 		<h3><?php echo apply_filters( 'woocommerce_my_account_edit_address_title', $page_title, $load_address ); ?></h3><?php // @codingStandardsIgnoreLine ?>
 
 		<div class="woocommerce-address-fields">
 			<?php do_action( "woocommerce_before_edit_address_form_{$load_address}" ); ?>
 
-			<div class="woocommerce-address-fields__field-wrapper row">
+			<div class="woocommerce-address-fields__field-wrapper">
 				<?php
 				foreach ( $address as $key => $field ) {
 					if ( isset( $field['country_field'], $address[ $field['country_field'] ] ) ) {
@@ -40,16 +40,16 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 					}
 					woocommerce_form_field( $key, $field, wc_get_post_data_by_key( $key, $field['value'] ));
 				}
+
+				fpusa_get_delivery_notes_form();
 				?>
+
 			</div>
 
-			<?php do_action( "woocommerce_after_edit_address_form_{$load_address}" ); ?>
 
-			<p>
-				<button type="submit" class="button" name="save_address" value="<?php esc_attr_e( 'Save address', 'woocommerce' ); ?>"><?php esc_html_e( 'Save address', 'woocommerce' ); ?></button>
-				<?php wp_nonce_field( 'woocommerce-edit_address', 'woocommerce-edit-address-nonce' ); ?>
-				<input type="hidden" name="action" value="edit_address" />
-			</p>
+			<button type="submit" class="btn btn-warning btn-block" name="save_address" value="<?php esc_attr_e( 'Save address', 'woocommerce' ); ?>"><?php esc_html_e( 'Save address', 'woocommerce' ); ?></button>
+			<?php wp_nonce_field( 'woocommerce-edit_address', 'woocommerce-edit-address-nonce' ); ?>
+			<input type="hidden" name="action" value="edit_address" />
 		</div>
 
 	</form>

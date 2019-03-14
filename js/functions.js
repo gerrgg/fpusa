@@ -463,4 +463,8 @@ $('.comment')
     wrapper.empty().html(newOrder);
   }
 
+  $('div.woocommerce').on('change', 'input.qty', function(){
+    $("[name='update_cart']").trigger('click');
+  })
+
 });
