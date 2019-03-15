@@ -1884,3 +1884,26 @@ function fpusa_customer_address_sync( $address_id ){
 		$address->sync_customer( get_current_user_id() );
 	}
 }
+
+add_action( 'woocommerce_before_checkout_form', 'fpusa_checkout_header', 1, 1 );
+function fpusa_checkout_header( $checkout ){
+	$items_count = sizeof( WC()->cart->get_cart() );
+	?>
+	<nav id="checkout-header" class="navbar navbar-dark bg-dark">
+		<div class="container">
+			<div class="d-flex justify-content-between align-items-center w-100">
+				<?php the_custom_logo(); ?>
+				<h1>Checkout
+					(<a class="link-color-normal" href=""><?php echo $items_count . ' ' . pluralize( $items_count, 'item' ) ?></a>)
+				</h1>
+				<a href="<?php echo get_privacy_policy_url() ?>"><i class="fas fa-lock fa-2x"></i></a>
+			</div>
+		</div>
+	</nav>
+	<?php
+}
+
+function pluralize( $count, $str ){
+	if( $count > 1 ) $str .= 's';
+	return $str;
+}

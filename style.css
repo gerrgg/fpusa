@@ -1601,6 +1601,11 @@ a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
 	text-decoration: none;
 }
 
+.woocommerce-checkout .entry-content, .woocommerce-checkout #primary{
+	margin: 0px;
+	padding: 0px;
+}
+
 /*--------------------------------------------------------------
 ## Create Review
 --------------------------------------------------------------*/

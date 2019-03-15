@@ -162,6 +162,12 @@ function fpusa_page_options_callback( $post ){
           'value'         => get_post_meta( get_the_ID(), 'hide_footer', true ),
           'label'         => __('Hide Footer'),
         ) );
+
+        woocommerce_wp_checkbox( array(
+            'id'            => 'hide_title',
+            'value'         => get_post_meta( get_the_ID(), 'hide_title', true ),
+            'label'         => __('Hide Title'),
+          ) );
       ?>
     </div>
   </div>
@@ -175,4 +181,7 @@ function fpusa_save_post_meta( $id, $post ){
 
   $hide_footer = ( isset( $_POST['hide_footer'] ) ) ? 'yes' : 'no';
   update_post_meta( $id, 'hide_footer', $hide_footer );
+
+  $hide_title = ( isset( $_POST['hide_title'] ) ) ? 'yes' : 'no';
+  update_post_meta( $id, 'hide_title', $hide_title );
 }
