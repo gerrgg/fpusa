@@ -28,7 +28,7 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 		add_theme_support( 'automatic-feed-links' );
 
 		require_once get_template_directory() . '/inc/class-wp-bootstrap-navwalker.php';
-		require_once get_template_directory() . '/inc/class-wc-address.php';
+		include get_template_directory() . '/inc/class-wc-address.php';
 		/*
 		 * Let WordPress manage the document title.
 		 * By adding theme support, we declare that this theme does not use a
@@ -141,11 +141,11 @@ function fpusa_maybe_create_table( $table_name, $sql ){
 	maybe_create_table( $table_name, $sql );
 }
 
-function fpusa_get_customer_addresses( $id ){
+function fpusa_get_user_address_ids( $id ){
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'address';
 	$addresses = $wpdb->get_results(
-			"SELECT *
+			"SELECT address_id
 			 FROM $table_name
 			 WHERE address_user_id = $id"
 	);
@@ -701,12 +701,12 @@ function fpusa_custom_address_fields( $address_fields ) {
      return $address_fields;
 }
 
-function fpusa_get_delivery_notes_form(){
+function fpusa_get_delivery_notes_form( $value ){
 	?>
 	<p class="form-row form-row-last form-row-wide">
 	<h5>Add delivery instructions</h5>
 	<p>Do we need additional information to help us find this address?</p>
-	<textarea id="delivery_instructions" name="delivery_instructions" class="m-0" placeholder="Provide details such as building description, nearby landmarks or other instructions."></textarea>
+	<textarea id="delivery_instructions" name="delivery_instructions" class="m-0" placeholder="Provide details such as building description, nearby landmarks or other instructions."><?php echo $value ?></textarea>
 	<p>
 	<?php
 }
@@ -1297,9 +1297,7 @@ function fpusa_comments( $comment ){
 			<?php do_action('fpusa_comment_actions', $comment->comment_ID ); ?>
 		</div>
 		<a role="button" class="show-comments-thread">
-		<?php fpusa_get_comments_thread( $comment->comment_ID ); ?>
-
-		<?php
+		<?php fpusa_get_comments_thread( $comment->comment_ID );
 }
 
 function fpusa_get_product_review_link( $id, $action = 'post'){
@@ -1796,28 +1794,83 @@ function fpusa_edit_address(){
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'address';
 
+		var_dump( $_POST );
+
+		$action = ( $_POST['address_id'] === 'new' ) ? 'insert' : 'update';
+
 		$args = array(
-			'address_shipto' => $_POST['shipping_first_name'] . ' ' . $_POST['shipping_last_name'],
-			'address_1' => $_POST['shipping_address_1'],
-			'address_2' => $_POST['shipping_address_2'],
-			'address_city' => $_POST['shipping_city'],
-			'address_state' => $_POST['shipping_state'],
-			'address_postal' => $_POST['shipping_postcode'],
-			'address_country' => $_POST['shipping_country'],
-			'address_phone' => $_POST['shipping_phone'],
+			'address_shipto' => $_POST['ship_to'],
+			'address_1' => $_POST['address_1'],
+			'address_2' => $_POST['address_2'],
+			'address_city' => $_POST['city'],
+			'address_state' => $_POST['state'],
+			'address_postal' => $_POST['postal'],
+			'address_country' => $_POST['country'],
+			'address_phone' => $_POST['phone'],
 			'address_delivery_notes' => $_POST['delivery_instructions'],
 			'address_user_id' => get_current_user_id(),
 		);
 
-		var_dump( $_POST );
+		if( $action === 'insert' ){
+			$wpdb->insert(
+				$table_name,
+				$args
+			);
 
-		// $wpdb->insert(
-		// 	$table_name,
-		// 	$args
-		// );
+			$default_address = get_metadata( 'user', get_current_user_id(), 'default_address', true );
 
-		// update_metadata( 'user', get_current_user_id(), 'default_address', $wpdb->insert_id );
+			if( empty( $default_address ) ){
+				update_metadata( 'user', get_current_user_id(), 'default_address', $wpdb->insert_id );
+			}
 
-		// wp_redirect( '/edit-address/' );
+		} else {
+			$wpdb->update(
+					$table_name,
+					$args,
+					array( 'address_id' => $_POST['address_id'] )
+			);
+		}
+
+
+
+		wp_redirect( '/edit-address/' );
 	}
+}
+
+function fpusa_get_address( $id ){
+	$address = new Address( $id );
+	return ( empty( $address ) );
+}
+
+function fpusa_form_field( $key, $value, $type = 'text' ){
+	?>
+	<div class="form-group">
+		<label for="<?php echo $key ?>"><?php echo str_replace( '_', ' ', ucfirst( $key ) ) ?></label>
+		<input id="<?php echo $key ?>" class="form-control" type="<?php echo $type ?>" name="<?php echo $key ?>" value="<?php echo $value ?>" />
+	</div>
+	<?php
+}
+
+add_action( 'admin_post_fpusa_delete_address', 'fpusa_delete_address' );
+add_action( 'admin_post_fpusa_make_address_default', 'fpusa_make_address_default' );
+
+function fpusa_delete_address(){
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'address';
+
+	$wpdb->delete($table_name, array( 'address_id' => $_GET['id'] ));
+
+	wp_redirect('/edit-address/');
+}
+
+function fpusa_make_address_default(){
+	global $wpdb;
+	$wpdb->update(
+		$wpdb->usermeta,
+		array( 'meta_value' => $_GET['id'] ),
+		array( 'user_id' => get_current_user_id(), 'meta_key' => 'default_address' )
+	);
+
+	// var_dump( $_POST );
+	wp_redirect('/edit-address/');
 }
