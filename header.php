@@ -8,7 +8,7 @@
  *
  * @package FallProtectionUSA
  */
-
+$hide_header = get_post_meta( get_the_ID(), 'hide_header', true );
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -23,7 +23,7 @@
 <body <?php body_class(); ?>>
 <div id="page" class="site">
 	<a class="skip-link screen-reader-text" href="#content"><?php esc_html_e( 'Skip to content', 'fpusa' ); ?></a>
-	<header id="header-wrapper">
+	<header id="header-wrapper" class="<?php if( $hide_header ===  'yes' ) echo 'd-none' ?>">
 		<!-- <div class=""> -->
 			<nav id="header-top" class="d-flex align-items-end">
 				<div class="nav-left d-flex align-items-end">

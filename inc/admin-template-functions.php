@@ -132,3 +132,47 @@ function fpusa_admin_product_specifications(){
 	</div>
 	<?php
 }
+
+add_action( 'admin_menu', 'fpusa_add_page_options' );
+function fpusa_add_page_options() {
+	add_meta_box(
+		'fpusa_page_options', // metabox ID, it also will be the HTML id attribute
+		'Page Options', // title
+		'fpusa_page_options_callback', // this is a callback function, which will print HTML of our metabox
+		'page', // post type or post types in array
+		'normal', // position on the screen where metabox should be displayed (normal, side, advanced)
+		'low' // priority over another metaboxes on this page (default, low, high, core)
+	);
+}
+
+function fpusa_page_options_callback( $post ){
+  wp_nonce_field( basename( __FILE__ ), 'fpusa_page_options_nonce' );
+  ?>
+  <div class="wrap">
+    <div class="options_group">
+      <?php
+      woocommerce_wp_checkbox( array(
+          'id'            => 'hide_header',
+          'value'         => get_post_meta( get_the_ID(), 'hide_header', true ),
+          'label'         => __('Hide Header'),
+        ) );
+
+      woocommerce_wp_checkbox( array(
+          'id'            => 'hide_footer',
+          'value'         => get_post_meta( get_the_ID(), 'hide_footer', true ),
+          'label'         => __('Hide Footer'),
+        ) );
+      ?>
+    </div>
+  </div>
+  <?php
+}
+
+add_action( 'save_post', 'fpusa_save_post_meta', 10, 2 );
+function fpusa_save_post_meta( $id, $post ){
+  $hide_header = ( isset( $_POST['hide_header'] ) ) ? 'yes' : 'no';
+	update_post_meta( $id, 'hide_header', $hide_header );
+
+  $hide_footer = ( isset( $_POST['hide_footer'] ) ) ? 'yes' : 'no';
+  update_post_meta( $id, 'hide_footer', $hide_footer );
+}

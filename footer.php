@@ -8,12 +8,12 @@
  *
  * @package FallProtectionUSA
  */
-
+$hide_footer = get_post_meta( get_the_ID(), 'hide_footer', true );
 ?>
 
 	</div><!-- #content -->
 
-	<footer id="colophon" class="site-footer">
+	<footer id="colophon" class="site-footer <?php if( $hide_footer === 'yes' ) echo 'd-none'; ?>">
 		<div class="back-to-top-wrapper text-center">
 			<a class="back-to-top text-mute" href="javascript:void(0)">Back to top</a>
 		</div>
