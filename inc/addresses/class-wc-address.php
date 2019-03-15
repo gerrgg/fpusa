@@ -42,14 +42,14 @@ class Address
   }
 
   public function get_edit_link(){
-    return ''
+    echo 'hi';
   }
 
   public function get_delete_link(){
-    return ''
+    return '';
   }
 
   public function get_address_as_default_link(){
-    return ''
+    return '';
   }
 }
