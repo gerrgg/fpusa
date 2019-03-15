@@ -2,75 +2,57 @@
 /**
  * Checkout Form
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates
- * @version     2.3.0
+ * This template can be overridden by copying it to yourtheme/woocommerce/checkout/form-checkout.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see https://docs.woocommerce.com/document/template-structure/
+ * @package WooCommerce/Templates
+ * @version 3.5.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-wc_print_notices();
-
 do_action( 'woocommerce_before_checkout_form', $checkout );
-
-// If checkout registration is disabled and not logged in, the user cannot checkout
-if ( ! $checkout->enable_signup && ! $checkout->enable_guest_checkout && ! is_user_logged_in() ) {
-	echo apply_filters( 'woocommerce_checkout_must_be_logged_in_message', esc_html__( 'You must be logged in to checkout.', 'woocommerce' ) );
+// If checkout registration is disabled and not logged in, the user cannot checkout.
+if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_required() && ! is_user_logged_in() ) {
+	echo esc_html( apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) ) );
 	return;
 }
+?>
 
-$shipping_address = fpusa_get_customer_location_details('shipping');
+<form name="checkout" method="post" class="checkout woocommerce-checkout row" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
 
-// filter hook for include new pages inside the payment method
-$get_checkout_url = apply_filters( 'woocommerce_get_checkout_url', wc_get_checkout_url() ); ?>
+	<?php if ( $checkout->get_checkout_fields() ) : ?>
 
-<div class="row">
-	<div class="col-9">
-		<div class="accordion" id="checkoutSteps">
+		<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
 
-			<h4>
-				<a class="checkout-step d-flex" data-toggle="collapse" href="#step1" role="button" aria-expanded="false" aria-controls="step1">
-	        <label class="pr-5">1</label>
-					<p class="m-0">Choose a shipping address</p>
-	      </a>
-			</h4>
-
-			<div id="step1" class="collapse" data-parent="#checkoutSteps">
-	      <div class="card-body">
-	        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-	      </div>
-	    </div>
-
-			<h4>
-				<a class="checkout-step d-flex" data-toggle="collapse" href="#step2" role="button" aria-expanded="false" aria-controls="step2">
-	        <label class="pr-5">2</label>
-					<p class="m-0">Choose a payment method</p>
-	      </a>
-			</h4>
-
-			<div id="step2" class="collapse" data-parent="#checkoutSteps">
-	      <div class="card-body">
-	        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-	      </div>
-	    </div>
-
-			<h4>
-				<a class="checkout-step d-flex" data-toggle="collapse" href="#step3" role="button" aria-expanded="false" aria-controls="step3">
-	          <label class="pr-5">3</label>
-						<p class="m-0">Review items and shipping</p>
-	      </a>
-			</h4>
-
-			<div id="step3" class="collapse" data-parent="#checkoutSteps">
-	      <div class="card-body">
-	        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-	      </div>
-	    </div>
+		<div class="col-8" id="customer_details">
+			<?php do_action( 'woocommerce_checkout_billing' ); ?>
+			<?php do_action( 'woocommerce_checkout_shipping' ); ?>
 		</div>
-	</div>
-	<div class="col">
-		<button>checkout</button>
-	</div>
-</div>
+
+		<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
+
+	<?php endif; ?>
+
+	<?php do_action( 'woocommerce_checkout_before_order_review_heading' ); ?>
+  <div class="col">
+  	<h3 id="order_review_heading"><?php esc_html_e( 'Your order', 'woocommerce' ); ?></h3>
+
+  	<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
+
+  	<div id="order_review" class="woocommerce-checkout-review-order">
+  		<?php do_action( 'woocommerce_checkout_order_review' ); ?>
+  	</div>
+  </div>
+
+	<?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
+
+</form>
+
+<?php do_action( 'woocommerce_after_checkout_form', $checkout ); ?>
