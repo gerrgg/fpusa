@@ -23,31 +23,27 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 	<?php wc_get_template( 'myaccount/my-address.php' ); ?>
 <?php else : ?>
 
+	<?php
+	$address = new Address( $load_address );
+	$action = ( empty( $address->data ) ) ? 'insert' : 'update';
+	$header = ( $action == 'insert' ) ? 'Add an address' : 'Edit Address' . $load_address;
+	?>
+
 	<form id="fpusa_edit_address" method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>" class="form center-small">
 
-		<h3>Edit Address <?php echo $load_address ?></h3><?php // @codingStandardsIgnoreLine ?>
+		<h3><?php echo $header ?></h3><?php // @codingStandardsIgnoreLine ?>
 
 		<div class="woocommerce-address-fields">
-			<?php
-			$address = new Address( $load_address );
-			?>
 
 			<div class="woocommerce-address-fields__field-wrapper">
 				<?php
-				foreach ( $address as $key => $field ) {
-					if ( isset( $field['country_field'], $address[ $field['country_field'] ] ) ) {
-						$field['country'] = wc_get_post_data_by_key( $field['country_field'], $address[ $field['country_field'] ]['value'] );
-					}
-					?>
+				foreach ( $address as $key => $value ) :
+					if( $key != 'user_id' && $key != 'notes' && $key != 'ID' ) fpusa_form_field( $key, $value );
+				endforeach;
 
-					<?php
-				}
-
-				fpusa_get_delivery_notes_form();
+				fpusa_get_delivery_notes_form( $address->notes );
 				?>
-
 			</div>
-
 
 			<button type="submit" class="btn btn-warning btn-block" name="save_address" value="<?php esc_attr_e( 'Save address', 'woocommerce' ); ?>"><?php esc_html_e( 'Save address', 'woocommerce' ); ?></button>
 			<?php wp_nonce_field( 'woocommerce-edit_address', 'woocommerce-edit-address-nonce' ); ?>
