@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <h2 class="pb-3">Edit your address</h2>
 <div class="row">
 	<div class="col-6 col-sm-4">
-		<a href="/edit-address/new" class="woocommerce-Address p-5 d-flex flex-column justify-content-center align-items-center text-dark a-link-normal">
+		<a href="/edit-address/new" class="p-5 d-flex flex-column justify-content-center align-items-center text-dark a-link-normal">
 			<i class="fas fa-plus fa-3x"></i>
 			<h3>Add Address</h3>
 		</a>
@@ -39,7 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			if( ! empty( $address ) ) :
 	?>
 			<div class="col-12 col-sm-4">
-				<div id="<?php echo $address->address_id; ?>" class="woocommerce-Address p-5">
+				<div id="<?php echo $id->address_id; ?>" class="woocommerce-Address p-5">
 					<?php if( $address->is_default() ) : ?>
 						<span class="badge badge-success">Default</span>
 					<?php endif; ?>

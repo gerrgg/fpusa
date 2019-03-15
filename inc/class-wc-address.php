@@ -31,6 +31,23 @@ class Address
     }
   }
 
+  public function sync_customer( $user_id ){
+    $name = $this->get_first_n_last_name();
+    update_user_meta( $user_id, 'shipping_first_name', $name[0] );
+    update_user_meta( $user_id, 'shipping_last_name', $name[1] );
+    update_user_meta( $user_id, 'shipping_address_1', $this->address_1 );
+    if( ! empty( $this->address_2 ) ) update_user_meta( $user_id, 'shipping_address_2', $this->address_2 );
+    update_user_meta( $user_id, 'shipping_city', $this->city );
+    update_user_meta( $user_id, 'shipping_state', $this->state );
+    update_user_meta( $user_id, 'shipping_postcode', $this->postal );
+    update_user_meta( $user_id, 'shipping_country', $this->country );
+    update_user_meta( $user_id, 'shipping_phone', $this->phone );
+  }
+
+  public function get_first_n_last_name(){
+    return explode( ' ', $this->ship_to );
+  }
+
   public function is_default(){
     $default = get_metadata( 'user', get_current_user_id(), 'default_address', true );
     return ( $this->ID === $default );

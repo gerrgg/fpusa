@@ -1871,6 +1871,16 @@ function fpusa_make_address_default(){
 		array( 'user_id' => get_current_user_id(), 'meta_key' => 'default_address' )
 	);
 
+	fpusa_customer_address_sync( $_GET['id'] );
+
 	// var_dump( $_POST );
 	wp_redirect('/edit-address/');
+}
+
+function fpusa_customer_address_sync( $address_id ){
+	$address = new Address( $address_id );
+	if( ! empty( $address ) ){
+		var_dump( $address );
+		$address->sync_customer( get_current_user_id() );
+	}
 }
