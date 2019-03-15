@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php
 	if( ! empty( $get_addresses ) ) :
 		foreach ( $get_addresses as $id ) :
-			$address = new Address( $id->address_id );
+			$address = new Address( $id[0] );
 			if( ! empty( $address ) ) :
 	?>
 			<div class="col-12 col-sm-4">

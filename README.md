@@ -1,3 +1,4 @@
+# fpusa
 
 What does this theme have?
 - Multiple header locations
@@ -21,3 +22,4 @@ What does this theme need?
 - Improved header (CSS)
 - Colorbox integration with image galleries
 - Switch from slick.js to owl carosuel ( or fix the dynamic width thing? ).
+- Dynamically create modals - https://stackoverflow.com/questions/33606856/dynamically-load-modal-dialog-in-one-page

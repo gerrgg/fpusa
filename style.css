@@ -1606,6 +1606,29 @@ a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
 	padding: 0px;
 }
 
+.checkout-address-label span{
+	text-transform: uppercase;
+}
+
+.checkout-address{
+	padding: .25rem .5rem;
+}
+
+.checkout-address.active{
+	background-color: #FCF5EE;
+	border: 1px solid #FBD8B4;
+  border-radius: 5px;
+}
+
+#payment ul{
+	margin: 0px;
+	padding: 0px;
+	list-style: none;
+}
+
+.payment_method_paypal img{
+	height: 50px;
+}
 /*--------------------------------------------------------------
 ## Create Review
 --------------------------------------------------------------*/

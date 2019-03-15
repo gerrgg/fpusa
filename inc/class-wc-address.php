@@ -31,6 +31,22 @@ class Address
     }
   }
 
+  public function convert_to_radio(){
+    $str = sprintf(
+      '<b>%s</b><span> %s %s, %s, %s, %s, %s</span>',
+      $this->ship_to, $this->address_1, $this->address_2, $this->city, $this->state, $this->postal, $this->country
+    );
+    ?>
+    <div class="form-check pl-4 checkout-address <?php if( $this->is_default() ) echo 'active'; ?>">
+      <input class="form-check-input" type="radio" name="use_address" id="use_address_<?php echo $this->ID ?>" value="<?php echo $this->ID ?>" <?php if( $this->is_default() ) echo 'checked' ?>>
+      <label class="form-check-label checkout-address-label" for="use_address_<?php echo $this->ID ?>">
+        <?php echo $str; ?>
+      </label>
+
+    </div>
+    <?php
+  }
+
   public function sync_customer( $user_id ){
     $name = $this->get_first_n_last_name();
     update_user_meta( $user_id, 'shipping_first_name', $name[0] );

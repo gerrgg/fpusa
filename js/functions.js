@@ -467,4 +467,19 @@ $('.comment')
     $("[name='update_cart']").trigger('click');
   })
 
+  $('#step-1')
+    .on( 'click', '.checkout-address', function(){
+        $('.checkout-address').removeClass( 'active' );
+        $(this).addClass( 'active' );
+      })
+    .on( 'click', 'button.btn.btn-warning', function(){
+        console.log( $(this).text() );
+        $('#step-2').collapse('toggle');
+    });
+
+    $('#step-2')
+      .on( 'click', 'button.btn.btn-warning', function(){
+        $('#step-3').collapse('toggle');
+      });
+
 });

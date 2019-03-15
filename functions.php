@@ -27,8 +27,7 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 		// Add default posts and comments RSS feed links to head.
 		add_theme_support( 'automatic-feed-links' );
 
-		require_once get_template_directory() . '/inc/class-wp-bootstrap-navwalker.php';
-		include get_template_directory() . '/inc/class-wc-address.php';
+
 		/*
 		 * Let WordPress manage the document title.
 		 * By adding theme support, we declare that this theme does not use a
@@ -83,6 +82,46 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 			'flex-height' => true,
 		) );
 
+		require_once get_template_directory() . '/inc/class-wp-bootstrap-navwalker.php';
+
+		require_once get_template_directory() . '/inc/class-wc-address.php';
+
+		/**
+		 * Custom template tags for this theme.
+		 */
+		require_once get_template_directory() . '/inc/template-tags.php';
+
+		/**
+		 * Functions which enhance the theme by hooking into WordPress.
+		 */
+		require_once get_template_directory() . '/inc/template-functions.php';
+
+		/**
+		 * Admin Functions which enhance the theme by hooking into WordPress Backend.
+		 */
+		require_once get_template_directory() . '/inc/admin-template-functions.php';
+
+		require_once get_template_directory() . '/inc/wc-checkout-functions.php';
+
+		/**
+		 * Functions which enhance the theme by hooking into WordPress.
+		 */
+
+		/**
+		 * Customizer additions.
+		 */
+		require_once get_template_directory() . '/inc/customizer.php';
+
+		/**
+		 * Load WooCommerce compatibility file.
+		 */
+		if ( class_exists( 'WooCommerce' ) ) {
+			require get_template_directory() . '/inc/woocommerce.php';
+		}
+
+		/**
+		 * custom tables
+		 */
 		fpusa_create_comment_karma_table();
 		fpusa_create_user_address_table();
 
@@ -144,11 +183,24 @@ function fpusa_maybe_create_table( $table_name, $sql ){
 function fpusa_get_user_address_ids( $id ){
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'address';
-	$addresses = $wpdb->get_results(
-			"SELECT address_id
-			 FROM $table_name
-			 WHERE address_user_id = $id"
-	);
+	$sql = "SELECT address_id FROM $table_name WHERE address_user_id = $id";
+	$addresses = $wpdb->get_results($sql, ARRAY_N );
+
+	// sort addresses by default
+	$default_id = get_user_meta( get_current_user_id(), 'default_address', true );
+	if( ! empty( $default_id ) ){
+		for($i = 0; $i < sizeof( $addresses ); $i++){
+			if( $addresses[$i][0] == $default_id ){
+				unset( $addresses[$i][0] );
+				array_unshift( $addresses, array($default_id) );
+				array_pop( $addresses );
+			}
+		}
+	}
+
+	// echo '<pre>';
+	// var_dump( $addresses );
+	// echo '</pre>';
 
 	return $addresses;
 }
@@ -603,38 +655,6 @@ function fpusa_template_single_divider(){
 
 function fpusa_template_single_brand(){
 	wc_get_template( 'single-product/brand.php' );
-}
-
-/**
- * Custom template tags for this theme.
- */
-require get_template_directory() . '/inc/template-tags.php';
-
-/**
- * Functions which enhance the theme by hooking into WordPress.
- */
-require get_template_directory() . '/inc/template-functions.php';
-
-/**
- * Admin Functions which enhance the theme by hooking into WordPress Backend.
- */
-require get_template_directory() . '/inc/admin-template-functions.php';
-
-/**
- * Functions which enhance the theme by hooking into WordPress.
- */
-// require get_template_directory() . '/inc/fpusa-free-gifts.php';
-
-/**
- * Customizer additions.
- */
-require get_template_directory() . '/inc/customizer.php';
-
-/**
- * Load WooCommerce compatibility file.
- */
-if ( class_exists( 'WooCommerce' ) ) {
-	require get_template_directory() . '/inc/woocommerce.php';
 }
 
 function get_client_ip() {
@@ -1883,24 +1903,6 @@ function fpusa_customer_address_sync( $address_id ){
 		var_dump( $address );
 		$address->sync_customer( get_current_user_id() );
 	}
-}
-
-add_action( 'woocommerce_before_checkout_form', 'fpusa_checkout_header', 1, 1 );
-function fpusa_checkout_header( $checkout ){
-	$items_count = sizeof( WC()->cart->get_cart() );
-	?>
-	<nav id="checkout-header" class="navbar navbar-dark bg-dark">
-		<div class="container">
-			<div class="d-flex justify-content-between align-items-center w-100">
-				<?php the_custom_logo(); ?>
-				<h1>Checkout
-					(<a class="link-color-normal" href=""><?php echo $items_count . ' ' . pluralize( $items_count, 'item' ) ?></a>)
-				</h1>
-				<a href="<?php echo get_privacy_policy_url() ?>"><i class="fas fa-lock fa-2x"></i></a>
-			</div>
-		</div>
-	</nav>
-	<?php
 }
 
 function pluralize( $count, $str ){

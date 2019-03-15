@@ -25,7 +25,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	return;
 }
 ?>
-
+<div class="container">
 <form name="checkout" method="post" class="checkout woocommerce-checkout row" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
 
 	<?php if ( $checkout->get_checkout_fields() ) : ?>
@@ -33,8 +33,18 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 		<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
 
 		<div class="col-8" id="customer_details">
-			<?php do_action( 'woocommerce_checkout_billing' ); ?>
-			<?php do_action( 'woocommerce_checkout_shipping' ); ?>
+
+			<div class="accordion" id="checkout-process">
+				<?php
+					fpusa_checkout_steps(
+						'checkout-process',
+						array( 'Shipping address', 'Choose a payment method', 'Items & Shipping' )
+					);
+				?>
+
+			</div>
+			<?php //do_action( 'woocommerce_checkout_billing' ); ?>
+			<?php //do_action( 'woocommerce_checkout_shipping' ); ?>
 		</div>
 
 		<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
@@ -48,12 +58,11 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
   	<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
 
   	<div id="order_review" class="woocommerce-checkout-review-order">
-  		<?php do_action( 'woocommerce_checkout_order_review' ); ?>
-  	</div>
+		</div>
   </div>
 
 	<?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
 
 </form>
-
+</div>
 <?php do_action( 'woocommerce_after_checkout_form', $checkout ); ?>
