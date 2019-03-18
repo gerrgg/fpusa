@@ -61,6 +61,7 @@ function fpusa_choose_shipping_address(){
         }
       }
       ?>
+			<a href="/edit-address/new"><i class="fas fa-plus"></i> Add new address</a>
     </div>
     <div class="card-header">
       <button type="button" class="btn btn-warning use-this-address">Use this address</button>
@@ -76,4 +77,73 @@ function fpusa_get_checkout_address(){
 		wp_send_json( $address );
 		wp_die();
 	}
+}
+
+function iww_make_date( $dates ){
+	// Eastern Time Zone
+  date_default_timezone_set('EST');
+  // Current Hour in numerical format 0-23
+  $current_hour = date('G');
+	// $current_hour = 13;
+  // Current day in numerical format 1-7
+  $current_day = date('N');
+  // init string
+	$date_str = '';
+	foreach( $dates as $key => $date ){
+    if( $current_day > 5 ){
+      $date = ( $current_day == 6 ) ? $date + 1 : $date + 2;
+    } else {
+      // weekdays
+      if( $current_hour >= 12 ) $date++;
+    }
+
+    // if this isn't the first date, add a hyphen to the string
+		if( $key != 0 )$date_str .= ' - ';
+    // create date based on leadtime + $date passed to function
+		$future = date( 'l, M j', strtotime('+' . $date . 'days') );
+    // if future lands on a sunday, add another day to it.
+		if( preg_match( '/Saturday/', $future ) ) $future = date( 'l, M j', strtotime('+' . ($date + 2) . 'days') );
+		if( preg_match( '/Sunday/', $future ) ) $future = date( 'l, M j', strtotime('+' . ($date + 1) . 'days') );
+
+		$date_str .= $future;
+	}
+	return '<h6 class="m-0 p-0 text-success iww-date-estimate">'.$date_str.'</h6>';
+}
+
+function fpusa_get_default_est_delivery( $method ){
+	switch( $method ){
+		case '3 Day Select (UPS)':
+		$date_str = iww_make_date( [3] );
+		break;
+		case 'Ground (UPS)':
+		$date_str = iww_make_date( [2, 5] );
+		break;
+		case '2nd Day Air (UPS)':
+		$date_str = iww_make_date( [2] );
+		break;
+		case 'Next Day Air (UPS)':
+		$date_str = iww_make_date( [2] );
+		break;
+		case 'Next Day Air Saver (UPS)':
+		$date_str = iww_make_date( [1] );
+		break;
+		case 'Next Day Air Early AM (UPS)':
+		$date_str = iww_make_date( [1] );
+		break;
+		case 'Free shipping':
+		$date_str = iww_make_date( [5, 10] );
+		break;
+	}
+
+	return $date_str;
+}
+
+add_action( 'wp_ajax_get_time_in_transit', 'fpusa_get_time_in_transit' );
+add_action( 'wp_ajax_nopriv_get_time_in_transit', 'fpusa_get_time_in_transit' );
+
+function fpusa_get_time_in_transit(){
+	$ups = new UPS();
+	$tit = $ups->time_in_transit($_POST);
+	wp_send_json( $tit );
+	wp_die();
 }

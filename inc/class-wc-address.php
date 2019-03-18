@@ -41,6 +41,7 @@ class Address
       <input class="form-check-input" type="radio" name="use_address" id="use_address_<?php echo $this->ID ?>" value="<?php echo $this->ID ?>" <?php if( $this->is_default() ) echo 'checked' ?>>
       <label class="form-check-label checkout-address-label" for="use_address_<?php echo $this->ID ?>">
         <?php echo $str; ?>
+          <span><a href="<?php echo $this->get_edit_link(); ?>">Edit Address</a></span>
       </label>
 
     </div>

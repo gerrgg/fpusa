@@ -85,6 +85,7 @@ if ( ! function_exists( 'fpusa_setup' ) ) :
 		require_once get_template_directory() . '/inc/class-wp-bootstrap-navwalker.php';
 
 		require_once get_template_directory() . '/inc/class-wc-address.php';
+		require_once get_template_directory() . '/inc/class-ups.php';
 
 		/**
 		 * Custom template tags for this theme.

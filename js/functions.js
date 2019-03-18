@@ -468,7 +468,30 @@ $('.comment')
   });
 
   $('#step-1').on( 'click', '.use-this-address', function(){
+    copy_to_inputs();
+    get_time_in_transit();
+  });
 
+  function get_time_in_transit(){
+    let data = {
+      action: 'get_time_in_transit',
+      street: $('#shipping_address_1').val(),
+      postal: $('#shipping_postcode').val(),
+      country: $('#shipping_country').val(),
+    }
+
+    $.post( ajax_object.ajax_url, data, function( response ){
+      display_time_in_transit_response( response );
+    } );
+  }
+
+  function display_time_in_transit_response(){
+    // find what user has selected
+    // compare it to $response
+    // display it to browser!
+  }
+
+  function copy_to_inputs(){
     selection = $('#step-1 input[type="radio"]:checked').val();
     let data = {
       action: 'fpusa_checkout_address',
@@ -476,8 +499,6 @@ $('.comment')
     };
 
     $.post(ajax_object.ajax_url, data, function( response ){
-      console.log( response );
-
       let name = response.ship_to.split( ' ' );
 
       fields = {
@@ -503,5 +524,7 @@ $('.comment')
       }
 
     });
-  });
+  }
+
+
 });

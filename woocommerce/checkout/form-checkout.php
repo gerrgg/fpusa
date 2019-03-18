@@ -25,7 +25,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	return;
 }
 ?>
-<div class="container">
+<div class="container-fluid">
 <form name="checkout" method="post" class="checkout woocommerce-checkout row" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
 
 	<?php if ( $checkout->get_checkout_fields() ) : ?>
@@ -93,6 +93,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 						</div>
 					<?php endif; ?>
 				<?php endif; ?>
+			</table>
 			</div>
 		</div>
 		<?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
