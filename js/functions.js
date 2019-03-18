@@ -465,21 +465,43 @@ $('.comment')
 
   $('div.woocommerce').on('change', 'input.qty', function(){
     $("[name='update_cart']").trigger('click');
-  })
+  });
 
-  $('#step-1')
-    .on( 'click', '.checkout-address', function(){
-        $('.checkout-address').removeClass( 'active' );
-        $(this).addClass( 'active' );
-      })
-    .on( 'click', 'button.btn.btn-warning', function(){
-        console.log( $(this).text() );
-        $('#step-2').collapse('toggle');
+  $('#step-1').on( 'click', '.use-this-address', function(){
+
+    selection = $('#step-1 input[type="radio"]:checked').val();
+    let data = {
+      action: 'fpusa_checkout_address',
+      id: selection
+    };
+
+    $.post(ajax_object.ajax_url, data, function( response ){
+      console.log( response );
+
+      let name = response.ship_to.split( ' ' );
+
+      fields = {
+        first_name: name[0],
+        last_name: name[1],
+        company: response.ship_to,
+        country_field: response.country,
+        address_1: response.address_1,
+        address_2: response.address_2,
+        city: response.city,
+        state: response.state,
+        postcode: response.postal,
+        phone: response.phone,
+        order_comments: response.notes,
+      }
+
+      for( let i = 0; i < 2; i++ ){
+        let prefix = ( i == 0 ) ? 'shipping' : 'billing';
+
+        Object.keys(fields).forEach(function (key) {
+        	$('#' + prefix + '_' + key).val( fields[key] ).change();
+        });
+      }
+
     });
-
-    $('#step-2')
-      .on( 'click', 'button.btn.btn-warning', function(){
-        $('#step-3').collapse('toggle');
-      });
-
+  });
 });

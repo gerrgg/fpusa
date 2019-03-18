@@ -8,7 +8,9 @@ remove_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_paymen
 add_action( 'fpusa_checkout_step_2', 'woocommerce_checkout_payment' );
 
 remove_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
-add_action( 'fpusa_checkout_step_3', 'woocommerce_order_review' );
+// add_action( 'fpusa_checkout_step_3', function(){ echo '<div class="card border-bottom p-3">'; }, 5 );
+add_action( 'fpusa_checkout_step_3', 'woocommerce_order_review', 10 );
+// add_action( 'fpusa_checkout_step_3', function(){ echo '</div>'; }, 15 );
 
 add_action( 'woocommerce_before_checkout_form', 'fpusa_checkout_header', 1, 1 );
 function fpusa_checkout_header( $checkout ){
@@ -61,8 +63,17 @@ function fpusa_choose_shipping_address(){
       ?>
     </div>
     <div class="card-header">
-      <button type="button" class="btn btn-warning">Use this address</button>
+      <button type="button" class="btn btn-warning use-this-address">Use this address</button>
     </div>
   </div>
   <?php
+}
+
+add_action( 'wp_ajax_fpusa_checkout_address', 'fpusa_get_checkout_address' );
+function fpusa_get_checkout_address(){
+	$address = new Address( $_POST['id'] );
+	if( ! empty( $address ) ){
+		wp_send_json( $address );
+		wp_die();
+	}
 }

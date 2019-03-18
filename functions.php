@@ -1863,12 +1863,17 @@ function fpusa_get_address( $id ){
 }
 
 function fpusa_form_field( $key, $value, $type = 'text' ){
-	?>
+	// echo $key . ' ' . $value . ' ' . $type . '<br>';
+	if( $key != 'state' && $key != 'country'  ) : ?>
 	<div class="form-group">
 		<label for="<?php echo $key ?>"><?php echo str_replace( '_', ' ', ucfirst( $key ) ) ?></label>
 		<input id="<?php echo $key ?>" class="form-control" type="<?php echo $type ?>" name="<?php echo $key ?>" value="<?php echo $value ?>" />
 	</div>
-	<?php
+<?php
+	else : ?>
+		<label for="<?php echo $key ?>"><?php echo str_replace( '_', ' ', ucfirst( $key ) ) ?></label>
+		<?php woocommerce_form_field( $key, array('type' => $key), wc_get_post_data_by_key( $key, $value ) );
+	endif;
 }
 
 add_action( 'admin_post_fpusa_delete_address', 'fpusa_delete_address' );
