@@ -291,6 +291,8 @@ function fpusa_scripts() {
 
 	wp_enqueue_script( 'dropzone-js', get_template_directory_uri() . '/js/dropzone.js', array('jquery'));
 
+	wp_enqueue_script( 'moment-js', 'http://momentjs.com/downloads/moment.min.js', array(), '4.9', true);
+
 	wp_localize_script( 'js-functions', 'ajax_object', array(
 		'ajax_url' => admin_url( 'admin-ajax.php' ),
 		'dropParam' => admin_url( 'admin-post.php?action=fpusa_process_product_review' ),
@@ -322,49 +324,13 @@ add_action( 'fpusa_template_product_gallery', 'fpusa_get_product_gallery' );
 remove_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals', 10 );
 add_action( 'woocommerce_after_cart_table', 'woocommerce_cart_totals', 10 );
 
-function fpusa_get_header_right(){
-	/**
-	*
-	* Gets the right side of the header
-	* TODO: Make less static
-	*
-	*/
-	$user = wp_get_current_user();
-	$login_msg = ( ! empty( $user->display_name ) ) ? "Hello, $user->display_name" : "Hello, Sign in";
-	?>
-	<ul class="navbar-nav d-flex align-items-end">
-		<li class="nav-item dropdown">
-			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				<?php echo $login_msg; ?>
-			</a>
-			<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-				<?php if( ( empty( $user->ID ) ) ) : ?>
-				<a class="dropdown-item" href="/my-account/">Login/Register</a>
-				<?php endif; ?>
-				<a class="dropdown-item" href="/my-account/orders/">My Orders</a>
-				<a class="dropdown-item" href="/my-account/edit-account/">My Account</a>
-				<a class="dropdown-item" href="/my-account/edit-address/">Edit Address</a>
-				<?php if( ( ! empty( $user->ID ) ) ) : ?>
-				<div class="dropdown-divider"></div>
-				<a class="dropdown-item" href="/my-account/customer-logout">Logout</a>
-				<?php endif; ?>
-			</div>
-		</li>
-		<li class="nav-item">
-      <a class="nav-link" href="/my-account/orders/">Orders</a>
-    </li>
-		<li class="nav-item">
-      <a class="nav-link" href="/cart/"><i class="fas fa-shopping-cart fa-2x"></i></a>
-    </li>
-	</ul>
-	<?php
-}
+
 
 function fpusa_choose_location_btn(){
 	/*
 	*
 	* Allows the user to choose which address they would like to use.
-	* TODO: Currently lacks the functionality for multiple addresses - Needs an address table?
+	* TODO: Integrate with address class
 	*
 	*/
 	$user = wp_get_current_user();

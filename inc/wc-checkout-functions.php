@@ -102,8 +102,8 @@ function iww_make_date( $dates ){
     // create date based on leadtime + $date passed to function
 		$future = date( 'l, M j', strtotime('+' . $date . 'days') );
     // if future lands on a sunday, add another day to it.
-		if( preg_match( '/Saturday/', $future ) ) $future = date( 'l, M j', strtotime('+' . ($date + 2) . 'days') );
-		if( preg_match( '/Sunday/', $future ) ) $future = date( 'l, M j', strtotime('+' . ($date + 1) . 'days') );
+		if( preg_match( '/Saturday/', $future ) ) $future = date( 'l, F j', strtotime('+' . ($date + 2) . 'days') );
+		if( preg_match( '/Sunday/', $future ) ) $future = date( 'l, F j', strtotime('+' . ($date + 1) . 'days') );
 
 		$date_str .= $future;
 	}
@@ -132,6 +132,9 @@ function fpusa_get_default_est_delivery( $method ){
 		break;
 		case 'Free shipping':
 		$date_str = iww_make_date( [5, 10] );
+		break;
+		default :
+		$date_str = iww_make_date( [5, 15] );
 		break;
 	}
 

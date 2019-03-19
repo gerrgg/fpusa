@@ -20,7 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-				<h5 class="text-success">Guaranteed delivery date: Mar. 20, 2019</h5>
+				<h5 class="text-success">
+					Expected delivery date: <span id="selected_option">Mar. 20, 2019</span></h5>
 				<div class="row">
 					<div class="col-7">
 					<?php

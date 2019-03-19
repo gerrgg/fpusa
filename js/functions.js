@@ -468,11 +468,15 @@ $('.comment')
   });
 
   $('#step-1').on( 'click', '.use-this-address', function(){
-    copy_to_inputs();
-    get_time_in_transit();
+    let $selection = copy_to_inputs();
+    get_time_in_transit( $selection );
   });
 
-  function get_time_in_transit(){
+  $('input.shipping_method').change(function(){
+    $('#selected_option').text( $(this).prev().text() );
+  });
+
+  function get_time_in_transit( selection ){
     let data = {
       action: 'get_time_in_transit',
       street: $('#shipping_address_1').val(),
@@ -481,21 +485,51 @@ $('.comment')
     }
 
     $.post( ajax_object.ajax_url, data, function( response ){
-      display_time_in_transit_response( response );
+      display_time_in_transit_response( response, selection.val() );
+      $('#selected_option').text( $('input.shipping_method:checked').prev().text() );
     } );
   }
 
-  function display_time_in_transit_response(){
+  function display_time_in_transit_response( data, selection ){
     // find what user has selected
-    // compare it to $response
-    // display it to browser!
+    $shipping_methods = $('#shipping_method li > input');
+    response = data.TransitResponse.ServiceSummary;
+
+    let services = {
+      'GND': 'ups:2:03',
+      '3DS': 'ups:2:12',
+      '2DA': 'ups:2:02',
+      '1DP': 'ups:2:13',
+      '1DA': 'ups:2:01'
+    }
+
+      // loop through the services array
+    Object.keys(services).forEach(function (key) {
+        // foreach shipping method
+      $shipping_methods.each( function(){
+          // check if the key matches the value
+        if( this.value == services[key] ){
+          // loop through api response
+          for( let i = 0; i < response.length; i++ ){
+            // compare it to $response
+            if( response[i].Service.Code == key ){
+              // format and display it to browser!
+              let est_arrival = response[i].EstimatedArrival;
+              let date = moment( est_arrival.Date ).format( 'dddd, MMMM Do' );
+              $(this).prev().html( date );
+            }
+          }
+        }
+      });
+    });
+
   }
 
   function copy_to_inputs(){
-    selection = $('#step-1 input[type="radio"]:checked').val();
+    selection = $('#step-1 input[type="radio"]:checked');
     let data = {
       action: 'fpusa_checkout_address',
-      id: selection
+      id: selection.val()
     };
 
     $.post(ajax_object.ajax_url, data, function( response ){
@@ -524,6 +558,8 @@ $('.comment')
       }
 
     });
+
+    return selection;
   }
 
 
