@@ -16,10 +16,12 @@ What does this theme have?
 - Allows users to vote on comments
 - Allows users to comment on comments
 - Allows users to sort comments based on rating, karma (score) or date.
+- Integration with UPS Time in Transit API
 
 What does this theme need?
 - Defined benefits for creating and using and account
 - Improved header (CSS)
 - Colorbox integration with image galleries
 - Switch from slick.js to owl carosuel ( or fix the dynamic width thing? ).
-- Dynamically create modals - https://stackoverflow.com/questions/33606856/dynamically-load-modal-dialog-in-one-page
+- Dynamically create modals - https://stackoverflow.com/questions/33606856/dynamically-load-modal-dialog-in-one-page ( really big task ).
+- Integrate theme options with UPS stuff (end of day, services, etc. )

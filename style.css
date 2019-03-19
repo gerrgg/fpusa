@@ -1620,6 +1620,12 @@ a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
   border-radius: 5px;
 }
 
+.order-total{
+	color: #B12704!important;
+	font-size: 20px;
+	font-weight: 600;
+}
+
 #payment ul{
 	margin: 0px;
 	padding: 0px;
@@ -1629,6 +1635,9 @@ a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
 .payment_method_paypal img{
 	height: 50px;
 }
+
+
+.order-total
 /*--------------------------------------------------------------
 ## Create Review
 --------------------------------------------------------------*/

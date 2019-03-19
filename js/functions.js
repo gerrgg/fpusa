@@ -467,10 +467,34 @@ $('.comment')
     $("[name='update_cart']").trigger('click');
   });
 
-  $('#step-1').on( 'click', '.use-this-address', function(){
+  $('form.checkout')
+  .on( 'click', '.use-this-address', function(){
     let $selection = copy_to_inputs();
     get_time_in_transit( $selection );
+    if( $selection.length > 0 ){
+      $('#order-button').html( $('#use-payment').addClass('btn-block') );
+      $('#step-btn-1').attr('href', '#step-1');
+      $('#step-2').collapse('toggle');
+    }
+  })
+  .on( 'click', '.use-payment-method', function(){
+    let card_num = $('#mes_cc-card-number').val();
+    let expire = $('#mes_cc-card-expiry').val().split(' / ');
+    let cvc = $('#mes_cc-card-cvc').val();
+    if( card_num.length > 0 && valid_credit_card( card_num ) ){
+      expire.splice(1, 0, '1');
+      future = new Date(expire);
+      now = new Date();
+      if( future > now && cvc.length > 0 ){
+        $('#step-3').collapse('toggle');
+        $order_btn = $('#place-order').clone();
+
+        $('#order-button').html( $order_btn );
+        $('#order-instructions').html( $('#order-instructions-btm').text() );
+      }
+    }
   });
+
 
   $('input.shipping_method').change(function(){
     $('#selected_option').text( $(this).prev().text() );
@@ -562,5 +586,27 @@ $('.comment')
     return selection;
   }
 
+  function valid_credit_card(value) {
+  // accept only digits, dashes or spaces
+	if (/[^0-9-\s]+/.test(value)) return false;
+
+	// The Luhn Algorithm. It's so pretty.
+	var nCheck = 0, nDigit = 0, bEven = false;
+	value = value.replace(/\D/g, "");
+
+	for (var n = value.length - 1; n >= 0; n--) {
+		var cDigit = value.charAt(n),
+			  nDigit = parseInt(cDigit, 10);
+
+		if (bEven) {
+			if ((nDigit *= 2) > 9) nDigit -= 9;
+		}
+
+		nCheck += nDigit;
+		bEven = !bEven;
+	}
+
+	return (nCheck % 10) == 0;
+}
 
 });

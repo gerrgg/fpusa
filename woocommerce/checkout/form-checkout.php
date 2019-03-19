@@ -25,9 +25,10 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	return;
 }
 ?>
-<div class="container-fluid">
-<form name="checkout" method="post" class="checkout woocommerce-checkout row" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
-
+<div class="container">
+<form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
+	<!-- layout bug fix -->
+	<div class="row">
 	<?php if ( $checkout->get_checkout_fields() ) : ?>
 
 		<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
@@ -43,13 +44,14 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 				?>
 
 			</div>
-		</div>
-		<div class="d-none">
-			<?php do_action( 'woocommerce_checkout_shipping' ); ?>
-			<?php do_action( 'woocommerce_checkout_billing' ); ?>
+			<div class="d-none">
+				<?php do_action( 'woocommerce_checkout_shipping' ); ?>
+				<?php do_action( 'woocommerce_checkout_billing' ); ?>
+			</div>
 		</div>
 
-		<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
+
+		<?php //do_action( 'woocommerce_checkout_after_customer_details' ); ?>
 
 	<?php endif; ?>
 
@@ -60,45 +62,19 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
   	<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
 		<div id="order_review" class="woocommerce-checkout-review-order card">
 			<div class="card-body">
-				<button type="submit" class="btn btn-warning btn-block">Place your order</button>
-
-				<h5 class="my-3">Order Summary</h5>
-				<table class="table">
-				<?php foreach ( WC()->cart->get_fees() as $fee ) : ?>
-					<div class="fee">
-						<th><?php echo esc_html( $fee->name ); ?></th>
-						<td><?php wc_cart_totals_fee_html( $fee ); ?></td>
-					</div>
-				<?php endforeach; ?>
-
-				<?php foreach ( WC()->cart->get_coupons() as $code => $coupon ) : ?>
-					<div class="cart-discount coupon-<?php echo esc_attr( sanitize_title( $code ) ); ?>">
-						<th><?php wc_cart_totals_coupon_label( $coupon ); ?></th>
-						<td><?php wc_cart_totals_coupon_html( $coupon ); ?></td>
-					</div>
-				<?php endforeach; ?>
-
-				<?php if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) : ?>
-					<?php if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) : ?>
-						<?php foreach ( WC()->cart->get_tax_totals() as $code => $tax ) : ?>
-							<div class="tax-rate tax-rate-<?php echo sanitize_title( $code ); ?>">
-								<th><?php echo esc_html( $tax->label ); ?></th>
-								<td><?php echo wp_kses_post( $tax->formatted_amount ); ?></td>
-							</div>
-						<?php endforeach; ?>
-					<?php else : ?>
-						<div class="tax-total">
-							<th><?php echo esc_html( WC()->countries->tax_or_vat() ); ?></th>
-							<td><?php wc_cart_totals_taxes_total_html(); ?></td>
-						</div>
-					<?php endif; ?>
-				<?php endif; ?>
-			</table>
+				<div id="order-button">
+					<button type="button" class="btn use-this-address btn-warning btn-block">Use this address</button>
+				</div>
+				<div class="text-center">
+					<small id="order-instructions" class="text-center">Continue to step 3 to finish checking out. You'll have a chance to review and edit your order before it's final.</small>
+				</div>
+				<?php do_action( 'fpusa_order_summary' ); ?>
 			</div>
 		</div>
 		<?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
   </div>
 	<?php wp_nonce_field( 'woocommerce-process_checkout' ); ?>
 </form>
-</div>
 <?php do_action( 'woocommerce_after_checkout_form', $checkout ); ?>
+
+</div>

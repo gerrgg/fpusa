@@ -26,7 +26,8 @@ $calculator_text          = '';
 ?>
 
 		<?php if ( $available_methods ) : ?>
-			<ul id="shipping_method" class="woocommerce-shipping-methods list-unstyled m-0 p-0">
+			<label class="font-weight-bold m-0 p-0">Choose your delivery method:</label>
+			<ul id="shipping_method" class="border-left woocommerce-shipping-methods list-unstyled m-0 pl-3">
 				<?php foreach ( $available_methods as $method ) : ?>
 					<li>
 						<h6 class="pl-3"><?php echo fpusa_get_default_est_delivery( $method->label ) ?></h6>

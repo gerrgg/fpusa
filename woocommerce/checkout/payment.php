@@ -37,9 +37,11 @@ if ( ! is_ajax() ) {
 			</ul>
 		<?php endif; ?>
 
+		<?php do_action( 'fpusa_after_payment' ); ?>
 	</div>
+
 	<div class="card-header">
-		<button type="button" class="btn btn-warning">Use this payment method</button>
+		<button id="use-payment" type="button" class="btn btn-warning use-payment-method">Use this payment method</button>
 	</div>
 </div>
 <?php

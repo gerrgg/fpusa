@@ -20,24 +20,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$totals = WC()->cart->get_totals();
 ?>
-<div class="col cart_totals <?php echo ( WC()->customer->has_calculated_shipping() ) ? 'calculated_shipping' : ''; ?>">
-	<div class="card py-2 px-3">
-	<?php do_action( 'woocommerce_before_cart_totals' ); ?>
+<h5 class="my-3">Order Summary</h5>
+<table class="table">
 
-	<h5>
-		<?php fpusa_get_cart_subtotal(); ?>
-	</h5>
+	<?php
+		$formatted_totals = array(
+			array('Items', $totals['cart_contents_total']),
+			array('Shipping & handling', $totals['shipping_total']),
+			array('Your Coupon Savings', $totals['discount_total']),
+			array('Total before tax', $totals['cart_contents_total']),
+			array('Estimated tax to be collected', $totals['fee_total']),
+		);
 
-	<div class="wc-proceed-to-checkout">
-		<?php do_action( 'woocommerce_proceed_to_checkout' ); ?>
-	</div>
+		foreach( $formatted_totals as $total_arr ){
+			echo fpusa_get_order_totals_html( $total_arr );
+		}
+	?>
 
+<?php do_action( 'woocommerce_review_order_before_order_total' ); ?>
 
-	<hr>
+	<tr class="order-total">
+		<th><?php _e( 'Order total:', 'woocommerce' ); ?></th>
+		<td><?php wc_cart_totals_order_total_html(); ?></td>
+	</tr>
 
-
-
-	<?php do_action( 'woocommerce_after_cart_totals' ); ?>
-	</div>
-</div>
+	<?php do_action( 'woocommerce_review_order_after_order_total' ); ?>
+</table>

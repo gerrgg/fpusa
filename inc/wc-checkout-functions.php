@@ -3,6 +3,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+add_action( 'fpusa_after_payment', 'woocommerce_checkout_coupon_form', 10 );
 
 remove_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
 add_action( 'fpusa_checkout_step_2', 'woocommerce_checkout_payment' );
@@ -10,6 +12,28 @@ add_action( 'fpusa_checkout_step_2', 'woocommerce_checkout_payment' );
 remove_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 // add_action( 'fpusa_checkout_step_3', function(){ echo '<div class="card border-bottom p-3">'; }, 5 );
 add_action( 'fpusa_checkout_step_3', 'woocommerce_order_review', 10 );
+add_action( 'fpusa_checkout_step_3', 'fpusa_place_order', 20 );
+
+add_action( 'fpusa_order_summary', 'get_order_summary' );
+function get_order_summary(){
+	wc_get_template( 'cart/cart-totals.php' );
+}
+
+function fpusa_place_order(){
+	?>
+	<div class="card p-3 mt-3">
+		<div class="d-flex align-items-center">
+			<button id="place-order" type="submit" class="btn btn-warning btn-block">Place your order</button>
+			<span class="mx-5">
+				<div class="order-total">
+					Order Total: <?php wc_cart_totals_order_total_html(); ?>
+				</div>
+				<p id="order-instructions-btm">By placing your order, you agree to Amazon.com's privacy notice and conditions of use.</p>
+			</span>
+		</div>
+	</div>
+	<?php
+}
 // add_action( 'fpusa_checkout_step_3', function(){ echo '</div>'; }, 15 );
 
 add_action( 'woocommerce_before_checkout_form', 'fpusa_checkout_header', 1, 1 );
@@ -34,8 +58,8 @@ function fpusa_checkout_steps( $parent, $labels ){
 	$max_steps = sizeof( $labels );
 	for( $i = 1; $i <= $max_steps; $i++ ) : ?>
 		<h4 class="mb-2">
-			<a class="checkout-step" data-toggle="collapse" href="#step-<?php echo $i; ?>" role="button" aria-expanded="<?php if( $i == 1 ) echo 'true'  ?>" aria-controls="step-<?php echo $i; ?>">
-				<span class="pr-5"><?php echo $i; ?></span>
+			<a id="step-btn-<?php echo $i; ?>" href="#step-<?php echo $i; ?>" class="checkout-step" data-toggle="collapse" role="button" aria-expanded="<?php if( $i == 1 ) echo 'true'  ?>" aria-controls="step-<?php echo $i; ?>">
+				<span class="pr-2"><?php echo $i; ?>: </span>
 				<span><?php echo $labels[$i - 1] ?></span>
 			</a>
 		</h4>
@@ -64,7 +88,7 @@ function fpusa_choose_shipping_address(){
 			<a href="/edit-address/new"><i class="fas fa-plus"></i> Add new address</a>
     </div>
     <div class="card-header">
-      <button type="button" class="btn btn-warning use-this-address">Use this address</button>
+      <button id="use-address" type="button" class="btn btn-warning use-this-address">Use this address</button>
     </div>
   </div>
   <?php
@@ -149,4 +173,20 @@ function fpusa_get_time_in_transit(){
 	$tit = $ups->time_in_transit($_POST);
 	wp_send_json( $tit );
 	wp_die();
+}
+
+function fpusa_cart_item_stock( $item ){
+	$stock = $item['data']->get_stock_status();
+	$class = ( $stock == 'instock' ) ? 'success' : 'warning';
+	$text = ( $stock == 'instock' ) ? 'In stock' : 'On backorder';
+	return "<span class='text-$class'>$text</span>";
+}
+
+function fpusa_get_order_totals_html( $arr ){
+	?>
+	<tr>
+		<td><?php echo $arr[0] ?>:</td>
+		<td <?php if( $arr[0] == 'Shipping & handling' ) echo 'id="shipping_fees"';?> >$<?php echo $arr[1] ?></td>
+	</tr>
+	<?php
 }
