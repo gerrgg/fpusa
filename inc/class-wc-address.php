@@ -12,6 +12,7 @@ class Address
   public $country;
   public $phone;
   public $notes;
+  public $type;
   public $user_id;
 
   public function __construct( $id ){
@@ -27,6 +28,7 @@ class Address
       $this->country = $data->address_country;
       $this->phone = $data->address_phone;
       $this->notes = $data->address_delivery_notes;
+      $this->type = $data->address_type;
       $this->user_id = $data->address_user_id;
     }
   }
