@@ -473,7 +473,7 @@ $('.comment')
     get_time_in_transit( $selection );
     if( $selection.length > 0 ){
       $('#order-button').html( $('#use-payment').addClass('btn-block') );
-      $('#step-btn-1').attr('href', '#step-1');
+      // $('#step-btn-1').attr('href', '#step-1');
       $('#step-2').collapse('toggle');
     }
   })

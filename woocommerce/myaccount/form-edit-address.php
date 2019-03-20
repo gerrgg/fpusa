@@ -25,20 +25,21 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 
 	<?php
 	$address = new Address( $load_address );
+	$type = $address->type;
 	$action = ( empty( $address->data ) ) ? 'insert' : 'update';
 	$header = ( $action == 'insert' ) ? 'Add an address' : 'Edit Address' . $load_address;
 	?>
 
 	<form id="fpusa_edit_address" method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>" class="form center-small">
-
-		<h3><?php echo $header ?></h3><?php // @codingStandardsIgnoreLine ?>
+		<h2><?php echo $header ?></h2><?php // @codingStandardsIgnoreLine ?>
 
 		<div class="woocommerce-address-fields">
 
 			<div class="woocommerce-address-fields__field-wrapper">
 				<?php
+
 				foreach ( $address as $key => $value ) :
-					if( $key != 'user_id' && $key != 'notes' && $key != 'ID' ) fpusa_form_field( $key, $value );
+					if( $key != 'user_id' && $key != 'notes' && $key != 'ID' && $key != 'type' ) fpusa_form_field( $key, $value );
 				endforeach;
 
 				fpusa_get_delivery_notes_form( $address->notes );
@@ -48,6 +49,7 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 			<button type="submit" class="btn btn-warning btn-block" name="save_address" value="<?php esc_attr_e( 'Save address', 'woocommerce' ); ?>"><?php esc_html_e( 'Save address', 'woocommerce' ); ?></button>
 			<?php wp_nonce_field( 'woocommerce-edit_address', 'woocommerce-edit-address-nonce' ); ?>
 			<input type="hidden" name="address_id" value="<?php echo $load_address; ?>" />
+			<input type="hidden" name="type" value="<?php echo ( ! empty( $type ) ) ? $type : 'both'; ?>" />
 			<input type="hidden" name="action" value="edit_address" />
 		</div>
 
