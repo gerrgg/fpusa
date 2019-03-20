@@ -467,32 +467,98 @@ $('.comment')
     $("[name='update_cart']").trigger('click');
   });
 
+  function get_checkout_preview_address(){
+    data = {
+      first: $('#shipping_first_name').val(),
+      last: $('#shipping_last_name').val(),
+      address_1: $('#shipping_address_1').val(),
+      address_2: $('#shipping_address_2').val(),
+      city: $('#shipping_city').val(),
+      state: $('#shipping_state').val(),
+      zip: $('#shipping_postcode').val(),
+      notes: $('#order_comments').val(),
+    }
+
+    $address = $('<ul/>', { class: 'list-unstyled m-0 p-0' });
+    $address.append( `<li>${data.first} ${data.last}</li>` )
+    $address.append( `<li>${data.address_1}</li>` );
+    if( data.address_2.length ){
+      $address.append( `<li>${data.address_2}</li>` );
+    }
+    $address.append( `<li>${data.city}, ${data.state}  ${data.zip}</li>` );
+    $address.append( `<li>${data.notes}</li>` );
+
+    return $address;
+  }
+
+  function get_payment_preview( last4 ){
+    console.log( last4 );
+    $preview = $('<div/>');
+    $preview.append(`<p class="text-muted d-flex align-items-center"><i class="far fa-credit-card pr-2 fa-2x"></i> ending in ${last4}</p>`);
+    $preview.append( $('<a/>', { href: '#' }).text( 'Billing address: ' ) ).append( compare_addresses() );
+    return $preview;
+  };
+
+  function compare_addresses(){
+    let data = {
+      action: 'fpusa_checkout_address',
+      id: $('#step-1 input[type="radio"]:checked').val(),
+    };
+
+    var type;
+
+    $.ajax({
+      async: false,
+      type: "POST",
+      url:  ajax_object.ajax_url,
+      data:
+      {
+        action: 'fpusa_checkout_address',
+        id: $('#step-1 input[type="radio"]:checked').val(),
+      },
+      success: function( response ){
+        // console.log( response );
+        type = response.type
+      }
+    });
+
+    // return string based on blah
+    if( type == 'both' ){
+      
+    }
+    console.log( type );
+  }
+
   $('form.checkout')
   .on( 'click', '.use-this-address', function(){
     let $selection = copy_to_inputs();
+    let $preview = $('#step-1').prev().find('span.preview');
     get_time_in_transit( $selection );
     if( $selection.length > 0 ){
       $('#order-button').html( $('#use-payment').addClass('btn-block') );
       // $('#step-btn-1').attr('href', '#step-1');
       $('#step-2').collapse('toggle');
+      $preview.html( get_checkout_preview_address() );
     }
+
   })
   .on( 'click', '.use-payment-method', function(){
+    let $preview = $('#step-2').prev().find('span.preview');
     let card_num = $('#mes_cc-card-number').val();
     let expire = $('#mes_cc-card-expiry').val().split(' / ');
     let cvc = $('#mes_cc-card-cvc').val();
-    if( card_num.length > 0 && valid_credit_card( card_num ) ){
-      expire.splice(1, 0, '1');
-      future = new Date(expire);
-      now = new Date();
-      if( future > now && cvc.length > 0 ){
+    // if( card_num.length > 0 && valid_credit_card( card_num ) ){
+    //   expire.splice(1, 0, '1');
+    //   future = new Date(expire);
+    //   now = new Date();
+    //   if( future > now && cvc.length > 0 ){
         $('#step-3').collapse('toggle');
         $order_btn = $('#place-order').clone();
-
+        $preview.html( get_payment_preview( card_num.substr( card_num.length - 4 ) ) );
         $('#order-button').html( $order_btn );
         $('#order-instructions').html( $('#order-instructions-btm').text() );
-      }
-    }
+    //   }
+    // }
   });
 
 
@@ -572,7 +638,6 @@ $('.comment')
         state: response.state,
         postcode: response.postal,
         phone: response.phone,
-        order_comments: response.notes,
       }
 
       for( let i = 0; i < 2; i++ ){
@@ -582,6 +647,8 @@ $('.comment')
         	$('#' + prefix + '_' + key).val( fields[key] ).change();
         });
       }
+
+      $('#order_comments').text( response.notes );
 
     });
 

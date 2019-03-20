@@ -39,7 +39,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 				<?php
 					fpusa_checkout_steps(
 						'checkout-process',
-						array( 'Shipping address', 'Choose a payment method', 'Items & Shipping' )
+						array( 'Shipping address', 'Payment method', 'Items & Shipping' )
 					);
 				?>
 

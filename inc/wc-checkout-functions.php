@@ -57,15 +57,18 @@ function fpusa_checkout_header( $checkout ){
 function fpusa_checkout_steps( $parent, $labels ){
 	$max_steps = sizeof( $labels );
 	for( $i = 1; $i <= $max_steps; $i++ ) : ?>
-		<h4 class="mb-2">
+	<div class="border-bottom py-3">
+		<h4 class="mb-2 d-flex">
 			<a id="step-btn-<?php echo $i; ?>" href="#step-<?php echo $i; ?>" class="checkout-step" data-toggle="collapse" role="button" aria-expanded="<?php if( $i == 1 ) echo 'true'  ?>" aria-controls="step-<?php echo $i; ?>">
 				<span class="pr-2"><?php echo $i; ?>: </span>
 				<span><?php echo $labels[$i - 1] ?></span>
 			</a>
+			<span class="pl-5 preview"></span>
 		</h4>
 		<div class="pl-5 ml-3 my-2 collapse <?php if( $i == 1 ) echo 'show'  ?>" id="step-<?php echo $i; ?>" data-parent="#<?php echo $parent; ?>">
 			<?php do_action( 'fpusa_checkout_step_' . $i ); ?>
 		</div>
+	</div>
 	<?php endfor;
 }
 
