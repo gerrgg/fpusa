@@ -28,7 +28,7 @@ function fpusa_place_order(){
 				<div class="order-total">
 					Order Total: <?php wc_cart_totals_order_total_html(); ?>
 				</div>
-				<p id="order-instructions-btm">By placing your order, you agree to Amazon.com's privacy notice and conditions of use.</p>
+				<p id="order-instructions-btm"><?php echo wc_get_privacy_policy_text( 'checkout' ); ?></p>
 			</span>
 		</div>
 	</div>
@@ -186,6 +186,7 @@ function fpusa_get_order_totals_html( $arr ){
 	?>
 	<tr>
 		<td><?php echo $arr[0] ?>:</td>
+		<!--  TODO: integrate with js  -->
 		<td <?php if( $arr[0] == 'Shipping & handling' ) echo 'id="shipping_fees"';?> >$<?php echo $arr[1] ?></td>
 	</tr>
 	<?php

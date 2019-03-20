@@ -514,6 +514,8 @@ $('.comment')
     } );
   }
 
+  $('#selected_option').text( $('input.shipping_method:checked').prev().text() );
+
   function display_time_in_transit_response( data, selection ){
     // find what user has selected
     $shipping_methods = $('#shipping_method li > input');
