@@ -1,4 +1,5 @@
 jQuery(document).ready(function($){
+
   //userUpload
   Dropzone.autoDiscover = false;
 
@@ -451,7 +452,7 @@ $('.comment')
     var wrapper = $('#comments-wrapper');
     var items = wrapper.children('div.comment');
 
-    // map the index of items where comment id and item id match
+    // map the index of items where comment id and item id matcha
     var newOrder = $.map(arr, function(comment_id) {
       for( var i = 0; i < items.length; i++ ){
         if( comment_id == items[i].id ){
@@ -491,42 +492,21 @@ $('.comment')
     return $address;
   }
 
-  function get_payment_preview( last4 ){
-    console.log( last4 );
-    $preview = $('<div/>');
-    $preview.append(`<p class="text-muted d-flex align-items-center"><i class="far fa-credit-card pr-2 fa-2x"></i> ending in ${last4}</p>`);
-    $preview.append( $('<a/>', { href: '#' }).text( 'Billing address: ' ) ).append( compare_addresses() );
-    return $preview;
+  function get_payment_preview( token_id ){
+    if( token_id != 'paypal' ){
+      let wrapper = $('<div/>');
+      wrapper.append( '<p>' + $('#payment_method_' + token_id).parent().find('label').text() + '</p>');
+      wrapper.append( '<p><a href="#">Billing Address: </a> Same as shipping address</p>');
+      wrapper.append( get_checkout_coupon_form() );
+      // console.log( card_text );
+      return wrapper;
+    }
   };
 
-  function compare_addresses(){
-    let data = {
-      action: 'fpusa_checkout_address',
-      id: $('#step-1 input[type="radio"]:checked').val(),
-    };
-
-    var type;
-
-    $.ajax({
-      async: false,
-      type: "POST",
-      url:  ajax_object.ajax_url,
-      data:
-      {
-        action: 'fpusa_checkout_address',
-        id: $('#step-1 input[type="radio"]:checked').val(),
-      },
-      success: function( response ){
-        // console.log( response );
-        type = response.type
-      }
-    });
-
-    // return string based on blah
-    if( type == 'both' ){
-      
-    }
-    console.log( type );
+  function get_checkout_coupon_form(){
+    let wrapper = $('<div/>', { class: 'form-group' } );
+    wrapper.append( $('<label>Add a gift card or promotion code</label>') );
+    wrapper.append( $('<input/>', {  }) )
   }
 
   $('form.checkout')
@@ -540,31 +520,55 @@ $('.comment')
       $('#step-2').collapse('toggle');
       $preview.html( get_checkout_preview_address() );
     }
-
   })
   .on( 'click', '.use-payment-method', function(){
     let $preview = $('#step-2').prev().find('span.preview');
-    let card_num = $('#mes_cc-card-number').val();
-    let expire = $('#mes_cc-card-expiry').val().split(' / ');
-    let cvc = $('#mes_cc-card-cvc').val();
-    // if( card_num.length > 0 && valid_credit_card( card_num ) ){
-    //   expire.splice(1, 0, '1');
-    //   future = new Date(expire);
-    //   now = new Date();
-    //   if( future > now && cvc.length > 0 ){
-        $('#step-3').collapse('toggle');
-        $order_btn = $('#place-order').clone();
-        $preview.html( get_payment_preview( card_num.substr( card_num.length - 4 ) ) );
-        $('#order-button').html( $order_btn );
-        $('#order-instructions').html( $('#order-instructions-btm').text() );
-    //   }
-    // }
-  });
+    let selection = $('input[name="payment_method"]:checked').val();
+    if( selection.length > 0 ){
+      $('#use_card').val( selection );
+      $('#step-3').collapse('toggle');
+      $order_btn = $('#place-order').clone();
+      $preview.html( get_payment_preview( selection ) );
+      $('#order-button').html( $order_btn );
+    }
+  })
+  .on( 'click', 'button[name="apply_coupon"]', function(){
+      let coupon_code = $('input[name="coupon_code"]').val();
+      $('input[name="coupon_code"]').val('');
+      if( coupon_code.length ){
+        $.post( ajax_object.ajax_url, { action: 'fpusa_apply_coupon', code: coupon_code }, function( response ){
+          console.log( response );
+          if( response == 1 ){
+            $('#applied_coupons').append( get_coupon_form_html() );
+          } else {
+            $('.woocommerce-notices-wrapper').last().html( response );
+          }
+        } );
+      }
+  })
+  .on( 'click', '.coupon-line button.close', function(){
+    $coupon = $(this).parent();
+    $.post( ajax_object.ajax_url, { action: 'fpusa_remove_coupon', code: this.id }, function( response ){
+      if( response ){
+        $coupon.remove();
+      }
+    } );
+  } )
+  .on( 'update_checkout', function(){
+    console.log( 'update_checkout' );
+  } );
 
 
   $('input.shipping_method').change(function(){
     $('#selected_option').text( $(this).prev().text() );
   });
+
+  function get_coupon_form_html(){
+    $.post( ajax_object.ajax_url, { action: 'fpusa_get_coupon_html' }, function( response ){
+      console.log( response );
+      $('#applied_coupons').html( response );
+    } );
+  }
 
   function get_time_in_transit( selection ){
     let data = {
@@ -654,6 +658,9 @@ $('.comment')
 
     return selection;
   }
+
+  $('#payment_method_paypal').show();
+
 
   function valid_credit_card(value) {
   // accept only digits, dashes or spaces

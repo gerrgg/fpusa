@@ -4,19 +4,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
-add_action( 'fpusa_after_payment', 'woocommerce_checkout_coupon_form', 10 );
-
 remove_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
-add_action( 'fpusa_checkout_step_2', 'woocommerce_checkout_payment' );
+
+add_action( 'fpusa_checkout_step_2', 'woocommerce_checkout_payment', 10 );
+add_action( 'fpusa_after_payment', 'woocommerce_checkout_coupon_form' );
 
 remove_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
-// add_action( 'fpusa_checkout_step_3', function(){ echo '<div class="card border-bottom p-3">'; }, 5 );
+
 add_action( 'fpusa_checkout_step_3', 'woocommerce_order_review', 10 );
 add_action( 'fpusa_checkout_step_3', 'fpusa_place_order', 20 );
 
 add_action( 'fpusa_order_summary', 'get_order_summary' );
+
+
 function get_order_summary(){
 	wc_get_template( 'cart/cart-totals.php' );
+}
+
+function fpusa_checkout_payment(){
+	wc_get_template( '/myaccount/payment-methods.php' );
 }
 
 function fpusa_place_order(){
@@ -36,8 +42,10 @@ function fpusa_place_order(){
 }
 // add_action( 'fpusa_checkout_step_3', function(){ echo '</div>'; }, 15 );
 
-add_action( 'woocommerce_before_checkout_form', 'fpusa_checkout_header', 1, 1 );
+add_action( 'fpusa_after_header', 'fpusa_checkout_header', 1, 1 );
 function fpusa_checkout_header( $checkout ){
+	if( ! is_checkout() ) return '';
+
 	$items_count = sizeof( WC()->cart->get_cart() );
 	?>
 	<nav id="checkout-header" class="navbar navbar-dark bg-dark">
@@ -193,4 +201,68 @@ function fpusa_get_order_totals_html( $arr ){
 		<td <?php if( $arr[0] == 'Shipping & handling' ) echo 'id="shipping_fees"';?> >$<?php echo $arr[1] ?></td>
 	</tr>
 	<?php
+}
+
+function fpusa_get_customer_saved_methods_list( $user_id ){
+	global $wpdb;
+	$token_arr = array();
+
+	$table_name = $wpdb->prefix . 'woocommerce_payment_tokens';
+	$results = $wpdb->get_results( "SELECT token_id
+																 FROM $table_name
+																 WHERE gateway_id = 'mes_cc'
+																 AND user_id = $user_id" );
+
+
+	foreach( $results as $result ){
+		$token = WC_Payment_Tokens::get( $result->token_id );
+		array_push( $token_arr, $token );
+	}
+
+	return $token_arr;
+}
+
+add_action( 'wp_ajax_fpusa_get_coupon_html', 'fpusa_get_applied_coupons' );
+add_action( 'wp_ajax_nopriv_fpusa_get_coupon_html', 'fpusa_get_applied_coupons' );
+
+function fpusa_get_applied_coupons( $echo = true ){
+	$html = '';
+	$applied_coupons = WC()->cart->get_coupon_discount_totals();
+	if( ! empty( $applied_coupons ) ){
+		foreach( $applied_coupons as $code => $coupon ){
+			$html .= "<div class='d-flex coupon-line'>";
+			$html .= 	"<button id='$code' type='button' class='close pr-3' aria-label='Close'>";
+			$html .= 		"&times";
+			$html .= 	"</button>";
+			$html .= 	"<span class='p-0 m-0 font-weight-bold pr-3'>$code</span>";
+			$html .= 	"<span class='price'>$-". number_format( $coupon, 2 ) ."</span>";
+			$html .= "</div>";
+		}
+		if( $echo ){
+			echo $html;
+			// wp_die();
+		} else {
+			return $html;
+		}
+	}
+}
+
+add_action( 'wp_ajax_fpusa_apply_coupon', 'fpusa_apply_coupon' );
+add_action( 'wp_ajax_nopriv_fpusa_apply_coupon', 'fpusa_apply_coupon' );
+
+function fpusa_apply_coupon(){
+	if( WC()->cart->add_discount( sanitize_text_field( $_POST['code'] ) ) ){
+		echo 1;
+	} else {
+		wc_print_notices();
+	}
+  wp_die();
+}
+
+add_action( 'wp_ajax_fpusa_remove_coupon', 'fpusa_remove_coupon' );
+add_action( 'wp_ajax_nopriv_fpusa_remove_coupon', 'fpusa_remove_coupon' );
+function fpusa_remove_coupon(){
+	echo ( WC()->cart->remove_coupon( sanitize_text_field( $_POST['code'] ) ) );
+	wc_print_notices();
+	wp_die();
 }

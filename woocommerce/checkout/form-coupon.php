@@ -20,16 +20,19 @@ defined( 'ABSPATH' ) || exit;
 if ( ! wc_coupons_enabled() ) { // @codingStandardsIgnoreLine.
 	return;
 }
-
 ?>
-<form class="checkout_coupon woocommerce-form-coupon" method="POST">
+<form class="checkout_coupon woocommerce-form-coupon mt-3" method="POST">
+	<h4 class="title"><?php esc_html_e( 'Your balances', 'fpusa' ); ?></h4>
 
-	<h5 class="border-bottom mb-3"><?php esc_html_e( 'Your balances', 'fpusa' ); ?></h5>
+	<div id="applied_coupons" class="applied-coupons m-3 w-50">
+		<?php fpusa_get_applied_coupons(); ?>
+	</div>
 
 	<div class="d-flex align-items-center">
 		<i class="fas fa-plus mx-3 text-muted" style="font-size: 20px;"></i>
-		<input type="text" name="coupon_code" class="input-text form-control w-25 mr-3" placeholder="<?php esc_attr_e( 'Enter promo code', 'woocommerce' ); ?>" id="coupon_code" value="" />
-		<button type="submit" class="btn btn-outline-secondary" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"><?php esc_html_e( 'Apply coupon', 'woocommerce' ); ?></button>
+		<input type="text" name="coupon_code" class="input-text form-control w-50 mr-3" placeholder="<?php esc_attr_e( 'Enter promo code', 'woocommerce' ); ?>" id="coupon_code" value="" />
+		<button type="button" class="btn btn-outline-secondary" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"><?php esc_html_e( 'Apply coupon', 'woocommerce' ); ?></button>
 	</div>
 	<div class="clear"></div>
+
 </form>

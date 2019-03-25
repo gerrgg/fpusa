@@ -428,6 +428,11 @@ h1, h2, h3, h4, h5, h6 {
 	clear: both;
 }
 
+h4.title{
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+	padding-bottom: .75rem;
+}
+
 p {
 	margin-bottom: 1.5em;
 }
@@ -1596,6 +1601,9 @@ button[name='update_cart'] {
 /*--------------------------------------------------------------
 ## Checkout
 --------------------------------------------------------------*/
+#payment_method_paypal{
+	display: inline-block !important;
+}
 a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
 	color: #333;
 	text-decoration: none;

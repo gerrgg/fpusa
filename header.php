@@ -119,4 +119,5 @@ $hide_header = get_post_meta( get_the_ID(), 'hide_header', true );
 			</div>
 		</div>
 		<!-- Location Modal -->
-		<?php fpusa_edit_location_modal();
+		<?php
+		do_action( 'fpusa_after_header' );

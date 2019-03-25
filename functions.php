@@ -371,6 +371,10 @@ function fpusa_get_myaccount_icons( $endpoint ){
 			$icon =  'file-invoice-dollar';
 		break;
 
+		case 'payment-methods':
+			$icon =  'credit-card';
+		break;
+
 		case 'downloads':
 			$icon =  'file-download';
 		break;
