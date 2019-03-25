@@ -218,7 +218,6 @@ function fpusa_scripts() {
 
 	wp_enqueue_script( 'bs4-js', get_template_directory_uri() . '/js/bootstrap.min.js', array('jquery'), '4.2', true );
 
-	wp_enqueue_script( 'js-functions', get_template_directory_uri() . '/js/functions.js', array('jquery'), filemtime(get_template_directory() . '/js/functions.js'), true );
 
 	wp_enqueue_script( 'slick-js', get_template_directory_uri() . '/js/slick.min.js', array('jquery'), '4.9', true );
 
@@ -228,9 +227,24 @@ function fpusa_scripts() {
 
 	wp_enqueue_script( 'moment-js', 'http://momentjs.com/downloads/moment.min.js', array(), '4.9', true);
 
+	wp_enqueue_script( 'js-functions', get_template_directory_uri() . '/js/dev/functions.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/functions.js'), true );
 	wp_localize_script( 'js-functions', 'ajax_object', array(
 		'ajax_url' => admin_url( 'admin-ajax.php' ),
-		'dropParam' => admin_url( 'admin-post.php?action=fpusa_process_product_review' ),
+	));
+
+	wp_enqueue_script( 'js-checkout', get_template_directory_uri() . '/js/dev/checkout.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/checkout.js'), true );
+	wp_localize_script( 'js-checkout', 'ajax_object', array(
+		'ajax_url' => admin_url( 'admin-ajax.php' ),
+	));
+
+	wp_enqueue_script( 'js-reviews', get_template_directory_uri() . '/js/dev/reviews.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/reviews.js'), true );
+	wp_localize_script( 'js-reviews', 'ajax_object', array(
+		'ajax_url' => admin_url( 'admin-ajax.php' ),
+	));
+
+	wp_enqueue_script( 'js-single-product', get_template_directory_uri() . '/js/dev/single-product.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/single-product.js'), true );
+	wp_localize_script( 'js-single-product', 'ajax_object', array(
+		'ajax_url' => admin_url( 'admin-ajax.php' ),
 	));
 }
 
