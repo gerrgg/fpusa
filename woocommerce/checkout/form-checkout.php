@@ -33,7 +33,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 		<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
 
-		<div class="col-8" id="customer_details">
+		<div class="col-12 col-lg-8" id="customer_details">
 
 			<div class="accordion" id="checkout-process">
 				<?php

@@ -24,7 +24,7 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
         <tr>
           <td>
             <div class="form-check">
-              <input class="form-check-input use_card" type="radio" name="payment_method" id="payment_method_<?php echo $token->get_id(); ?>" value="<?php echo $token->get_id(); ?>" <?php checked( $token->is_default(), 1 ); ?>>
+              <input class="form-check-input use_card" type="radio" name="wc-simplify_commerce-payment-token" id="payment_method_<?php echo $token->get_id(); ?>" value="<?php echo $token->get_id(); ?>" <?php checked( $token->is_default(), 1 ); ?>>
               <label class="form-check-label" for="payment_method_<?php echo $token->get_id(); ?>">
                 <?php echo sprintf( '<b>%s</b> ending in %s', ucfirst( $token->get_card_type() ), $token->get_last4() ) ?>
               </label>
@@ -36,7 +36,5 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
     <?php endforeach; ?>
   </tbody>
 </table>
-
-<input id="use_card" type="hidden" name="wc-simplify_commerce-payment-token" value="<?php if( $token->is_default() ) echo $token->get_id(); ?>" />
 
 <?php endif; ?>

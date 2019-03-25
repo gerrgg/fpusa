@@ -1,5 +1,44 @@
 jQuery( function( $ ) {
 
+    var wc_checkout_form = {
+      $checkout_form: $('form.checkout'),
+      init: function(){
+        $(document.body).bind( 'update_checkout', this.update_checkout );
+        $(document.body).bind( 'init_checkout', this.init_checkout );
+
+        this.$checkout_form.on( 'change', 'input[name="wc-simplify_commerce-payment-token"]', this.update_payment_method );
+        this.$checkout_form.on( 'change', 'input[name="payment_method"]', this.update_payment_method );
+      },
+
+      update_payment_method: function(){
+        let method = wc_checkout_form.get_payent_method();
+        let trigger = ( method == 'mes_cc' ) ? 'set_payment_method_to_cc' : 'clear_use_cards'
+        console.log( trigger );
+        $(document.body).trigger( trigger );
+      },
+
+      get_payent_method: function(){
+        return wc_checkout_form.$checkout_form.find( 'input[name="payment_method"]:checked' ).val();
+      },
+
+      set_payment_method_to_cc: function( e ){
+        e.stopPropagation();
+
+        if( wc_checkout_form.get_payent_method() != 'mes_cc' ){
+          $('#payment_method_mes_cc').prop('checked', true);
+        }
+
+      },
+
+      init_checkout: function(){
+        $(document.body).trigger( 'update_checkout' );
+      },
+
+      update_checkout: function(){
+
+      }
+    }
+
     $('form.checkout')
     .on( 'click', '.use-this-address', function(){
       let $selection = copy_to_inputs();
@@ -222,4 +261,6 @@ jQuery( function( $ ) {
 
       return (nCheck % 10) == 0;
     }
+
+    wc_checkout_form.init();
   });
