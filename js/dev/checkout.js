@@ -26,8 +26,8 @@ jQuery( function( $ ) {
       },
 
       init_checkout: function(){
-        this.get_time_in_transit();
-        this.check_user_prefs();
+        // first get prefs!
+        this.get_user_prefs();
       },
 
       update_expected_delivery: function(){
@@ -48,11 +48,11 @@ jQuery( function( $ ) {
         }
       },
 
-      check_user_prefs: function(){
+      get_user_prefs: function(){
         $.post( ajax_object.ajax_url, { action: 'fpusa_get_user_order_prefs' }, function( response ){
-          // console.log(response);
           wc_checkout_form.steps.use_address = response[0];
           wc_checkout_form.steps.use_payment = response[1];
+          //2nd trigger
           $(document.body).trigger('update_steps');
         });
       },
@@ -82,9 +82,7 @@ jQuery( function( $ ) {
       },
 
       copy_to_inputs: function(){
-        // TODO: fix fields!
         selection = wc_checkout_form.steps.use_address;
-        console.log( selection );
 
         let data = {
           action: 'fpusa_checkout_address',
@@ -117,6 +115,7 @@ jQuery( function( $ ) {
 
           $('#order_comments').text( response.notes );
 
+          //4th: get address preview
           wc_checkout_form.get_preview( 1 );
 
         });
@@ -161,8 +160,6 @@ jQuery( function( $ ) {
             zip: $('#shipping_postcode').val(),
             notes: $('#order_comments').val(),
           }
-
-          console.log( data );
 
           $address = $('<ul/>', { class: 'list-unstyled m-0 p-0' });
           $address.append( `<li>${data.first} ${data.last}</li>` )
@@ -256,14 +253,16 @@ jQuery( function( $ ) {
       },
 
       update_steps: function(){
-        console.log( wc_checkout_form.steps );
+        //3rd: copy to inputs
+        wc_checkout_form.copy_to_inputs();
 
+        //5th (4 is in ^^): get TIT
         wc_checkout_form.get_time_in_transit();
 
         let do_step = 1;
         Object.keys( wc_checkout_form.steps ).forEach(function (key) {
           if( wc_checkout_form.steps[key] ){
-            // wc_checkout_form.get_preview( do_step );
+            wc_checkout_form.get_preview( do_step );
             do_step++;
           }
         });
@@ -309,7 +308,7 @@ jQuery( function( $ ) {
     //     }
     // })
     // .on( 'click', '.coupon-line button.close', function(){
-    //   $coupon = $(this).parent();
+    //   $coupon = $(copy_to).parent();
     //   $.post( ajax_object.ajax_url, { action: 'fpusa_remove_coupon', code: this.id }, function( response ){
     //     if( response ){
     //       $coupon.remove();
