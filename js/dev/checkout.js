@@ -118,6 +118,7 @@ jQuery( function( $ ) {
           $('#order_comments').text( response.notes );
 
           $preview.html( wc_checkout_form.get_address_preview() );
+          wc_checkout_form.get_time_in_transit();
         });
 
       },
@@ -270,7 +271,6 @@ jQuery( function( $ ) {
             var $preview = $('#preview-' + do_step);
 
             if( do_step == 1 ){
-              wc_checkout_form.get_time_in_transit();
               wc_checkout_form.copy_shipping_address( $preview );
             } else {
               wc_checkout_form.copy_billing_address( $preview );

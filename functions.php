@@ -232,6 +232,11 @@ function fpusa_scripts() {
 		'ajax_url' => admin_url( 'admin-ajax.php' ),
 	));
 
+	wp_enqueue_script( 'js-modal', get_template_directory_uri() . '/js/dev/modal.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/modal.js'), true );
+	wp_localize_script( 'js-modal', 'ajax_object', array(
+		'ajax_url' => admin_url( 'admin-ajax.php' ),
+	));
+
 	if( is_checkout() ){
 		wp_enqueue_script( 'js-checkout', get_template_directory_uri() . '/js/dev/checkout.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/checkout.js'), true );
 		wp_localize_script( 'js-checkout', 'ajax_object', array(
@@ -1636,4 +1641,22 @@ function fpusa_get_cart_subtotal(){
 function pluralize( $count, $str ){
 	if( $count > 1 ) $str .= 's';
 	return $str;
+}
+
+function make_modal_btn( $args = array() ){
+	$defaults = array(
+		'text' => 'text',
+		'title' => 'title',
+		'model' => '',
+		'action' => ''
+	);
+
+	$args = wp_parse_args( $args, $defaults );
+
+	echo sprintf( '<a href="#fpusa_modal" data-toggle="modal" data-title="%s" data-model="%s" data-action="%s">%s</a>',
+		$args['title'],
+		$args['model'],
+		$args['action'],
+		$args['text']
+ 	);
 }

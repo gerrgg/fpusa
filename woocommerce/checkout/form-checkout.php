@@ -43,10 +43,10 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 				?>
 
 			</div>
-			<!-- <div class="d-none"> -->
+			<div class="d-none">
 				<?php do_action( 'woocommerce_checkout_shipping' ); ?>
 				<?php do_action( 'woocommerce_checkout_billing' ); ?>
-			<!-- </div> -->
+			</div>
 		</div>
 
 

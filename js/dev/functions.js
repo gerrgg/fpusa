@@ -48,8 +48,6 @@ jQuery(document).ready(function($){
 
   });
 
-
-
   $('.slick').slick({
      dots: true,
      arrows: true,

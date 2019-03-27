@@ -176,8 +176,13 @@ function fpusa_choose_shipping_address(){
           $address->convert_to_radio();
         }
       }
+			make_modal_btn(array(
+				'text' => '<i class="fas fa-plus"></i> Add new address',
+				'title' => 'Add a new shipping address',
+				'model' => 'address',
+				'action' => 'create',
+			));
       ?>
-			<a href="/edit-address/new"><i class="fas fa-plus"></i> Add new address</a>
     </div>
     <div class="card-header">
       <button id="use-address" type="button" class="btn btn-warning use-this-address">Use this address</button>
