@@ -232,10 +232,12 @@ function fpusa_scripts() {
 		'ajax_url' => admin_url( 'admin-ajax.php' ),
 	));
 
-	wp_enqueue_script( 'js-checkout', get_template_directory_uri() . '/js/dev/checkout.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/checkout.js'), true );
-	wp_localize_script( 'js-checkout', 'ajax_object', array(
-		'ajax_url' => admin_url( 'admin-ajax.php' ),
-	));
+	if( is_checkout() ){
+		wp_enqueue_script( 'js-checkout', get_template_directory_uri() . '/js/dev/checkout.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/checkout.js'), true );
+		wp_localize_script( 'js-checkout', 'ajax_object', array(
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+		));
+	}
 
 	wp_enqueue_script( 'js-reviews', get_template_directory_uri() . '/js/dev/reviews.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/reviews.js'), true );
 	wp_localize_script( 'js-reviews', 'ajax_object', array(
