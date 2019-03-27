@@ -11,11 +11,11 @@ add_action( 'fpusa_after_payment', 'woocommerce_checkout_coupon_form' );
 
 remove_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 
-add_action( 'fpusa_checkout_step_3', 'woocommerce_order_review', 10 );
-add_action( 'fpusa_checkout_step_3', 'fpusa_place_order', 20 );
+add_action( 'fpusa_checkout_step_3', 'fpusa_maybe_set_order_prefs_callback', 10 );
+add_action( 'fpusa_checkout_step_3', 'woocommerce_order_review', 20 );
+add_action( 'fpusa_checkout_step_3', 'fpusa_place_order', 30 );
 
 add_action( 'fpusa_order_summary', 'get_order_summary' );
-
 
 function get_order_summary(){
 	wc_get_template( 'cart/cart-totals.php' );
@@ -23,6 +23,78 @@ function get_order_summary(){
 
 function fpusa_checkout_payment(){
 	wc_get_template( '/myaccount/payment-methods.php' );
+}
+
+function compare_user_prefs(){
+	$prefs = get_user_order_prefs();
+	$user_id = get_current_user_id();
+
+	$match = true;
+
+	$default_address = get_user_meta( $user_id, 'default_address', true );
+	if( $default_address != $prefs['use_address'] ){
+		$match = false;
+	}
+
+	$default_token = WC_Payment_Tokens::get_customer_default_token( get_current_user_id() );
+	if( $default_token->get_id() != $prefs['use_payment'] ){
+		$match = false;
+	}
+
+	return $match;
+}
+
+function fpusa_maybe_set_order_prefs_callback(){
+	$prefs_match = compare_user_prefs();
+	if( ! $prefs_match ) : ?>
+	<div class="alert alert-info d-flex" role="alert">
+		<i class="fas fa-info-circle fa-2x pr-3"></i>
+		<div>
+			<h6 class="mb-1">Want to save time on your next order and go directly to this step when checking out?</h6>
+			<div class="form-check">
+				<input class="form-check-input" type="checkbox" id="set_user_order_prefs" name="set_user_order_prefs">
+				<label class="form-check-label" for="set_user_order_prefs">
+					Check this box to default to these delivery and payment options in the future.
+				</label>
+			</div>
+		</div>
+	</div>
+	<?php endif;
+}
+
+add_action( 'wp_ajax_fpusa_get_user_order_prefs', 'get_user_order_prefs_ajax' );
+add_action( 'wp_ajax_nopriv_fpusa_get_user_order_prefs', 'get_user_order_prefs_ajax' );
+function get_user_order_prefs( ){
+	$arr = maybe_unserialize(get_user_meta( get_current_user_id(), 'order_prefs', true ));
+
+	return array(
+		'use_address' => $arr[0],
+		'use_payment' => $arr[1]
+	);
+}
+
+function get_user_order_prefs_ajax( ){
+	$arr = maybe_unserialize(get_user_meta( get_current_user_id(), 'order_prefs', true ));
+
+	wp_send_json( $arr );
+	wp_die();
+}
+
+add_action( 'wp_ajax_fpusa_update_user_order_prefs','fpusa_update_user_order_prefs' );
+function fpusa_update_user_order_prefs(){
+	$user_id = get_current_user_id();
+
+	update_user_meta( $user_id, 'default_address', $_POST['use_address']  );
+	$default_address = get_user_meta( $user_id, 'default_address', 'true' );
+
+	$token = WC_Payment_Tokens::get( intval( $_POST['use_payment'] ) );
+	$token->set_default( 1 );
+	$token->save();
+
+	$arr = [ $default_address, $token->get_id() ];
+	update_user_meta( $user_id, 'order_prefs', maybe_serialize( $arr ) );
+	wp_send_json( $arr );
+	wp_die();
 }
 
 function fpusa_place_order(){
@@ -40,7 +112,6 @@ function fpusa_place_order(){
 	</div>
 	<?php
 }
-// add_action( 'fpusa_checkout_step_3', function(){ echo '</div>'; }, 15 );
 
 add_action( 'fpusa_after_header', 'fpusa_checkout_header', 1, 1 );
 function fpusa_checkout_header( $checkout ){
@@ -71,9 +142,9 @@ function fpusa_checkout_steps( $parent, $labels ){
 				<span class="pr-2"><?php echo $i; ?>: </span>
 				<span><?php echo $labels[$i - 1] ?></span>
 			</a>
-			<span class="pl-5 preview"></span>
+			<span id="preview-<?php echo $i; ?>" class="pl-5 preview"></span>
 		</h4>
-		<div class="pl-5 ml-3 my-2 collapse <?php if( $i == 1 ) echo 'show'  ?>" id="step-<?php echo $i; ?>" data-parent="#<?php echo $parent; ?>">
+		<div class="mt-4 mb-2 collapse <?php if( $i == 1 ) echo 'show'  ?>" id="step-<?php echo $i; ?>" data-parent="#<?php echo $parent; ?>">
 			<?php do_action( 'fpusa_checkout_step_' . $i ); ?>
 		</div>
 	</div>
