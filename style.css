@@ -1604,6 +1604,9 @@ button[name='update_cart'] {
 #payment_method_paypal{
 	display: inline-block !important;
 }
+.payment_method_mes_cc{
+	display: none;
+}
 a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
 	color: #333;
 	text-decoration: none;
@@ -1622,10 +1625,10 @@ a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
 	padding: .25rem .5rem;
 }
 
-.checkout-address.active{
+.active{
 	background-color: #FCF5EE;
 	border: 1px solid #FBD8B4;
-  border-radius: 5px;
+  border-radius: 5px !important;
 }
 
 .order-total{
