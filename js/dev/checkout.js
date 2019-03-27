@@ -52,6 +52,7 @@ jQuery( function( $ ) {
         $.post( ajax_object.ajax_url, { action: 'fpusa_get_user_order_prefs' }, function( response ){
           wc_checkout_form.steps.use_address = response[0];
           wc_checkout_form.steps.use_payment = response[1];
+          // console.log( response );
           //2nd trigger
           $(document.body).trigger('update_steps');
         });
@@ -81,9 +82,16 @@ jQuery( function( $ ) {
         return wc_checkout_form.$checkout_form.find( 'input[name="payment_method"]:checked' ).val();
       },
 
-      copy_to_inputs: function(){
-        selection = wc_checkout_form.steps.use_address;
+      copy_billing_address: function( $preview ){
+        $.post(ajax_object.ajax_url, {action: 'fpusa_get_billing_info', id: wc_checkout_form.steps.use_payment }, function( response ){
+          wc_checkout_form.copy_to( response, 'billing' );
+          $preview.html( wc_checkout_form.get_payment_preview() );
+        });
 
+      },
+
+      copy_shipping_address: function( $preview ){
+        selection = wc_checkout_form.steps.use_address;
         let data = {
           action: 'fpusa_checkout_address',
           id: selection
@@ -105,34 +113,34 @@ jQuery( function( $ ) {
             phone: response.phone,
           }
 
-          for( let i = 0; i < 2; i++ ){
-            let prefix = ( i == 0 ) ? 'shipping' : 'billing';
-
-            Object.keys(fields).forEach(function (key) {
-              $('#' + prefix + '_' + key).val( fields[key] );
-            });
-          }
-
+          // copies to fields
+          wc_checkout_form.copy_to( fields, 'shipping' );
           $('#order_comments').text( response.notes );
 
-          //4th: get address preview
-          wc_checkout_form.get_preview( 1 );
-
+          $preview.html( wc_checkout_form.get_address_preview() );
         });
 
       },
 
-      get_preview: function( step ){
-        let $preview = $('#preview-' + step);
-        if( step == 1 ){
-          console.log( 'getting address preview' );
-          $preview.html( wc_checkout_form.get_address_preview() );
+      copy_to: function( obj, where = 'both' ){
+        // console.log( obj, where );
+
+        if( where == 'both' ){
+          for( var i = 0; i < 2; i ++ ){
+            let prefix = ( i == 0 ) ? 'shipping' : 'billing';
+            Object.keys(obj).forEach(function (key) {
+              $('#' + prefix + '_' + key).val( obj[key] );
+            });
+          }
+
         } else {
-          $preview.html( wc_checkout_form.get_payment_preview() );
+          Object.keys(obj).forEach(function (key) {
+            $('#' + where + '_'+ key).val( obj[key] );
+          });
         }
       },
 
-      get_payment_preview: function(){
+      get_payment_preview: function( ){
         let payment = $('ul.wc_payment_methods li input:checked');
         let preview = $('<div/>');
 
@@ -144,13 +152,11 @@ jQuery( function( $ ) {
         });
 
         preview.append('<a href="#">Billing address</a>: same as shipping.');
-
         return preview;
       },
 
-      get_address_preview: function(){
-
-        data = {
+      get_address_preview: function( ){
+        let data = {
             first: $('#shipping_first_name').val(),
             last: $('#shipping_last_name').val(),
             address_1: $('#shipping_address_1').val(),
@@ -187,7 +193,7 @@ jQuery( function( $ ) {
 
       submit_address: function(){
         wc_checkout_form.steps.use_address = wc_checkout_form.get_address_selected();
-        wc_checkout_form.copy_to_inputs();
+        // wc_checkout_form.copy_shipping_address();
         $(document.body).trigger('update_steps');
       },
 
@@ -212,40 +218,44 @@ jQuery( function( $ ) {
       display_time_in_transit_response: function( data ){
         // find what user has selected
         $shipping_methods = $('#shipping_method li > input');
-        response = data.TransitResponse.ServiceSummary;
 
-        let services = {
-          'GND': 'ups:2:03',
-          '3DS': 'ups:2:12',
-          '2DA': 'ups:2:02',
-          '1DP': 'ups:2:13',
-          '1DA': 'ups:2:01'
-        }
+        if( data && data.length ){
+          response = data.TransitResponse.ServiceSummary;
 
-          // loop through the services array
-        Object.keys(services).forEach(function (key) {
-            // foreach shipping method
-          $shipping_methods.each( function(){
-              // check if the key matches the value
-            if( this.value == services[key] ){
-              // loop through api response
-              for( let i = 0; i < response.length; i++ ){
-                // compare it to $response
-                if( response[i].Service.Code == key ){
-                  // format and display it to browser!
-                  let est_arrival = response[i].EstimatedArrival;
-                  let date = moment( est_arrival.Date ).format( 'dddd, MMMM Do' );
-                  $(this).prev().html( date );
+          let services = {
+            'GND': 'ups:2:03',
+            '3DS': 'ups:2:12',
+            '2DA': 'ups:2:02',
+            '1DP': 'ups:2:13',
+            '1DA': 'ups:2:01'
+          }
+
+            // loop through the services array
+          Object.keys(services).forEach(function (key) {
+              // foreach shipping method
+            $shipping_methods.each( function(){
+                // check if the key matches the value
+              if( this.value == services[key] ){
+                // loop through api response
+                for( let i = 0; i < response.length; i++ ){
+                  // compare it to $response
+                  if( response[i].Service.Code == key ){
+                    // format and display it to browser!
+                    let est_arrival = response[i].EstimatedArrival;
+                    let date = moment( est_arrival.Date ).format( 'dddd, MMMM Do' );
+                    $(this).prev().html( date );
+                  }
                 }
               }
-            }
+            });
           });
-        });
+        }
       },
 
       submit_payment: function(){
-        $(document.body).trigger('update_steps');
         wc_checkout_form.steps.use_payment = wc_checkout_form.which_payment_method();
+        // wc_checkout_form.copy_billing_address();
+        $(document.body).trigger('update_steps');
       },
 
       which_payment_method: function(){
@@ -253,209 +263,26 @@ jQuery( function( $ ) {
       },
 
       update_steps: function(){
-        //3rd: copy to inputs
-        wc_checkout_form.copy_to_inputs();
-
-        //5th (4 is in ^^): get TIT
-        wc_checkout_form.get_time_in_transit();
-
         let do_step = 1;
+
         Object.keys( wc_checkout_form.steps ).forEach(function (key) {
           if( wc_checkout_form.steps[key] ){
-            wc_checkout_form.get_preview( do_step );
+            var $preview = $('#preview-' + do_step);
+
+            if( do_step == 1 ){
+              wc_checkout_form.get_time_in_transit();
+              wc_checkout_form.copy_shipping_address( $preview );
+            } else {
+              wc_checkout_form.copy_billing_address( $preview );
+            }
+
             do_step++;
           }
         });
+
         wc_checkout_form.open( do_step );
       },
     }
-
-    // $('form.checkout')
-    // .on( 'click', '.use-this-address', function(){
-    //   let $selection = copy_to_inputs();
-    //   let $preview = $('#step-1').prev().find('span.preview');
-    //   // get_time_in_transit( $selection );
-    //   if( $selection.length > 0 ){
-    //     $('#order-button').html( $('#use-payment').addClass('btn-block') );
-    //     // $('#step-btn-1').attr('href', '#step-1');
-    //     $('#step-2').collapse('toggle');
-    //     $preview.html( get_checkout_preview_address() );
-    //   }
-    // })
-    // .on( 'click', '.use-payment-method', function(){
-    //   let $preview = $('#step-2').prev().find('span.preview');
-    //   let selection = $('input[name="payment_method"]:checked').val();
-    //   if( selection.length > 0 ){
-    //     $('#use_card').val( selection );
-    //     $('#step-3').collapse('toggle');
-    //     $order_btn = $('#place-order').clone();
-    //     $preview.html( get_payment_preview( selection ) );
-    //     $('#order-button').html( $order_btn );
-    //   }
-    // })
-    // .on( 'click', 'button[name="apply_coupon"]', function(){
-    //     let coupon_code = $('input[name="coupon_code"]').val();
-    //     $('input[name="coupon_code"]').val('');
-    //     if( coupon_code.length ){
-    //       $.post( ajax_object.ajax_url, { action: 'fpusa_apply_coupon', code: coupon_code }, function( response ){
-    //         console.log( response );
-    //         if( response == 1 ){
-    //           $('#applied_coupons').append( get_coupon_form_html() );
-    //         } else {
-    //           $('.woocommerce-notices-wrapper').last().html( response );
-    //         }
-    //       } );
-    //     }
-    // })
-    // .on( 'click', '.coupon-line button.close', function(){
-    //   $coupon = $(copy_to).parent();
-    //   $.post( ajax_object.ajax_url, { action: 'fpusa_remove_coupon', code: this.id }, function( response ){
-    //     if( response ){
-    //       $coupon.remove();
-    //     }
-    //   } );
-    // } )
-    // .on( 'update_steps', function(){
-    //   console.log( 'update_steps' );
-    // } );
-    //
-    // $('div.woocommerce').on('change', 'input.qty', function(){
-    //   $("[name='update_cart']").trigger('click');
-    // });
-    //
-    // function get_checkout_preview_address(){
-    //   data = {
-    //     first: $('#shipping_first_name').val(),
-    //     last: $('#shipping_last_name').val(),
-    //     address_1: $('#shipping_address_1').val(),
-    //     address_2: $('#shipping_address_2').val(),
-    //     city: $('#shipping_city').val(),
-    //     state: $('#shipping_state').val(),
-    //     zip: $('#shipping_postcode').val(),
-    //     notes: $('#order_comments').val(),
-    //   }
-    //
-    //   $address = $('<ul/>', { class: 'list-unstyled m-0 p-0' });
-    //   $address.append( `<li>${data.first} ${data.last}</li>` )
-    //   $address.append( `<li>${data.address_1}</li>` );
-    //   if( data.address_2.length ){
-    //     $address.append( `<li>${data.address_2}</li>` );
-    //   }
-    //   $address.append( `<li>${data.city}, ${data.state}  ${data.zip}</li>` );
-    //   $address.append( `<li>${data.notes}</li>` );
-    //
-    //   return $address;
-    // }
-    //
-    // function get_payment_preview( token_id ){
-    //   if( token_id != 'paypal' ){
-    //     let wrapper = $('<div/>');
-    //     wrapper.append( '<p>' + $('#payment_method_' + token_id).parent().find('label').text() + '</p>');
-    //     wrapper.append( '<p><a href="#">Billing Address: </a> Same as shipping address</p>');
-    //     wrapper.append( get_checkout_coupon_form() );
-    //     // console.log( card_text );
-    //     return wrapper;
-    //   }
-    // };
-    //
-    // function get_checkout_coupon_form(){
-    //   let wrapper = $('<div/>', { class: 'form-group' } );
-    //   wrapper.append( $('<label>Add a gift card or promotion code</label>') );
-    //   wrapper.append( $('<input/>', {  }) )
-    // }
-    //
-    //
-    //
-    //
-    // $('input.shipping_method').change(function(){
-    //   $('#selected_option').text( $(this).prev().text() );
-    // });
-    //
-    // function get_coupon_form_html(){
-    //   $.post( ajax_object.ajax_url, { action: 'fpusa_get_coupon_html' }, function( response ){
-    //     console.log( response );
-    //     $('#applied_coupons').html( response );
-    //   } );
-    // }
-    //
-    // function get_time_in_transit( selection ){
-    //   let data = {
-    //     action: 'get_time_in_transit',
-    //     street: $('#shipping_address_1').val(),
-    //     postal: $('#shipping_postcode').val(),
-    //     country: $('#shipping_country').val(),
-    //   }
-    //
-    //   $.post( ajax_object.ajax_url, data, function( response ){
-    //     display_time_in_transit_response( response, selection.val() );
-    //     $('#selected_option').text( $('input.shipping_method:checked').prev().text() );
-    //   } );
-    // }
-    //
-    // $('#selected_option').text( $('input.shipping_method:checked').prev().text() );
-    //
-    // function display_time_in_transit_response( data, selection ){
-    //   // find what user has selected
-    //   $shipping_methods = $('#shipping_method li > input');
-    //   response = data.TransitResponse.ServiceSummary;
-    //
-    //   let services = {
-    //     'GND': 'ups:2:03',
-    //     '3DS': 'ups:2:12',
-    //     '2DA': 'ups:2:02',
-    //     '1DP': 'ups:2:13',
-    //     '1DA': 'ups:2:01'
-    //   }
-    //
-    //     // loop through the services array
-    //   Object.keys(services).forEach(function (key) {
-    //       // foreach shipping method
-    //     $shipping_methods.each( function(){
-    //         // check if the key matches the value
-    //       if( this.value == services[key] ){
-    //         // loop through api response
-    //         for( let i = 0; i < response.length; i++ ){
-    //           // compare it to $response
-    //           if( response[i].Service.Code == key ){
-    //             // format and display it to browser!
-    //             let est_arrival = response[i].EstimatedArrival;
-    //             let date = moment( est_arrival.Date ).format( 'dddd, MMMM Do' );
-    //             $(this).prev().html( date );
-    //           }
-    //         }
-    //       }
-    //     });
-    //   });
-    //
-    // }
-    //
-
-    //
-    // $('#payment_method_paypal').show();
-    //
-    //
-    // function valid_credit_card(value) {
-    //   // accept only digits, dashes or spaces
-    //   if (/[^0-9-\s]+/.test(value)) return false;
-    //
-    //   // The Luhn Algorithm. It's so pretty.
-    //   var nCheck = 0, nDigit = 0, bEven = false;
-    //   value = value.replace(/\D/g, "");
-    //
-    //   for (var n = value.length - 1; n >= 0; n--) {
-    //     var cDigit = value.charAt(n),
-    //         nDigit = parseInt(cDigit, 10);
-    //
-    //     if (bEven) {
-    //       if ((nDigit *= 2) > 9) nDigit -= 9;
-    //     }
-    //
-    //     nCheck += nDigit;
-    //     bEven = !bEven;
-    //   }
-    //
-    //   return (nCheck % 10) == 0;
-    // }
 
     wc_checkout_form.init();
   });

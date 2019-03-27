@@ -1604,7 +1604,7 @@ button[name='update_cart'] {
 #payment_method_paypal{
 	display: inline-block !important;
 }
-.payment_method_mes_cc{
+.checkout .payment_method_mes_cc{
 	display: none;
 }
 a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
