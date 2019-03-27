@@ -76,6 +76,16 @@ function get_user_order_prefs( ){
 function get_user_order_prefs_ajax( ){
 	$arr = maybe_unserialize(get_user_meta( get_current_user_id(), 'order_prefs', true ));
 
+	$address = new Address( $arr[0] );
+	if( empty( $address ) ){
+		$arr[0] = '';
+	}
+
+	$payment = WC_Payment_Tokens::get( $arr[1] );
+	// var_dump( $payment );
+	if( empty( $payment ) ){
+		$arr[1] = '';
+	}
 	wp_send_json( $arr );
 	wp_die();
 }
@@ -174,6 +184,27 @@ function fpusa_choose_shipping_address(){
     </div>
   </div>
   <?php
+}
+
+add_action( 'wp_ajax_fpusa_get_billing_info', 'fpusa_get_billing_info' );
+function fpusa_get_billing_info(){
+	// echo $_POST['id'];
+
+		$billing = array(
+			'first_name' => get_metadata( 'payment_token', $_POST['id'], 'billing_first_name', true ),
+			'last_name' => get_metadata( 'payment_token', $_POST['id'], 'billing_last_name', true ),
+			'address_1' => get_metadata( 'payment_token', $_POST['id'], 'billing_address_1', true ),
+			'address_2' => get_metadata( 'payment_token', $_POST['id'], 'billing_address_2', true ),
+			'city' => get_metadata( 'payment_token', $_POST['id'], 'billing_city', true ),
+			'state' => get_metadata( 'payment_token', $_POST['id'], 'billing_state', true ),
+			'postcode' => get_metadata( 'payment_token', $_POST['id'], 'billing_postcode', true ),
+			'country' => get_metadata( 'payment_token', $_POST['id'], 'billing_country', true ),
+		);
+
+		wp_send_json( $billing );
+
+		wp_die();
+
 }
 
 add_action( 'wp_ajax_fpusa_checkout_address', 'fpusa_get_checkout_address' );
