@@ -17,30 +17,46 @@ jQuery( function ( $ ){
 
       form_data = $('#modal-table input, #modal-table select, #modal-table textarea ').serialize();
 
+      let data = {
+        action: `fpusa_${fpusa.path.model}_${fpusa.path.action}`,
+        form_data,
+      };
+
+      if( fpusa.path.id.length ){
+        data.id = fpusa.path.id;
+      }
+
       $.ajax({
         type: 'POST',
         url: ajax_object.ajax_url,
-        data: { action: 'fpusa_address_create', form_data },
+        data: data,
         success: function( data ){
-          console.log( data );
+          if( data && data.length ){
+            window.location.reload();
+          }
+        },
+        error: function( error ){
+          alert( error );
         }
-      })
+      });
     },
 
     // get data from button clicked
     build: function( e ){
       let $button = $(e.relatedTarget);
 
-      let data = {
+      var path = {
         title: $button.attr('data-title'),
         model: $button.attr('data-model'),
         action: $button.attr('data-action'),
         id: $button.attr('data-id'),
       }
 
-      fpusa.$title.text( data.title );
+      fpusa.path = path;
+
+      fpusa.$title.text( path.title );
       // run function based on the data-model and data-action attributes of the button pressed.
-      fpusa[ data.model ]( data.action, data.id );
+      fpusa[ path.model ]( path.action, path.id );
     },
 
     ['address']: function( action, id = '' ){
@@ -52,7 +68,8 @@ jQuery( function ( $ ){
         { label: 'State', type: 'text', id: 'address_state', value: '' },
         { label: 'Postal Code', type: 'tel', id: 'address_postal', value: '' },
         { label: 'Country', type: 'tel', id: 'address_country', value: '' },
-        { label: 'Phone', type: 'tel', id: 'address_phone', value: '' }
+        { label: 'Phone', type: 'tel', id: 'address_phone', value: '' },
+        { label: 'Add delivery instructions (optional)', type: 'textarea', id: 'address_delivery_notes', value: '' },
       ];
 
       if( action != 'create' && id != '' ){
@@ -106,8 +123,23 @@ jQuery( function ( $ ){
 
     build_field: function( field ){
       let row = $('<tr>');
-      row.append(`<td><label for="${field.id}">${field.label}</label></td>`);
-      row.append( '<td>', $('<input/>', { type: field.type, id: field.id, name: field.id, value: field.value, class: 'form-control' } ), '</td>' );
+      let type = field.type;
+
+      if( type == 'select' ){
+        alert( 'sorry, you are trying to build a select and that logic isn\'t here yet!' );
+      } else if( type ==='textarea' ){
+        row.append(
+          $('<td/>', { colspan: 2 } ).append(
+            $('<label/>', { for: field.id } ).text( field.label ),
+            $('<textarea/>', { id: field.id, name: field.id, value: field.value, class: 'form-control' } ),
+          ),
+        );
+
+      } else {
+        // select
+        row.append(`<td><label for="${field.id}">${field.label}</label></td>`);
+        row.append( $('<td/>').append( $('<input/>', { type: field.type, id: field.id, name: field.id, value: field.value, class: 'form-control' } ) ) )
+      }
       return row;
     },
 

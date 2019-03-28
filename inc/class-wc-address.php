@@ -44,13 +44,16 @@ class Address
       <label class="form-check-label checkout-address-label" for="use_address_<?php echo $this->ID ?>">
         <?php echo $str; ?>
           <span>
-            <?php make_modal_btn(  array(
-                'text'   => 'EDIT ADDRESS',
+            <?php
+            make_modal_btn(  array(
+                'text'   => 'Edit Address',
                 'title'  => 'Edit your shipping address',
                 'model'  => 'address',
                 'action' => 'edit',
                 'id'     => $this->ID,
-              ) ); ?>
+              ) );
+              ?> |
+              <a class="set_as_default" href="<?php echo $this->get_address_as_default_link(); ?>">Set as default</a>
           </span>
       </label>
 

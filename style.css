@@ -1617,8 +1617,8 @@ a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
 	padding: 0px;
 }
 
-.checkout-address-label span{
-	text-transform: uppercase;
+.checkout-address-label:not(a){
+	/* text-transform: uppercase; */
 }
 
 .checkout-address{

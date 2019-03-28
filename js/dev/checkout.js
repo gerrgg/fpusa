@@ -16,8 +16,10 @@ jQuery( function( $ ) {
 
         //shipping_city
         this.$checkout_form.on( 'change', 'input[name="shipping_method[0]"]', this.update_expected_delivery );
+
         //address
         this.$checkout_form.on( 'click', 'button.use-this-address', this.submit_address );
+        this.$checkout_form.on( 'click', 'a.set_as_default', this.update_address );
 
         //payment methods
         this.$checkout_form.on( 'click', 'input[name="payment_method"]', this.payment_changed );
@@ -50,9 +52,9 @@ jQuery( function( $ ) {
 
       get_user_prefs: function(){
         $.post( ajax_object.ajax_url, { action: 'fpusa_get_user_order_prefs' }, function( response ){
+          console.log( response );
           wc_checkout_form.steps.use_address = response[0];
           wc_checkout_form.steps.use_payment = response[1];
-          // console.log( response );
           //2nd trigger
           $(document.body).trigger('update_steps');
         });
@@ -98,7 +100,7 @@ jQuery( function( $ ) {
         };
 
         $.post(ajax_object.ajax_url, data, function( response ){
-          if( response & response.length ){
+          if( response ){
             let name = response.ship_to.split( ' ' );
 
             fields = {
@@ -197,7 +199,6 @@ jQuery( function( $ ) {
 
       submit_address: function(){
         wc_checkout_form.steps.use_address = wc_checkout_form.get_address_selected();
-        // wc_checkout_form.copy_shipping_address();
         $(document.body).trigger('update_steps');
       },
 
@@ -266,11 +267,21 @@ jQuery( function( $ ) {
         return ( wc_checkout_form.get_payment_method() == 'mes_cc' ) ? wc_checkout_form.get_saved_card() : wc_checkout_form.get_payment_method();
       },
 
+      update_address: function(){
+        let wrapper = $('#step-1 > div > div.card-body');
+        console.log( wrapper );
+      },
+
       update_steps: function(){
+        // start at step 1
         let do_step = 1;
 
-        Object.keys( wc_checkout_form.steps ).forEach(function (key) {
-          if( wc_checkout_form.steps[key] ){
+        // we need the keys because we HAVE to use a for loop to break out of.
+        // https://stackoverflow.com/questions/39882842/how-to-break-out-from-foreach-loop-in-javascript
+        let keys = Object.keys( wc_checkout_form.steps );
+
+        for( let i = 0; i < keys.length; i++ ){
+          if( wc_checkout_form.steps[keys[i]] ){
             var $preview = $('#preview-' + do_step);
 
             if( do_step == 1 ){
@@ -280,8 +291,10 @@ jQuery( function( $ ) {
             }
 
             do_step++;
+          } else {
+            break;
           }
-        });
+        }
 
         wc_checkout_form.open( do_step );
       },

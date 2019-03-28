@@ -1656,7 +1656,7 @@ function make_modal_btn( $args = array() ){
 
 	echo sprintf( '<a href="#fpusa_modal" data-toggle="modal"
 										data-title="%s" data-model="%s" data-action="%s"
-										data-id="%d">%s</a>',
+										data-id="%d" class="">%s</a>',
 		$args['title'],
 		$args['model'],
 		$args['action'],

@@ -248,9 +248,7 @@ function fpusa_make_address_default(){
 	);
 
 	fpusa_customer_address_sync( $_GET['id'] );
-
-	// var_dump( $_POST );
-	wp_redirect('/edit-address/');
+	exit;
 }
 
 function fpusa_customer_address_sync( $address_id ){

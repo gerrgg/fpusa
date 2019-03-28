@@ -64,29 +64,49 @@ function fpusa_maybe_set_order_prefs_callback(){
 
 add_action( 'wp_ajax_fpusa_get_user_order_prefs', 'get_user_order_prefs_ajax' );
 add_action( 'wp_ajax_nopriv_fpusa_get_user_order_prefs', 'get_user_order_prefs_ajax' );
-function get_user_order_prefs( ){
-	$arr = maybe_unserialize(get_user_meta( get_current_user_id(), 'order_prefs', true ));
 
-	return array(
-		'use_address' => $arr[0],
-		'use_payment' => $arr[1]
+function get_user_order_prefs(  ){
+	$valid_order_prefs = array(
+		'use_address' => '',
+		'use_payment' => ''
 	);
+
+	$default_address = get_user_meta( get_current_user_id(), 'default_address', true );
+
+	$address = new Address( $default_address );
+	if( ! empty( $address->ID ) ){
+		$valid_order_prefs['use_address'] =  $default_address;
+	}
+
+
+	$token = WC_Payment_Tokens::get_customer_default_token( get_current_user_id() );
+	if( ! empty( $token->get_id() ) ){
+		$valid_order_prefs['use_payment'] =  $token->get_id();
+	}
+
+	return $valid_order_prefs;
 }
 
 function get_user_order_prefs_ajax( ){
-	$arr = maybe_unserialize(get_user_meta( get_current_user_id(), 'order_prefs', true ));
+	$valid_order_prefs = array(
+		'use_address' => '',
+		'use_payment' => ''
+	);
 
-	$address = new Address( $arr[0] );
-	if( empty( $address ) ){
-		$arr[0] = '';
+	$default_address = get_user_meta( get_current_user_id(), 'default_address', true );
+
+	$address = new Address( $default_address );
+	if( ! empty( $address->ID ) ){
+		$valid_order_prefs['use_address'] =  $default_address;
 	}
 
-	$payment = WC_Payment_Tokens::get( $arr[1] );
-	// var_dump( $payment );
-	if( empty( $payment ) ){
-		$arr[1] = '';
+
+	$token = WC_Payment_Tokens::get_customer_default_token( get_current_user_id() );
+	if( ! empty( $token->get_id() ) ){
+		$valid_order_prefs['use_payment'] =  $token->get_id();
 	}
-	wp_send_json( $arr );
+
+	wp_send_json( $valid_order_prefs );
 	wp_die();
 }
 
@@ -101,8 +121,6 @@ function fpusa_update_user_order_prefs(){
 	$token->set_default( 1 );
 	$token->save();
 
-	$arr = [ $default_address, $token->get_id() ];
-	update_user_meta( $user_id, 'order_prefs', maybe_serialize( $arr ) );
 	wp_send_json( $arr );
 	wp_die();
 }
@@ -409,10 +427,9 @@ function fpusa_ajax_address_edit(){
 	$table_name = $wpdb->prefix . 'address';
 	parse_str( $_POST['form_data'], $form_data );
 
-	if( ! empty( $form_data ) ){
-		// $id = $wpdb->update( $table_name, $form_data, array('address_id' => ) );
-	}
 
-	echo $id;
+	echo $wpdb->update( $table_name, $form_data, array( 'address_id' => $_POST['id'] ) );
+
+
 	wp_die();
 }
