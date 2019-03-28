@@ -17,7 +17,6 @@ function fpusa_create_user_address_table(){
 		address_country varchar(100) NOT NULL,
 		address_phone varchar(100) NOT NULL,
 		address_delivery_notes text NOT NULL,
-    address_type enum('shipping', 'billing', 'both') NOT NULL,
 		address_user_id mediumint(9) NOT NULL,
 		PRIMARY KEY (address_id),
 		FOREIGN KEY ( address_user_id ) REFERENCES $wpdb->users (ID)
@@ -34,10 +33,19 @@ function fpusa_get_user_address_ids( $id ){
 
 	// sort addresses by default
   $default = get_user_meta( get_current_user_id(), 'default_address', true );
-  $addresses = fpusa_sort_addresses_by_default( $addresses, $default );
+	if( address_exists( $default ) ){
+		$addresses = fpusa_sort_addresses_by_default( $addresses, $default );
+	}
 
 
 	return $addresses;
+}
+
+function address_exists( $id ){
+	$exists = false;
+	$address = new Address( $id );
+	if( ! empty( $address->ID ) ) $exists = true;
+	return $exists;
 }
 
 function fpusa_sort_addresses_by_default( $addresses, $default ){
@@ -169,7 +177,6 @@ function fpusa_edit_address(){
 			'address_postal' => $_POST['postal'],
 			'address_country' => $_POST['country'],
 			'address_phone' => $_POST['phone'],
-      'address_type' => $_POST['type'],
 			'address_delivery_notes' => $_POST['delivery_instructions'],
 			'address_user_id' => get_current_user_id(),
 		);
