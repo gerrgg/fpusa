@@ -41,7 +41,7 @@ $hide_footer = get_post_meta( get_the_ID(), 'hide_footer', true );
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary ajax_submit">Save changes</button>
+        <button type="submit" class="btn btn-primary modal_ajax_submit">Save changes</button>
       </div>
     </div>
   </div>
