@@ -48,8 +48,7 @@ class Address
                 'text'   => 'EDIT ADDRESS',
                 'title'  => 'Edit your shipping address',
                 'model'  => 'address',
-                'action' => 'edit',
-                'id'     => $this->ID,
+                'action' => 'edit'
               ) ); ?>
           </span>
       </label>

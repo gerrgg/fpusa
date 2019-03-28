@@ -38,9 +38,6 @@ $hide_footer = get_post_meta( get_the_ID(), 'hide_footer', true );
         </button>
       </div>
       <div class="modal-body">
-				<div class="spinner-border text-danger" role="status">
-				  <span class="sr-only">Loading...</span>
-				</div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

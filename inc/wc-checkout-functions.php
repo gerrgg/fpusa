@@ -163,6 +163,7 @@ function fpusa_checkout_steps( $parent, $labels ){
 
 add_action( 'fpusa_checkout_step_1', 'fpusa_choose_shipping_address' );
 function fpusa_choose_shipping_address(){
+  // TODO: Sort addresses by default first, than date
   $addresses = fpusa_get_user_address_ids( get_current_user_id() );
   ?>
   <div class="card border-bottom">
@@ -370,49 +371,5 @@ add_action( 'wp_ajax_nopriv_fpusa_remove_coupon', 'fpusa_remove_coupon' );
 function fpusa_remove_coupon(){
 	echo ( WC()->cart->remove_coupon( sanitize_text_field( $_POST['code'] ) ) );
 	wc_print_notices();
-	wp_die();
-}
-
-add_action( 'wp_ajax_fpusa_get_address', 'fpusa_ajax_get_address' );
-// add_action( 'wp_ajax_nopriv_fpusa_address_create', 'fpusa_ajax_address_create' );
-function fpusa_ajax_get_address(){
-	global $wpdb;
-	if( isset( $_POST['id'] ) ){
-		$id = $_POST['id'];
-		$table_name = $wpdb->prefix . 'address';
-		$row = $wpdb->get_row( "SELECT * FROM $table_name WHERE address_id = $id" );
-		wp_send_json( $row );
-	}
-	wp_die();
-}
-
-add_action( 'wp_ajax_fpusa_address_create', 'fpusa_ajax_address_create' );
-// add_action( 'wp_ajax_nopriv_fpusa_address_create', 'fpusa_ajax_address_create' );
-function fpusa_ajax_address_create(){
-	global $wpdb;
-	$table_name = $wpdb->prefix . 'address';
-	parse_str( $_POST['form_data'], $form_data );
-
-	if( ! empty( $form_data ) ){
-		$form_data['address_user_id'] = get_current_user_id();
-		$id = $wpdb->insert( $table_name, $form_data );
-	}
-
-	echo $id;
-	wp_die();
-}
-
-add_action( 'wp_ajax_fpusa_address_edit', 'fpusa_ajax_address_edit' );
-// add_action( 'wp_ajax_nopriv_fpusa_address_create', 'fpusa_ajax_address_create' );
-function fpusa_ajax_address_edit(){
-	global $wpdb;
-	$table_name = $wpdb->prefix . 'address';
-	parse_str( $_POST['form_data'], $form_data );
-
-	if( ! empty( $form_data ) ){
-		// $id = $wpdb->update( $table_name, $form_data, array('address_id' => ) );
-	}
-
-	echo $id;
 	wp_die();
 }
