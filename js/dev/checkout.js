@@ -98,27 +98,30 @@ jQuery( function( $ ) {
         };
 
         $.post(ajax_object.ajax_url, data, function( response ){
-          let name = response.ship_to.split( ' ' );
+          if( response & response.length ){
+            let name = response.ship_to.split( ' ' );
 
-          fields = {
-            first_name: name[0],
-            last_name: name[1],
-            company: response.ship_to,
-            country_field: response.country,
-            address_1: response.address_1,
-            address_2: response.address_2,
-            city: response.city,
-            state: response.state,
-            postcode: response.postal,
-            phone: response.phone,
+            fields = {
+              first_name: name[0],
+              last_name: name[1],
+              company: response.ship_to,
+              country_field: response.country,
+              address_1: response.address_1,
+              address_2: response.address_2,
+              city: response.city,
+              state: response.state,
+              postcode: response.postal,
+              phone: response.phone,
+            }
+
+            // copies to fields
+            wc_checkout_form.copy_to( fields, 'shipping' );
+            $('#order_comments').text( response.notes );
+
+            $preview.html( wc_checkout_form.get_address_preview() );
+            wc_checkout_form.get_time_in_transit();
           }
 
-          // copies to fields
-          wc_checkout_form.copy_to( fields, 'shipping' );
-          $('#order_comments').text( response.notes );
-
-          $preview.html( wc_checkout_form.get_address_preview() );
-          wc_checkout_form.get_time_in_transit();
         });
 
       },

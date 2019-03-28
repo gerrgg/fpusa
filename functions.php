@@ -1645,18 +1645,22 @@ function pluralize( $count, $str ){
 
 function make_modal_btn( $args = array() ){
 	$defaults = array(
-		'text' => 'text',
-		'title' => 'title',
-		'model' => '',
-		'action' => ''
+		'text'   => 'text',
+		'title'  => 'title',
+		'model'  => '',
+		'action' => '',
+		'id'		 => '',
 	);
 
 	$args = wp_parse_args( $args, $defaults );
 
-	echo sprintf( '<a href="#fpusa_modal" data-toggle="modal" data-title="%s" data-model="%s" data-action="%s">%s</a>',
+	echo sprintf( '<a href="#fpusa_modal" data-toggle="modal"
+										data-title="%s" data-model="%s" data-action="%s"
+										data-id="%d">%s</a>',
 		$args['title'],
 		$args['model'],
 		$args['action'],
+		$args['id'],
 		$args['text']
  	);
 }
