@@ -1,5 +1,6 @@
 <?php
 
+add_action('admin_enqueue_scripts', 'my_enqueue');
 function my_enqueue($hook) {
     // Only add to the edit.php admin page.
     // See WP docs.
@@ -17,32 +18,90 @@ function fpusa_theme_options() {
   add_action( 'admin_init', 'fpusa_register_settings' );
 }
 add_action('admin_menu', 'fpusa_theme_options');
-/**
-* Registers a text field setting for Wordpress 4.7 and higher.
-**/
+
 function fpusa_register_settings() {
-    // register_setting( 'fpusa_theme_options', 'my_option_name' );
+  //https://codex.wordpress.org/Settings_API
+  add_settings_section(
+		'ups_api_creds', //id
+		'UPS API CREDS:', // header
+		'', // section label
+		'fpusa_options' // the page to put it on
+	);
+
+  add_settings_field(
+		'ups_api_key', //id
+		'API Key:', //option label
+		'ups_api_key_callback', // option markup
+		'fpusa_options', // page its on
+		'ups_api_creds' // section it goes on that page
+	);
+  register_setting( 'fpusa_options', 'ups_api_key' );
+
+  add_settings_field(
+		'ups_api_username', //id
+		'Username:', //option label
+		'ups_api_username_callback', // option markup
+		'fpusa_options', // page its on
+		'ups_api_creds' // section it goes on that page
+	);
+
+  register_setting( 'fpusa_options', 'ups_api_username' );
+
+  add_settings_field(
+    'ups_api_password', //id
+    'Password:', //option label
+    'ups_api_password_callback', // option markup
+    'fpusa_options', // page its on
+    'ups_api_creds' // section it goes on that page
+  );
+
+  register_setting( 'fpusa_options', 'ups_api_password' );
+
+  add_settings_field(
+    'ups_api_account', //id
+    'Account:', //option label
+    'ups_api_account_callback', // option markup
+    'fpusa_options', // page its on
+    'ups_api_creds' // section it goes on that page
+  );
+
+  register_setting( 'fpusa_options', 'ups_api_account' );
+
 }
+
+
+function ups_api_key_callback(){
+  echo '<input name="ups_api_key" id="ups_api_key" type="text" value="'. get_option( 'ups_api_key' ) .'" class="code" />';
+}
+
+function ups_api_username_callback(){
+  echo '<input name="ups_api_username" id="ups_api_username" type="text" value="'. get_option( 'ups_api_username' ) .'" class="code" />';
+}
+
+function ups_api_password_callback(){
+  echo '<input name="ups_api_password" id="ups_api_password" type="text" value="'. get_option( 'ups_api_password' ) .'" class="code" />';
+}
+
+function ups_api_account_callback(){
+  echo '<input name="ups_api_account" id="ups_api_account" type="text" value="'. get_option( 'ups_api_account' ) .'" class="code" />';
+}
+
+
+
 function fpusa_options_callback(){
   ?>
   <div class="wrap">
     <h1><?php echo bloginfo('sitename'); ?> Theme Options</h1>
     <form method="post" action="options.php">
-      <?php settings_fields( 'fpusa_theme_options' ); ?>
-      <?php do_settings_sections( 'fpusa_theme_options' ); ?>
-      <h2>Social Media Connections</h2>
-      <table class="form-table">
-        <tr valign="top">
-          <th scope="row">New Option Name</th>
-          <td><input type="text" name="new_option_name" value="<?php echo esc_attr( get_option('new_option_name') ); ?>" /></td>
-        </tr>
-      </table>
-    <?php submit_button(); ?>
+      <?php settings_fields( 'fpusa_options' ); ?>
+
+      <?php do_settings_sections( 'fpusa_options' ); ?>
+      <?php submit_button(); ?>
     </form>
   </div>
   <?php
 }
-add_action('admin_enqueue_scripts', 'my_enqueue');
+
 function fpusa_add_product_videos_meta_box(){
 	add_meta_box(
 		'fpusa-product-video',
