@@ -84,6 +84,10 @@ class Address
     return ( $this->ID === $default );
   }
 
+  public function is_valid(){
+    return ( ! empty( $this->ID ) );
+  }
+
   public function formatted_address(){
     return sprintf("<ul class='list-unstyled m-0 p-0'>
   									<li><b>%s</b></li>
