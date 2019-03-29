@@ -52,36 +52,44 @@ jQuery( function( $ ) {
 
       get_user_prefs: function(){
         $.post( ajax_object.ajax_url, { action: 'fpusa_get_user_order_prefs' }, function( response ){
-          console.log( response );
-          wc_checkout_form.steps.use_address = response[0];
-          wc_checkout_form.steps.use_payment = response[1];
+
+          if( response ){
+            wc_checkout_form.steps.use_address = response['use_address'];
+            wc_checkout_form.steps.use_payment = response['use_payment'];
+          }
+
           //2nd trigger
           $(document.body).trigger('update_steps');
         });
       },
 
-      radio_activate: function( e ){
-        let name = e.target.name;
-        // console.log( e.target.value );
-        if( name != 'shipping_method[0]' &&  e.target.value != 'mes_cc' ){
-          let input_wrapper = ( name == 'use_address' ) ? $('input[name="'+ name +'"]').parent() : $('ul.wc_payment_methods li');
-          input_wrapper.removeClass('active');
-          $(e.target).parent().addClass('active');
-          $(e.target).prop('checked', true);
+      update_steps: function(){
+        console.log( wc_checkout_form.steps );
+
+        // start at step 1
+        let do_step = 1;
+
+        // we need the keys because we HAVE to use a for loop to break out of.
+        // https://stackoverflow.com/questions/39882842/how-to-break-out-from-foreach-loop-in-javascript
+        let keys = Object.keys( wc_checkout_form.steps );
+
+        for( let i = 0; i < keys.length; i++ ){
+          if( wc_checkout_form.steps[keys[i]] ){
+            var $preview = $('#preview-' + do_step);
+
+            if( do_step == 1 ){
+              wc_checkout_form.copy_shipping_address( $preview );
+            } else {
+              wc_checkout_form.copy_billing_address( $preview );
+            }
+
+            do_step++;
+          } else {
+            break;
+          }
         }
 
-      },
-
-      get_address_selected: function(){
-        return wc_checkout_form.$checkout_form.find('input[name="use_address"]:checked').val();
-      },
-
-      get_saved_card: function(){
-        return wc_checkout_form.$checkout_form.find( 'input[name="wc-simplify_commerce-payment-token"]:checked' ).val();
-      },
-
-      get_payment_method: function(){
-        return wc_checkout_form.$checkout_form.find( 'input[name="payment_method"]:checked' ).val();
+        wc_checkout_form.open( do_step );
       },
 
       copy_billing_address: function( $preview ){
@@ -274,32 +282,31 @@ jQuery( function( $ ) {
         });
       },
 
-      update_steps: function(){
-        // start at step 1
-        let do_step = 1;
-
-        // we need the keys because we HAVE to use a for loop to break out of.
-        // https://stackoverflow.com/questions/39882842/how-to-break-out-from-foreach-loop-in-javascript
-        let keys = Object.keys( wc_checkout_form.steps );
-
-        for( let i = 0; i < keys.length; i++ ){
-          if( wc_checkout_form.steps[keys[i]] ){
-            var $preview = $('#preview-' + do_step);
-
-            if( do_step == 1 ){
-              wc_checkout_form.copy_shipping_address( $preview );
-            } else {
-              wc_checkout_form.copy_billing_address( $preview );
-            }
-
-            do_step++;
-          } else {
-            break;
-          }
+      radio_activate: function( e ){
+        let name = e.target.name;
+        // console.log( e.target.value );
+        if( name != 'shipping_method[0]' &&  e.target.value != 'mes_cc' ){
+          let input_wrapper = ( name == 'use_address' ) ? $('input[name="'+ name +'"]').parent() : $('ul.wc_payment_methods li');
+          input_wrapper.removeClass('active');
+          $(e.target).parent().addClass('active');
+          $(e.target).prop('checked', true);
         }
 
-        wc_checkout_form.open( do_step );
       },
+
+      get_address_selected: function(){
+        return wc_checkout_form.$checkout_form.find('input[name="use_address"]:checked').val();
+      },
+
+      get_saved_card: function(){
+        return wc_checkout_form.$checkout_form.find( 'input[name="wc-simplify_commerce-payment-token"]:checked' ).val();
+      },
+
+      get_payment_method: function(){
+        return wc_checkout_form.$checkout_form.find( 'input[name="payment_method"]:checked' ).val();
+      },
+
+
     }
 
     wc_checkout_form.init();
