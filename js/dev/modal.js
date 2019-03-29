@@ -3,9 +3,9 @@ jQuery( function ( $ ){
     $modal: $('#fpusa_modal'),
     init: function(){
       // find title and body
-      fpusa.$title = this.$modal.find('.modal-title'),
-      fpusa.$body = this.$modal.find('.modal-body'),
-      fpusa.$form = this.$modal.find( 'form.modal-form' );
+      this.$title = this.$modal.find('.modal-title'),
+      this.$body = this.$modal.find('.modal-body'),
+      this.$form = this.$modal.find( 'form.modal-form' );
 
       // set event on show
       this.$modal.on('show.bs.modal', '', this.build);

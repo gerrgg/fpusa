@@ -45,15 +45,16 @@ class Address
         <?php echo $str; ?>
           <span>
             <?php
-            make_modal_btn(  array(
+             make_modal_btn(  array(
                 'text'   => 'Edit Address',
                 'title'  => 'Edit your shipping address',
                 'model'  => 'address',
                 'action' => 'edit',
                 'id'     => $this->ID,
               ) );
-              ?> |
-              <a class="set_as_default" href="<?php echo $this->get_address_as_default_link(); ?>">Set as default</a>
+              if( ! $this->is_default() ) echo ' | <a class="set_as_default" href="javascript:void(0)">Set as default</a>';
+            ?>
+
           </span>
       </label>
 

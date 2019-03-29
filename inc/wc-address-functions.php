@@ -227,29 +227,27 @@ function fpusa_form_field( $key, $value, $type = 'text' ){
 	endif;
 }
 
-add_action( 'admin_post_fpusa_delete_address', 'fpusa_delete_address' );
-add_action( 'admin_post_fpusa_make_address_default', 'fpusa_make_address_default' );
-
-function fpusa_delete_address(){
-	global $wpdb;
-	$table_name = $wpdb->prefix . 'address';
-
-	$wpdb->delete($table_name, array( 'address_id' => $_GET['id'] ));
-
-	wp_redirect('/edit-address/');
-}
-
+add_action( 'wp_ajax_fpusa_make_address_default', 'fpusa_make_address_default' );
 function fpusa_make_address_default(){
 	global $wpdb;
 	$wpdb->update(
 		$wpdb->usermeta,
-		array( 'meta_value' => $_GET['id'] ),
+		array( 'meta_value' => $_POST['id'] ),
 		array( 'user_id' => get_current_user_id(), 'meta_key' => 'default_address' )
 	);
 
-	fpusa_customer_address_sync( $_GET['id'] );
+	fpusa_customer_address_sync( $_POST['id'] );
 	exit;
 }
+
+add_action( 'admin_post_fpusa_delete_address', 'fpusa_delete_address' );
+function fpusa_delete_address(){
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'address';
+	$wpdb->delete($table_name, array( 'address_id' => $_GET['id'] ));
+	wp_redirect('/edit-address/');
+}
+
 
 function fpusa_customer_address_sync( $address_id ){
 	$address = new Address( $address_id );

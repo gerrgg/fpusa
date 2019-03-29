@@ -267,9 +267,11 @@ jQuery( function( $ ) {
         return ( wc_checkout_form.get_payment_method() == 'mes_cc' ) ? wc_checkout_form.get_saved_card() : wc_checkout_form.get_payment_method();
       },
 
-      update_address: function(){
-        let wrapper = $('#step-1 > div > div.card-body');
-        console.log( wrapper );
+      update_address: function( e ){
+        let address_id = $( e.target ).parent().parent().prev().val();
+        $.post(ajax_object.ajax_url, { action: 'fpusa_make_address_default', id: address_id }, function( data ){
+          window.location.reload();
+        });
       },
 
       update_steps: function(){
