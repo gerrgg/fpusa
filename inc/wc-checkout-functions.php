@@ -114,8 +114,14 @@ add_action( 'wp_ajax_fpusa_update_user_order_prefs','fpusa_update_user_order_pre
 function fpusa_update_user_order_prefs(){
 	$user_id = get_current_user_id();
 
-	update_user_meta( $user_id, 'default_address', $_POST['use_address']  );
-	$default_address = get_user_meta( $user_id, 'default_address', 'true' );
+
+	// Check for address validation?
+	$address = new Address( $_POST['use_address'] );
+	if( $address->is_valid() ){
+		update_user_meta( $user_id, 'default_address', $_POST['use_address']  );
+		$default_address = get_user_meta( $user_id, 'default_address', 'true' );
+		$address->sync_customer();
+	}
 
 	$token = WC_Payment_Tokens::get( intval( $_POST['use_payment'] ) );
 	$token->set_default( 1 );
