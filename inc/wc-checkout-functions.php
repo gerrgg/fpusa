@@ -15,15 +15,11 @@ add_action( 'fpusa_checkout_step_3', 'fpusa_maybe_set_order_prefs_callback', 10 
 add_action( 'fpusa_checkout_step_3', 'woocommerce_order_review', 20 );
 add_action( 'fpusa_checkout_step_3', 'fpusa_place_order', 30 );
 
-add_action( 'fpusa_order_summary', 'get_order_summary' );
-
-function get_order_summary(){
-	wc_get_template( 'cart/cart-totals.php' );
-}
-
 function fpusa_checkout_payment(){
 	wc_get_template( '/myaccount/payment-methods.php' );
 }
+
+
 
 function compare_user_prefs(){
 	$prefs = get_user_order_prefs();

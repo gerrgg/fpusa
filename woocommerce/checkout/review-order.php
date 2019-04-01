@@ -11,27 +11,24 @@
  * the readme will list any important changes.
  *
  * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     3.3.0
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<div class="card p-3 border-bottom">
+<div class="shop_table woocommerce-checkout-review-order-table">
+	<div class="card p-3 border-bottom">
 	<h5 class="text-success">
 		Expected delivery date: <span id="selected_option"></span></h5>
 		<div class="row">
 			<div class="col-7">
 			<?php
 				do_action( 'woocommerce_review_order_before_cart_contents' );
-
 				foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					$_product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 					$image_src = wp_get_attachment_image_src( $_product->get_image_id() );
-
 					if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
 						?>
 						<div class="<?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?> d-flex align-items-center my-2 pb-2">
@@ -69,3 +66,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 </div>
+</table>

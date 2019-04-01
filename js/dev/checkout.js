@@ -16,7 +16,7 @@ jQuery( function( $ ) {
         this.$checkout_form.on( 'click', 'input[name="set_user_order_prefs"]', this.update_user_order_prefs );
 
         //shipping_city
-        this.$checkout_form.on( 'change', 'input[name="shipping_method[0]"]', this.update_expected_delivery );
+        this.$checkout_form.on( 'change', 'input[name="shipping_method[0]"]', this.get_time_in_transit );
 
         //address
         this.$checkout_form.on( 'click', 'button.use-this-address', this.submit_address );
