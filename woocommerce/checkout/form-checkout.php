@@ -26,9 +26,8 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 ?>
 <div class="container">
 <form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
-	<!-- layout bug fix -->
-	<div class="row">
 	<?php if ( $checkout->get_checkout_fields() ) : ?>
+		<div class="row">
 
 		<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
 
@@ -41,7 +40,6 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 						array( 'Shipping address', 'Payment method', 'Items & Shipping' )
 					);
 				?>
-
 			</div>
 			<div class="d-none">
 				<?php do_action( 'woocommerce_checkout_shipping' ); ?>

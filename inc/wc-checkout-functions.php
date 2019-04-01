@@ -20,7 +20,6 @@ function fpusa_checkout_payment(){
 }
 
 
-
 function compare_user_prefs(){
 	$prefs = get_user_order_prefs();
 	$user_id = get_current_user_id();

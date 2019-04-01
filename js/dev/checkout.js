@@ -235,7 +235,7 @@ jQuery( function( $ ) {
         // find what user has selected
         $shipping_methods = $('#shipping_method li > input');
 
-        if( data ){
+        if( data.TransitResponse.ServiceSummary ){
           response = data.TransitResponse.ServiceSummary;
 
           let services = {

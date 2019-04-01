@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="shop_table woocommerce-checkout-review-order-table">
 	<div class="card p-3 border-bottom">
-	<h5 class="text-success">
+		<h5 class="text-success">
 		Expected delivery date: <span id="selected_option"></span></h5>
 		<div class="row">
 			<div class="col-7">
@@ -51,19 +51,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 				do_action( 'woocommerce_review_order_after_cart_contents' );
 			?>
-		</div>
-		<div class="col-5">
+			</div>
+			<div class="col-5">
 
-			<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) : ?>
+				<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) : ?>
 
-				<?php do_action( 'woocommerce_review_order_before_shipping' ); ?>
+					<?php do_action( 'woocommerce_review_order_before_shipping' ); ?>
 
-				<?php wc_cart_totals_shipping_html(); ?>
+					<?php wc_cart_totals_shipping_html(); ?>
 
-				<?php do_action( 'woocommerce_review_order_after_shipping' ); ?>
+					<?php do_action( 'woocommerce_review_order_after_shipping' ); ?>
 
-			<?php endif; ?>
+				<?php endif; ?>
+			</div>
 		</div>
 	</div>
 </div>
-</table>
