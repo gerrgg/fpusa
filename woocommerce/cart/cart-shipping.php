@@ -14,30 +14,28 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates
- * @version 3.5.0
+ * @version 3.6.0
  */
-
 defined( 'ABSPATH' ) || exit;
-
 $formatted_destination    = isset( $formatted_destination ) ? $formatted_destination : WC()->countries->get_formatted_address( $package['destination'], ', ' );
 $has_calculated_shipping  = ! empty( $has_calculated_shipping );
 $show_shipping_calculator = ! empty( $show_shipping_calculator );
 $calculator_text          = '';
 ?>
-
+<tr class="woocommerce-shipping-totals shipping">
+	<th><?php echo wp_kses_post( $package_name ); ?></th>
+	<td data-title="<?php echo esc_attr( $package_name ); ?>">
 		<?php if ( $available_methods ) : ?>
-			<label class="font-weight-bold m-0 p-0">Choose your delivery method:</label>
-			<ul id="shipping_method" class="border-left woocommerce-shipping-methods list-unstyled m-0 pl-3">
+			<ul id="shipping_method" class="woocommerce-shipping-methods">
 				<?php foreach ( $available_methods as $method ) : ?>
 					<li>
-						<h6 class="pl-3"><?php echo fpusa_get_default_est_delivery( $method->label ) ?></h6>
 						<?php
 						if ( 1 < count( $available_methods ) ) {
 							printf( '<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ), checked( $method->id, $chosen_method, false ) ); // WPCS: XSS ok.
 						} else {
 							printf( '<input type="hidden" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ) ); // WPCS: XSS ok.
 						}
-						printf( '<label for="shipping_method_%1$s_%2$s" class="pl-2">%3$s</label>', $index, esc_attr( sanitize_title( $method->id ) ), wc_cart_totals_shipping_method_label( $method ) ); // WPCS: XSS ok.
+						printf( '<label for="shipping_method_%1$s_%2$s">%3$s</label>', $index, esc_attr( sanitize_title( $method->id ) ), wc_cart_totals_shipping_method_label( $method ) ); // WPCS: XSS ok.
 						do_action( 'woocommerce_after_shipping_rate', $method, $index );
 						?>
 					</li>
@@ -48,19 +46,19 @@ $calculator_text          = '';
 					<?php
 					if ( $formatted_destination ) {
 						// Translators: $s shipping destination.
-						printf( esc_html__( 'Estimate for %s.', 'woocommerce' ) . ' ', '<strong>' . esc_html( $formatted_destination ) . '</strong>' );
+						printf( esc_html__( 'Shipping to %s.', 'woocommerce' ) . ' ', '<strong>' . esc_html( $formatted_destination ) . '</strong>' );
 						$calculator_text = __( 'Change address', 'woocommerce' );
 					} else {
-						echo esc_html__( 'This is only an estimate. Prices will be updated during checkout.', 'woocommerce' );
+						echo wp_kses_post( apply_filters( 'woocommerce_shipping_estimate_html', __( 'Shipping options will be updated during checkout.', 'woocommerce' ) ) );
 					}
 					?>
 				</p>
 			<?php endif; ?>
-		<?php
+			<?php
 		elseif ( ! $has_calculated_shipping || ! $formatted_destination ) :
-			esc_html_e( 'Enter your address to view shipping options.', 'woocommerce' );
+			echo wp_kses_post( apply_filters( 'woocommerce_shipping_may_be_available_html', __( 'Enter your address to view shipping options.', 'woocommerce' ) ) );
 		elseif ( ! is_cart() ) :
-			echo wp_kses_post( apply_filters( 'woocommerce_no_shipping_available_html', __( 'There are no shipping methods available. Please ensure that your address has been entered correctly, or contact us if you need any help.', 'woocommerce' ) ) );
+			echo wp_kses_post( apply_filters( 'woocommerce_no_shipping_available_html', __( 'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.', 'woocommerce' ) ) );
 		else :
 			// Translators: $s shipping destination.
 			echo wp_kses_post( apply_filters( 'woocommerce_cart_no_shipping_available_html', sprintf( esc_html__( 'No shipping options were found for %s.', 'woocommerce' ) . ' ', '<strong>' . esc_html( $formatted_destination ) . '</strong>' ) ) );
@@ -75,3 +73,5 @@ $calculator_text          = '';
 		<?php if ( $show_shipping_calculator ) : ?>
 			<?php woocommerce_shipping_calculator( $calculator_text ); ?>
 		<?php endif; ?>
+	</td>
+</tr>

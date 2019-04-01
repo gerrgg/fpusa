@@ -3,13 +3,13 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
-remove_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
+// remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+// remove_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
+// remove_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 
 add_action( 'fpusa_checkout_step_2', 'woocommerce_checkout_payment', 10 );
 add_action( 'fpusa_after_payment', 'woocommerce_checkout_coupon_form' );
 
-remove_action( 'woocommerce_checkout_order_review', 'woocommerce_order_review', 10 );
 
 add_action( 'fpusa_checkout_step_3', 'fpusa_maybe_set_order_prefs_callback', 10 );
 add_action( 'fpusa_checkout_step_3', 'woocommerce_order_review', 20 );
