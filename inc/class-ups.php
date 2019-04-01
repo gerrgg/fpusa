@@ -7,6 +7,7 @@ class UPS{
 
 // TODO: use base address instead. unless of course we are going to include dropship logic
 // https://woocommerce.wp-a2z.org/oik_api/wc_countriesget_base_address/
+
   public $from = array(
     'address_1' => '8640 Commerce Ct',
     'city'      => 'Harbor Springs',
@@ -23,11 +24,12 @@ class UPS{
   );
 
   public function __construct(){
-    $this->access_request = $this->get_access_request();
     $this->api = get_option( 'ups_api_key' );
     $this->username = get_option( 'ups_api_username' );
     $this->password = get_option( 'ups_api_password' );
     $this->account = get_option( 'ups_api_account' );
+
+    $this->access_request = $this->get_access_request();
   }
 
   public function time_in_transit( $ship_to ){

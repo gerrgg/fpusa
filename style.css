@@ -59,6 +59,19 @@ html {
 	-webkit-text-size-adjust: 100%; /* 2 */
 }
 
+
+@media (max-width: 1200px){
+	.container{
+		max-width: 100%;
+	}
+}
+
+@media (min-width: 1200px){
+	.container{
+		max-width: 1200px !important;
+	}
+}
+
 /* Sections
 	 ========================================================================== */
 
@@ -69,6 +82,7 @@ html {
  #header {
   white-space: nowrap;
   overflow: hidden;
+	width: 100%;
 }
 
 body {
@@ -1022,7 +1036,7 @@ object {
 	align-items: flex-end;
 }
 
-#header-bottom{
+#header-mid{
 	white-space: nowrap;
 	overflow: hidden;
 }
@@ -1082,7 +1096,7 @@ nav.navbar a.nav-link, nav.navbar i{
 }
 
 .nav-center{
-	width: 800px;
+	/* width: 800px; */
 	overflow: hidden;
 }
 
@@ -1625,7 +1639,7 @@ a.checkout-step, a.checkout-step:hover, a.checkout-step:visited{
 	padding: .25rem .5rem;
 }
 
-.active{
+.checkout .active{
 	background-color: #FCF5EE;
 	border: 1px solid #FBD8B4;
   border-radius: 5px !important;

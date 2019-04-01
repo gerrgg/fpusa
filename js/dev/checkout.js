@@ -6,6 +6,7 @@ jQuery( function( $ ) {
       init: function(){
         $(document.body).bind( 'update_steps', this.update_steps );
         $(document.body).bind( 'init_checkout', this.init_checkout );
+        $(document.body).bind( 'update_checkout', this.update_checkout );
 
         this.init_checkout();
 
@@ -130,6 +131,7 @@ jQuery( function( $ ) {
 
             $preview.html( wc_checkout_form.get_address_preview() );
             wc_checkout_form.get_time_in_transit();
+            $(document.body).trigger('update_checkout');
           }
 
         });
@@ -219,6 +221,7 @@ jQuery( function( $ ) {
         }
 
         $.post( ajax_object.ajax_url, data, function( response ){
+          // console.log( response );
           wc_checkout_form.display_time_in_transit_response( response );
           $('#selected_option').text( wc_checkout_form.get_transit_display_time );
         });
@@ -232,7 +235,7 @@ jQuery( function( $ ) {
         // find what user has selected
         $shipping_methods = $('#shipping_method li > input');
 
-        if( data && data.length ){
+        if( data ){
           response = data.TransitResponse.ServiceSummary;
 
           let services = {
@@ -256,6 +259,7 @@ jQuery( function( $ ) {
                     // format and display it to browser!
                     let est_arrival = response[i].EstimatedArrival;
                     let date = moment( est_arrival.Date ).format( 'dddd, MMMM Do' );
+                    // console.log( response[i].Service.Description, est_arrival, date );
                     $(this).prev().html( date );
                   }
                 }
