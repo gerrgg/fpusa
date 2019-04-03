@@ -5,6 +5,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 // remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
 // remove_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
+remove_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals', 10 );
+add_action( 'woocommerce_after_cart_table', 'woocommerce_cart_totals', 10 );
+
+add_action( 'woocommerce_cart_collaterals', 'woocommerce_cart_totals', 10 );
 remove_action( 'woocommerce_after_cart_table', 'woocommerce_cart_totals' );
 add_action( 'woocommerce_after_cart_table', 'fpusa_get_checkout_button' );
 
@@ -493,4 +497,13 @@ function fpusa_get_applied_coupons( $echo = true ){
 			return $html;
 		}
 	}
+}
+
+function fpusa_get_cart_subtotal(){
+	global $woocommerce;
+	?>
+		<label>Subtotal (<?php echo $woocommerce->cart->get_cart_contents_count() ?> items):</label>
+		<span class="price">$<?php echo $woocommerce->cart->get_subtotal() ?></span>
+	<?php
+
 }
