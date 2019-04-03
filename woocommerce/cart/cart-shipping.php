@@ -28,7 +28,7 @@ $calculator_text          = '';
 			<ul id="shipping_method" class="border-left woocommerce-shipping-methods list-unstyled m-0 pl-3">
 				<?php foreach ( $available_methods as $method ) : ?>
 					<li>
-						<h6 class="pl-3"><?php echo fpusa_get_default_est_delivery( $method->label ) ?></h6>
+						<h6 class="text-success iww-date-estimate m-0 p-0"><?php echo fpusa_get_default_est_delivery( $method->label ) ?></h6>
 						<?php
 						if ( 1 < count( $available_methods ) ) {
 							printf( '<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ), checked( $method->id, $chosen_method, false ) ); // WPCS: XSS ok.

@@ -1605,7 +1605,8 @@ td.product-name > a, td.product-price{
 }
 
 button[name='update_cart'] {
-	display: none !important;
+	/* display: none !important; */
+	cursor: pointer;
 }
 
 .cart_totals .card{
@@ -1741,4 +1742,10 @@ span.verified{
 
 i.karma-highlight{
 	color: orange;
+}
+
+.fpusa-order-total{
+	font-size: 18px;
+	color: firebrick;
+	font-weight: 700;
 }

@@ -113,8 +113,12 @@ do_action( 'woocommerce_before_cart' );
 							echo apply_filters( 'woocommerce_cart_item_quantity', $product_quantity, $cart_item_key, $cart_item ); // PHPCS: XSS ok.
 							?>
 							</td>
-							<button type="submit" class="button" name="update_cart" value="<?php esc_attr_e( 'Update cart', 'woocommerce' ); ?>"><?php esc_html_e( 'Update cart', 'woocommerce' ); ?></button>
+						</tr>
+						<tr>
+							<td colspan="4">
+							<button type="submit" class="btn btn-info float-right" name="update_cart" value="<?php esc_attr_e( 'Update cart', 'woocommerce' ); ?>"><?php esc_html_e( 'Update cart', 'woocommerce' ); ?></button>
 							<?php wp_nonce_field( 'woocommerce-cart', 'woocommerce-cart-nonce' ); ?>
+							<td>
 						</tr>
 						<?php
 					}
@@ -139,7 +143,6 @@ do_action( 'woocommerce_before_cart' );
 		 * Cart collaterals hook.
 		 *
 		 * @hooked woocommerce_cross_sell_display
-		 * @hooked woocommerce_cart_totals - 10
 		 */
 		do_action( 'woocommerce_cart_collaterals' );
 	?>
