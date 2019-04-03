@@ -196,6 +196,8 @@ function fpusa_scripts() {
 
 	wp_enqueue_script( 'dropzone-js', get_template_directory_uri() . '/js/dropzone.js', array('jquery'));
 
+	wp_enqueue_script( 'slideout-js', get_template_directory_uri() . '/js/slideout.min.js', array('jquery'));
+
 	wp_enqueue_script( 'moment-js', 'http://momentjs.com/downloads/moment.min.js', array(), '4.9', true);
 
 	wp_enqueue_script( 'js-functions', get_template_directory_uri() . '/js/dev/functions.js', array('jquery'), filemtime(get_template_directory() . '/js/dev/functions.js'), true );

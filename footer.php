@@ -51,5 +51,39 @@ $hide_footer = get_post_meta( get_the_ID(), 'hide_footer', true );
 </div>
 
 <?php wp_footer(); ?>
+
+<nav id="menu">
+	<div id="mobile-menu-top-wrapper" class="d-flex align-items-end p-3">
+		<i class="fas fa-user-circle pr-3"></i>
+		<span>
+			Hello, Greg
+		</span>
+	</div>
+	<div class="">
+		<h5 class="p-3 text-muted">Shop by Category</h5>
+		<?php
+			wp_nav_menu( array(
+				'theme_location'    => 'category_menu',
+				'container_id'			=> 'mobile-nav-container',
+				'fallback_cb'       => 'WP_Bootstrap_Navwalker::fallback',
+				'walker'            => new WP_Bootstrap_Navwalker(),
+			) );
+			?>
+			<div class="dropdown-divider"></div>
+			<h5 class="p-3 text-muted">HELP & SETTINGS</h5>
+			<ul class="navbar-nav m-0 pl-3">
+				<li class="nav-item">
+					<a class="nav-link" href="#"><i class="fas fa-user-circle pr-3"></i>Your Account</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#"><i class="fas fa-question pr-3"></i>Help</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#"><i class="fas fa-sign-out-alt pr-3"></i>Sign Out</a>
+				</li>
+			</ul>
+	</div>
+</nav>
+
 </body>
 </html>

@@ -79,45 +79,6 @@ $hide_header = get_post_meta( get_the_ID(), 'hide_header', true );
 			</nav>
 		<!-- </div> -->
 	</header>
-
-	<div id="content" class="site-content">
-		<div id="hm-menu">
-			<div id="mySidenav" class="sidenav d-flex">
-				<div id="sidenav-inner" class="w-25">
-					<div id="mobile-menu-top-wrapper" class="d-flex align-items-end p-3">
-						<i class="fas fa-user-circle pr-3"></i>
-						<span>
-							Hello, Greg
-						</span>
-						<a class="ml-auto closebtn" href="javascript:void(0)"><i class="fas fa-times"></i></a>
-					</div>
-					<div class="">
-						<h5 class="p-3 text-muted">Shop by Category</h5>
-						<?php
-							wp_nav_menu( array(
-								'theme_location'    => 'category_menu',
-								'container_id'			=> 'mobile-nav-container',
-								'fallback_cb'       => 'WP_Bootstrap_Navwalker::fallback',
-								'walker'            => new WP_Bootstrap_Navwalker(),
-							) );
-							?>
-							<div class="dropdown-divider"></div>
-							<h5 class="p-3 text-muted">HELP & SETTINGS</h5>
-							<ul class="navbar-nav m-0 p-0">
-								<li class="nav-item">
-									<a class="nav-link" href="#"><i class="fas fa-user-circle pr-3"></i>Your Account</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link" href="#"><i class="fas fa-question pr-3"></i>Help</a>
-								</li>
-								<li class="nav-item">
-									<a class="nav-link" href="#"><i class="fas fa-sign-out-alt pr-3"></i>Sign Out</a>
-								</li>
-							</ul>
-					</div>
-				</div>
-			</div>
-		</div>
 		<!-- Location Modal -->
 		<?php
 		do_action( 'fpusa_after_header' );
