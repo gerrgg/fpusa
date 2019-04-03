@@ -41,6 +41,13 @@ function fpusa_get_user_address_ids( $id ){
 	return $addresses;
 }
 
+function on_woocommerce_login_redirect_to($redirect, $user){
+    return !empty($_GET['redirect_to']) ? $_GET['redirect_to'] : $redirect;
+}
+// add the filter
+add_filter('woocommerce_login_redirect', 'on_woocommerce_login_redirect_to', 10, 2 );
+add_filter('woocommerce_register_redirect', 'on_woocommerce_login_redirect_to', 10, 2 );
+
 function address_exists( $id ){
 	$exists = false;
 	$address = new Address( $id );
@@ -237,6 +244,8 @@ function fpusa_make_address_default(){
 	);
 
 	fpusa_customer_address_sync( $_POST['id'] );
+
+
 	exit;
 }
 
