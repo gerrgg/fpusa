@@ -6,7 +6,7 @@ jQuery( function( $ ) {
       init: function(){
         $(document.body).bind( 'update_steps', this.update_steps );
         $(document.body).bind( 'init_checkout', this.init_checkout );
-        $(document.body).bind( 'update_checkout', this.update_checkout );
+        // $(document.body).bind( 'update_checkout', this.update_checkout );
 
         this.init_checkout();
 
@@ -17,6 +17,10 @@ jQuery( function( $ ) {
 
         //shipping_city
         this.$checkout_form.on( 'change', 'input[name="shipping_method[0]"]', this.get_time_in_transit );
+
+        //coupon
+        // this.$checkout_form.on( 'click', 'input[name="apply_coupon"]', function(){ $(document.body).trigger('update_checkout') } );
+        this.$checkout_form.on( 'click', '.woocommerce-remove-coupon', this.get_time_in_transit );
 
         //address
         this.$checkout_form.on( 'click', 'button.use-this-address', this.submit_address );
@@ -65,7 +69,7 @@ jQuery( function( $ ) {
       },
 
       update_steps: function(){
-        console.log( wc_checkout_form.steps );
+        // console.log( wc_checkout_form.steps );
 
         // start at step 1
         let do_step = 1;
@@ -89,17 +93,17 @@ jQuery( function( $ ) {
             break;
           }
         }
-
         wc_checkout_form.open( do_step );
       },
 
       copy_billing_address: function( $preview ){
-        $.post(ajax_object.ajax_url, {action: 'fpusa_get_billing_info', id: wc_checkout_form.steps.use_payment }, function( response ){
+        $.post(ajax_object.ajax_url, {action: 'fpusa_get_billing_address', id: wc_checkout_form.steps.use_payment }, function( response ){
           wc_checkout_form.copy_to( response, 'billing' );
-          $preview.html( wc_checkout_form.get_payment_preview() );
+          $preview.html( wc_checkout_form.get_payment_preview( response ) );
         });
 
       },
+
 
       copy_shipping_address: function( $preview ){
         selection = wc_checkout_form.steps.use_address;
@@ -132,10 +136,32 @@ jQuery( function( $ ) {
             $preview.html( wc_checkout_form.get_address_preview() );
             wc_checkout_form.get_time_in_transit();
             $(document.body).trigger('update_checkout');
+
           }
 
         });
 
+      },
+
+      update_totals: function(){
+        var $cart_totals = $('#cart-totals');
+        $cart_totals.html( wc_checkout_form.spinner );
+        $.post( ajax_object.ajax_url, {action: 'fpusa_get_cart_totals'}, function( data ){
+          // console.log( 'hi', data );
+          if( data ){
+            $cart_totals.html( data );
+            let new_total = $('tr.fpusa-order-total > td').text();
+            $('div.fpusa-order-total').text( 'Order Total: ' + new_total );
+          }
+        });
+      },
+
+      spinner: function(){
+        return `<div class="d-flex justify-content-center">
+                  <div class="spinner-border text-success" role="status">
+                    <span class="sr-only">Loading...</span>
+                  </div>
+                </div>`;
       },
 
       copy_to: function( obj, where = 'both' ){
@@ -156,7 +182,8 @@ jQuery( function( $ ) {
         }
       },
 
-      get_payment_preview: function( ){
+      get_payment_preview: function( data ){
+
         let payment = $('ul.wc_payment_methods li input:checked');
         let preview = $('<div/>');
 
@@ -167,8 +194,51 @@ jQuery( function( $ ) {
           }
         });
 
-        preview.append('<a href="#">Billing address</a>: same as shipping.');
+        preview.append(
+          wc_checkout_form.get_billing_link( data ),
+          // wc_checkout_form.get_coupon_link(),
+          // wc_checkout_form.get_inline_coupon_form()
+        );
+
         return preview;
+      },
+
+      get_coupon_link: function(){
+        $wrapper = $('</p>');
+        $wrapper.append( '<a href="#step-2" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="step-2">Click to apply coupon.</a>' );
+        return $wrapper;
+      },
+
+      get_inline_coupon_form: function(){
+        $form = $( '<form/>', { class: 'checkout_coupon woocommerce-form-coupon d-flex align-items-center', method: 'POST' } );
+        $form.append(
+          $('<input/>', {
+            type: 'text',
+            name: 'coupon_code',
+            class: 'input-text mr-3',
+            placeholder: 'Enter promo code'
+          }),
+          $('<button/>', { type: 'submit', class: 'btn btn-outline-secondary btn-sm', name: 'apply_coupon' }).text('Apply')
+        );
+        return $form;
+      },
+
+      get_billing_link: function( data ){
+        var $wrapper = $('<p/>', { class: 'd-flex' });
+        var $btn = $('<a/>', {
+          href: '#fpusa_modal',
+          'data-toggle': 'modal',
+          'data-title': 'Edit your billing address',
+          'data-model': 'billing_address',
+          'data-action': 'edit',
+          'data-id': wc_checkout_form.get_saved_card,
+          class: 'pr-2',
+        }).text( 'Billing address: ' );
+
+        $btn_txt = wc_checkout_form.get_billing_address( data );
+        $wrapper.append( $btn, $btn_txt );
+
+        return $wrapper;
       },
 
       get_address_preview: function( ){
@@ -183,16 +253,36 @@ jQuery( function( $ ) {
             notes: $('#order_comments').val(),
           }
 
-          $address = $('<ul/>', { class: 'list-unstyled m-0 p-0' });
-          $address.append( `<li>${data.first} ${data.last}</li>` )
-          $address.append( `<li>${data.address_1}</li>` );
-          if( data.address_2.length ){
-            $address.append( `<li>${data.address_2}</li>` );
-          }
-          $address.append( `<li>${data.city}, ${data.state}  ${data.zip}</li>` );
-          $address.append( `<li>Notes: ${data.notes}</li>` );
+          return wc_checkout_form.format_address( data );
+      },
 
-          return $address;
+      get_billing_address: function( response ){
+        // console.log( response );
+        let data = {
+            first: response.billing_first_name,
+            last: response.billing_last_name,
+            address_1: response.billing_address_1,
+            address_2: response.billing_address_2,
+            city: response.billing_city,
+            state: response.billing_state,
+            zip: response.billing_postcode,
+          }
+
+          return wc_checkout_form.format_address( data );
+      },
+
+      format_address: function( data ){
+        $address = $('<ul/>', { class: 'list-unstyled m-0 p-0' });
+        $address.append( `<li>${data.first} ${data.last}</li>` )
+        $address.append( `<li>${data.address_1}</li>` );
+
+        if( data.address_2 ){
+          $address.append( `<li>${data.address_2}</li>` );
+        }
+
+        $address.append( `<li>${data.city}, ${data.state}  ${data.zip}</li>` );
+
+        return $address;
       },
 
       open: function( step ){
@@ -224,6 +314,7 @@ jQuery( function( $ ) {
           // console.log( response );
           wc_checkout_form.display_time_in_transit_response( response );
           $('#selected_option').text( wc_checkout_form.get_transit_display_time );
+          wc_checkout_form.update_totals();
         });
       },
 
