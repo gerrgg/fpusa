@@ -8,14 +8,13 @@ jQuery( function ( $ ){
       this.$form = this.$modal.find( 'form.modal-form' );
 
       // set event on show
-      this.$modal.on('show.bs.modal', '', this.build);
+      this.$modal.on('show.bs.modal', '', this.route);
       this.$modal.on( 'click', 'button.modal_ajax_submit', this.submit_form );
     },
 
     submit_form: function( e ){
       e.preventDefault();
-
-      form_data = $('#modal-table input, #modal-table select, #modal-table textarea ').serialize();
+      var form_data = $('#modal-table input, #modal-table select, #modal-table textarea ').serialize();
 
       let data = {
         action: `fpusa_${fpusa.path.model}_${fpusa.path.action}`,
@@ -30,8 +29,9 @@ jQuery( function ( $ ){
         type: 'POST',
         url: ajax_object.ajax_url,
         data: data,
-        success: function( data ){
-          if( data && data.length ){
+        success: function( response ){
+          if( response ){
+            // TODO: Work out a way to display new data.
             window.location.reload();
           }
         },
@@ -42,7 +42,7 @@ jQuery( function ( $ ){
     },
 
     // get data from button clicked
-    build: function( e ){
+    route: function( e ){
       let $button = $(e.relatedTarget);
 
       var path = {
@@ -71,23 +71,39 @@ jQuery( function ( $ ){
         { label: 'Phone', type: 'tel', id: 'address_phone', value: '' },
         { label: 'Add delivery instructions (optional)', type: 'textarea', id: 'address_delivery_notes', value: '' },
       ];
+      fpusa.build( fields );
+    },
 
-      if( action != 'create' && id != '' ){
+    ['billing_address']: function( action, id = '' ){
+      var fields = [
+        { label: 'First Name', type: 'text', id: 'billing_first_name', value: '' },
+        { label: 'Last Name', type: 'text', id: 'billing_last_name', value: '' },
+        { label: 'Address 1', type: 'text', id: 'billing_address_1', value: '' },
+        { label: 'Address 2', type: 'text', id: 'billing_address_2', value: '' },
+        { label: 'City', type: 'text', id: 'billing_city', value: '' },
+        { label: 'State', type: 'text', id: 'billing_state', value: '' },
+        { label: 'Postal Code', type: 'tel', id: 'billing_postcode', value: '' },
+        { label: 'Country', type: 'tel', id: 'billing_country', value: '' },
+      ];
+      fpusa.build( fields );
+    },
+
+    build: function( fields ){
+      // console.log( fpusa.path );
+      if( fpusa.path.action != 'create' && fpusa.path.id != '' ){
         // console.log( 'get data first' );
-        fpusa.get_field_values( fields, 'address', action, id );
+        fpusa.get_field_values( fields, fpusa.path.model, fpusa.path.action, fpusa.path.id );
       } else {
         // console.log( 'create the form' );
-        fpusa.create_form( fields, 'address', action );
+        fpusa.create_form( fields, fpusa.path.model, fpusa.path.action );
       }
-
     },
 
     get_field_values: function( fields, model, action, id ){
-      // console.log( 'getting_field_values' );
-
-      var $form;
+      console.log( 'getting_field_values' );
 
       $.post( ajax_object.ajax_url, { action: `fpusa_get_${model}`, id: id  }, function( data ){
+        console.log(  data, fields  );
         Object.keys( fields ).forEach( function(fieldKey) {
           Object.keys( data ).forEach( function(dataKey) {
             if( fields[fieldKey].id == dataKey ){
@@ -102,7 +118,7 @@ jQuery( function ( $ ){
     },
 
     create_form: function( fields, model, action ){
-      // console.log( 'create_form', fields );
+      console.log( 'create_form', fpusa.path );
 
       var $form = $('<form/>', {
         method: 'POST',
