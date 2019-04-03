@@ -19,7 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-do_action( 'woocommerce_before_customer_login_form' ); ?>
+do_action( 'woocommerce_before_customer_login_form' );
+?>
 
 
 <div id="customer_login">
@@ -64,7 +65,7 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 		</form>
 
 		<hr>
-		<a href="?form=register"class="btn btn-block btn-primary text-white">Create your <?php echo bloginfo('sitename') ?> account</a>
+		<a href="?<?php echo $_GET['redirect_to'] ?>&form=register"class="btn btn-block btn-primary text-white">Create your <?php echo bloginfo('sitename') ?> account</a>
 
 	<?php elseif( $form == 'register') : ?>
 
@@ -86,7 +87,7 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 			<div class="form-group">
 				<label class="font-weight-bold" for="password"><?php esc_html_e( 'Password', 'woocommerce' ); ?></label>
-				<input type="text" class="form-control" name="password" id="password" autocomplete="off" /><?php // @codingStandardsIgnoreLine ?>
+				<input type="password" class="form-control" name="password" id="password" autocomplete="off" /><?php // @codingStandardsIgnoreLine ?>
 			</div>
 
 			<div class="form-group">
@@ -102,7 +103,7 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 		<hr>
 
-		<p>Already have an account? <a href="?form=login">Sign in <i class="fas fa-angle-right"></i></a></p>
+		<p>Already have an account? <a href="?<?php echo $_GET['redirect_to'] ?>&form=login">Sign in <i class="fas fa-angle-right"></i></a></p>
 
 	</div>
 

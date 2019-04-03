@@ -21,6 +21,8 @@ if ( ! wc_coupons_enabled() ) { // @codingStandardsIgnoreLine.
 	return;
 }
 ?>
+
+
 <form class="checkout_coupon woocommerce-form-coupon mt-3" method="POST">
 	<h4 class="title"><?php esc_html_e( 'Your balances', 'fpusa' ); ?></h4>
 
@@ -31,7 +33,7 @@ if ( ! wc_coupons_enabled() ) { // @codingStandardsIgnoreLine.
 	<div class="d-flex align-items-center">
 		<i class="fas fa-plus mx-3 text-muted" style="font-size: 20px;"></i>
 		<input type="text" name="coupon_code" class="input-text form-control w-50 mr-3" placeholder="<?php esc_attr_e( 'Enter promo code', 'woocommerce' ); ?>" id="coupon_code" value="" />
-		<button type="button" class="btn btn-outline-secondary" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"><?php esc_html_e( 'Apply coupon', 'woocommerce' ); ?></button>
+		<button type="submit" class="btn btn-outline-secondary" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"><?php esc_html_e( 'Apply coupon', 'woocommerce' ); ?></button>
 	</div>
 	<div class="clear"></div>
 
