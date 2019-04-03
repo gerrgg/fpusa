@@ -210,16 +210,15 @@ function fpusa_scripts() {
 
 	wp_enqueue_style( 'fontawesome', 'https://use.fontawesome.com/releases/v5.7.1/css/all.css' );
 
-	wp_enqueue_style( 'slick', get_template_directory_uri() . '/css/slick.css' );
+	wp_enqueue_style( 'owl-carousel', get_template_directory_uri() . '/css/owl.carousel.min.css' );
 
-	wp_enqueue_style( 'slick-theme', get_template_directory_uri() . '/css/slick-theme.css' );
+	wp_enqueue_style( 'owl-carousel-theme', get_template_directory_uri() . '/css/owl.theme.default.min.css' );
 
 	wp_enqueue_style( 'dropzone-css', get_template_directory_uri() . '/css/dropzone.css' );
 
 	wp_enqueue_script( 'bs4-js', get_template_directory_uri() . '/js/bootstrap.min.js', array('jquery'), '4.2', true );
 
-
-	wp_enqueue_script( 'slick-js', get_template_directory_uri() . '/js/slick.min.js', array('jquery'), '4.9', true );
+	wp_enqueue_script( 'owl-carousel-js', get_template_directory_uri() . '/js/owl.carousel.min.js', array('jquery'), '4.9', true );
 
 	wp_enqueue_script( 'zoom-js', get_template_directory_uri() . '/js/jquery.zoom.js', array('jquery'), '4.9', true );
 
@@ -463,7 +462,7 @@ function fpusa_slick_query($header, $args){
 		$wc_query = new WP_Query( $args );
 		?>
 		<h3><?php echo $header; ?></h3>
-		<div class="slick">
+		<div class="owl-carousel">
 		<?php
 		if( $wc_query->have_posts() ) :
 			while( $wc_query->have_posts() ) :
@@ -541,43 +540,6 @@ function fpusa_template_single_divider(){
 function fpusa_template_single_brand(){
 	wc_get_template( 'single-product/brand.php' );
 }
-
-function get_client_ip() {
-    $ipaddress = '';
-    if (isset($_SERVER['HTTP_CLIENT_IP']))
-        $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
-    else if(isset($_SERVER['HTTP_X_FORWARDED_FOR']))
-        $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    else if(isset($_SERVER['HTTP_X_FORWARDED']))
-        $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
-    else if(isset($_SERVER['HTTP_FORWARDED_FOR']))
-        $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
-    else if(isset($_SERVER['HTTP_FORWARDED']))
-        $ipaddress = $_SERVER['HTTP_FORWARDED'];
-    else if(isset($_SERVER['REMOTE_ADDR']))
-        $ipaddress = $_SERVER['REMOTE_ADDR'];
-    else
-        $ipaddress = 'UNKNOWN';
-    return $ipaddress;
-}
-
-function fpusa_get_location_from_ip(){
-	// TODO: MAKE AJAX
-	$data = array();
-	// look around for an ip
-	$ip = get_client_ip();
-	// get the long and lat from that IP
-	$geo = unserialize(file_get_contents("http://www.geoplugin.net/php.gp?ip=$ip"));
-	// ask geocoder.ca for info on that long and lat
-	if( isset( $geo['geoplugin_latitude'], $geo['geoplugin_longitude'] ) ){
-		$loc = new SimpleXMLElement(file_get_contents('http://geocoder.ca/?latt='. $geo['geoplugin_latitude'] .'&longt='. $geo['geoplugin_longitude'] .'&matchonly=1&geoit=xml'));
-		// return the postal code if there is one.
-		if( isset( $loc->postal ) ) array_push( $data, $loc->postal );
-		if( isset( $loc->postal ) ) array_push( $data, $loc->city );
-	}
-	return $data;
-}
-
 
 add_action( 'fpusa_order_actions', 'fpusa_track_package' );
 

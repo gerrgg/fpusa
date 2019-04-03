@@ -2,6 +2,10 @@ jQuery(document).ready(function($){
   //userUpload
   Dropzone.autoDiscover = false;
 
+  $(document).ready(function(){
+    $(".slick").owlCarousel();
+  });
+
   $("#media-uploader").dropzone({
     url: ajax_object.dropParam,
     paramName: 'file'
